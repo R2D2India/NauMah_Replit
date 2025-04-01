@@ -5,6 +5,55 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+// Assistant ID for the pregnancy companion
+const ASSISTANT_ID = "asst_zwfWiYjLCIqIVlUN0617YRZQ";
+
+export async function getAssistantResponse(message: string): Promise<string> {
+  try {
+    // Create a thread
+    const thread = await openai.beta.threads.create();
+    
+    // Add the user's message
+    await openai.beta.threads.messages.create(
+      thread.id,
+      { role: "user", content: message }
+    );
+    
+    // Run the assistant
+    const run = await openai.beta.threads.runs.create(
+      thread.id,
+      { assistant_id: ASSISTANT_ID }
+    );
+    
+    // Wait for completion
+    while (true) {
+      const runStatus = await openai.beta.threads.runs.retrieve(
+        thread.id,
+        run.id
+      );
+      if (runStatus.status === "completed") {
+        break;
+      } else if (runStatus.status === "failed") {
+        throw new Error("Assistant run failed");
+      }
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+    
+    // Get the assistant's reply
+    const messages = await openai.beta.threads.messages.list(thread.id);
+    const assistantMessage = messages.data.find(msg => msg.role === "assistant");
+    
+    if (!assistantMessage?.content[0]?.text?.value) {
+      throw new Error("No response from assistant");
+    }
+    
+    return assistantMessage.content[0].text.value;
+  } catch (error) {
+    console.error("Error in getAssistantResponse:", error);
+    throw error;
+  }
+}
+
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const MODEL = "gpt-4o";
 

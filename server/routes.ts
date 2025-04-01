@@ -202,7 +202,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       context += " Your responses should be compassionate, evidence-based, and medically sound, but always recommend consulting healthcare providers for personal medical advice.";
       
-      const response = await generateChatResponse(message, context);
+      const response = await getAssistantResponse(message);
       res.json({ response });
     } catch (error) {
       console.error("Error generating chat response:", error);
