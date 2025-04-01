@@ -113,9 +113,3 @@ export const waitlistSchema = z.object({
 
 export type WaitlistEntry = typeof waitlistTable.$inferSelect;
 export type InsertWaitlistEntry = typeof waitlistTable.$inferInsert;
-import { z } from "zod";
-
-export const waitlistSchema = z.object({
-  email: z.string().email(),
-  name: z.string().min(2),
-});
