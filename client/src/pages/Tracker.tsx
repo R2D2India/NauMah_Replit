@@ -5,16 +5,19 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { LineChart } from "@/components/ui/chart";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 export default function Tracker() {
   const [date, setDate] = useState<Date | undefined>(new Date());
 
-  const weightData = [
-    { week: "Week 1", weight: 65 },
-    { week: "Week 2", weight: 65.5 },
-    { week: "Week 3", weight: 66 },
-    { week: "Week 4", weight: 66.2 },
-  ];
+  const { data: weightData = [] } = useQuery({
+    queryKey: ["/api/weight-tracking"],
+    queryFn: async () => {
+      const response = await fetch("/api/weight-tracking");
+      if (!response.ok) return [];
+      return response.json();
+    }
+  });
 
   return (
     <div className="container mx-auto px-4 py-6">

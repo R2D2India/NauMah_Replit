@@ -3,15 +3,23 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { useQuery } from "@tanstack/react-query";
 
 export default function Journal() {
-  const [entries, setEntries] = useState([
-    {
-      date: "2024-03-19",
-      title: "First Baby Kick!",
-      content: "Today I felt the baby kick for the first time..."
+  const { data: entries = [] } = useQuery({
+    queryKey: ["/api/journal-entries"],
+    queryFn: async () => {
+      const response = await fetch("/api/journal-entries");
+      if (!response.ok) {
+        return [{
+          date: "2024-03-19",
+          title: "First Baby Kick!",
+          content: "Today I felt the baby kick for the first time..."
+        }];
+      }
+      return response.json();
     }
-  ]);
+  });
 
   return (
     <div className="container mx-auto px-4 py-6">
