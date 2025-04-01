@@ -1,7 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { PgStorage } from "./pgStorage";
-import { pregnancyStageSchema, medicationCheckSchema, moodEntrySchema } from "@shared/schema";
+import { pregnancyStageSchema, medicationCheckSchema, moodEntrySchema, waitlistSchema } from "@shared/schema";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { generateChatResponse, generateSpeech, transcribeSpeech } from "./openai";
