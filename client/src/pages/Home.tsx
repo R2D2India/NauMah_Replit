@@ -4,7 +4,7 @@ import { useLocation } from "wouter";
 import WelcomeSection from "@/components/pregnancy/WelcomeSection";
 import { AIAssistantSection } from "@/components/ai/AIAssistantSection";
 import { WaitlistSection } from "@/components/marketing/WaitlistSection";
-import ComingSoonSections from "@/components/marketing/ComingSoonSections";
+import { ComingSoonSections } from "@/components/marketing/ComingSoonSections";
 import { Loader2 } from "lucide-react";
 
 const Home = () => {
