@@ -258,5 +258,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   const httpServer = createServer(app);
+  // Waitlist endpoint
+  app.post("/api/waitlist", validateRequest(waitlistSchema), async (req: Request, res: Response) => {
+    try {
+      const entry = await storage.createWaitlistEntry(req.validatedData);
+      res.json(entry);
+    } catch (error) {
+      console.error("Error creating waitlist entry:", error);
+      res.status(500).json({ message: "Failed to join waitlist" });
+    }
+  });
+
   return httpServer;
 }

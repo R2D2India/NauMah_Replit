@@ -96,3 +96,20 @@ export const moodEntrySchema = z.object({
 });
 
 export type MoodEntryRequest = z.infer<typeof moodEntrySchema>;
+
+export const waitlistTable = pgTable("waitlist", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  mobile: text("mobile").notNull(),
+  email: text("email").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const waitlistSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  mobile: z.string().min(1, "Mobile number is required"),
+  email: z.string().email("Invalid email address"),
+});
+
+export type WaitlistEntry = typeof waitlistTable.$inferSelect;
+export type InsertWaitlistEntry = typeof waitlistTable.$inferInsert;
