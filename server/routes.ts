@@ -1,14 +1,26 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { PgStorage } from "./pgStorage";
 import { pregnancyStageSchema, medicationCheckSchema, moodEntrySchema } from "@shared/schema";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
 
+// Initialize the PostgreSQL storage
+const storage = new PgStorage();
+
+// Extend the Request type to include validatedData
+declare global {
+  namespace Express {
+    interface Request {
+      validatedData: any;
+    }
+  }
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Middleware to handle validation errors consistently
   const validateRequest = (schema: any) => {
-    return (req: any, res: any, next: any) => {
+    return (req: Request, res: Response, next: NextFunction) => {
       try {
         req.validatedData = schema.parse(req.body);
         next();
@@ -25,16 +37,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // For demonstration, we'll create a demo user if none exists
   const demoUserId = 1;
-  const existingDemoUser = await storage.getUser(demoUserId);
+  let existingDemoUser = await storage.getUser(demoUserId);
   if (!existingDemoUser) {
     await storage.createUser({
       username: "demo",
       password: "password", // In a real app, this would be hashed
     });
+    existingDemoUser = await storage.getUser(demoUserId);
+    console.log('Created demo user:', existingDemoUser);
   }
 
   // Get pregnancy data for a user
-  app.get("/api/pregnancy", async (req, res) => {
+  app.get("/api/pregnancy", async (req: Request, res: Response) => {
     try {
       // In a real app, we would get the userId from the authenticated session
       const userId = demoUserId;
@@ -52,7 +66,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update pregnancy stage for a user
-  app.post("/api/pregnancy/stage", validateRequest(pregnancyStageSchema), async (req, res) => {
+  app.post("/api/pregnancy/stage", validateRequest(pregnancyStageSchema), async (req: Request, res: Response) => {
     try {
       // In a real app, we would get the userId from the authenticated session
       const userId = demoUserId;
@@ -68,7 +82,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get mood entries for a user
-  app.get("/api/mood", async (req, res) => {
+  app.get("/api/mood", async (req: Request, res: Response) => {
     try {
       // In a real app, we would get the userId from the authenticated session
       const userId = demoUserId;
@@ -82,7 +96,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create a new mood entry
-  app.post("/api/mood", validateRequest(moodEntrySchema), async (req, res) => {
+  app.post("/api/mood", validateRequest(moodEntrySchema), async (req: Request, res: Response) => {
     try {
       // In a real app, we would get the userId from the authenticated session
       const userId = demoUserId;
@@ -109,7 +123,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get medication checks for a user
-  app.get("/api/medication", async (req, res) => {
+  app.get("/api/medication", async (req: Request, res: Response) => {
     try {
       // In a real app, we would get the userId from the authenticated session
       const userId = demoUserId;
@@ -123,7 +137,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Check medication safety for pregnancy
-  app.post("/api/medication/check", validateRequest(medicationCheckSchema), async (req, res) => {
+  app.post("/api/medication/check", validateRequest(medicationCheckSchema), async (req: Request, res: Response) => {
     try {
       // In a real app, we would get the userId from the authenticated session
       const userId = demoUserId;

@@ -15,30 +15,30 @@ const Header = () => {
             <i className="fas fa-baby text-white"></i>
           </div>
           <Link href="/">
-            <a className="text-xl md:text-2xl font-montserrat font-semibold text-primary">NauMah</a>
+            <span className="text-xl md:text-2xl font-montserrat font-semibold text-primary cursor-pointer">NauMah</span>
           </Link>
         </div>
         
         <nav className="hidden md:flex space-x-6">
           <Link href="/dashboard">
-            <a className={`font-medium ${isActive("/dashboard") ? "text-primary" : "text-neutral-dark hover:text-primary"} transition`}>
+            <span className={`font-medium ${isActive("/dashboard") ? "text-primary" : "text-neutral-dark hover:text-primary"} transition cursor-pointer`}>
               Dashboard
-            </a>
+            </span>
           </Link>
           <Link href="/tracker">
-            <a className={`font-medium ${isActive("/tracker") ? "text-primary" : "text-neutral-dark hover:text-primary"} transition`}>
+            <span className={`font-medium ${isActive("/tracker") ? "text-primary" : "text-neutral-dark hover:text-primary"} transition cursor-pointer`}>
               Tracker
-            </a>
+            </span>
           </Link>
           <Link href="/resources">
-            <a className={`font-medium ${isActive("/resources") ? "text-primary" : "text-neutral-dark hover:text-primary"} transition`}>
+            <span className={`font-medium ${isActive("/resources") ? "text-primary" : "text-neutral-dark hover:text-primary"} transition cursor-pointer`}>
               Resources
-            </a>
+            </span>
           </Link>
           <Link href="/journal">
-            <a className={`font-medium ${isActive("/journal") ? "text-primary" : "text-neutral-dark hover:text-primary"} transition`}>
+            <span className={`font-medium ${isActive("/journal") ? "text-primary" : "text-neutral-dark hover:text-primary"} transition cursor-pointer`}>
               Journal
-            </a>
+            </span>
           </Link>
         </nav>
         
@@ -60,29 +60,29 @@ const Header = () => {
         <div className="md:hidden bg-white border-t border-gray-100 px-4 py-3">
           <nav className="flex flex-col space-y-3">
             <Link href="/dashboard">
-              <a className={`font-medium ${isActive("/dashboard") ? "text-primary" : "text-neutral-dark"} py-2`}>
+              <span className={`font-medium ${isActive("/dashboard") ? "text-primary" : "text-neutral-dark"} py-2 block cursor-pointer`}>
                 Dashboard
-              </a>
+              </span>
             </Link>
             <Link href="/tracker">
-              <a className={`font-medium ${isActive("/tracker") ? "text-primary" : "text-neutral-dark"} py-2`}>
+              <span className={`font-medium ${isActive("/tracker") ? "text-primary" : "text-neutral-dark"} py-2 block cursor-pointer`}>
                 Tracker
-              </a>
+              </span>
             </Link>
             <Link href="/resources">
-              <a className={`font-medium ${isActive("/resources") ? "text-primary" : "text-neutral-dark"} py-2`}>
+              <span className={`font-medium ${isActive("/resources") ? "text-primary" : "text-neutral-dark"} py-2 block cursor-pointer`}>
                 Resources
-              </a>
+              </span>
             </Link>
             <Link href="/journal">
-              <a className={`font-medium ${isActive("/journal") ? "text-primary" : "text-neutral-dark"} py-2`}>
+              <span className={`font-medium ${isActive("/journal") ? "text-primary" : "text-neutral-dark"} py-2 block cursor-pointer`}>
                 Journal
-              </a>
+              </span>
             </Link>
             <Link href="/profile">
-              <a className="font-medium text-primary py-2">
+              <span className="font-medium text-primary py-2 block cursor-pointer">
                 My Profile
-              </a>
+              </span>
             </Link>
           </nav>
         </div>

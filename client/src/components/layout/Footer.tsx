@@ -17,16 +17,16 @@ const Footer = () => {
           
           <div className="flex flex-wrap justify-center gap-x-8 gap-y-2">
             <Link href="/privacy">
-              <a className="text-sm text-neutral-dark hover:text-primary transition">Privacy Policy</a>
+              <span className="text-sm text-neutral-dark hover:text-primary transition cursor-pointer">Privacy Policy</span>
             </Link>
             <Link href="/terms">
-              <a className="text-sm text-neutral-dark hover:text-primary transition">Terms of Service</a>
+              <span className="text-sm text-neutral-dark hover:text-primary transition cursor-pointer">Terms of Service</span>
             </Link>
             <Link href="/support">
-              <a className="text-sm text-neutral-dark hover:text-primary transition">Contact Support</a>
+              <span className="text-sm text-neutral-dark hover:text-primary transition cursor-pointer">Contact Support</span>
             </Link>
             <Link href="/disclaimer">
-              <a className="text-sm text-neutral-dark hover:text-primary transition">Medical Disclaimer</a>
+              <span className="text-sm text-neutral-dark hover:text-primary transition cursor-pointer">Medical Disclaimer</span>
             </Link>
           </div>
         </div>
