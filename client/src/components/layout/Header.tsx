@@ -11,10 +11,10 @@ const Header = () => {
     <header className="bg-white shadow-sm">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <div className="flex items-center space-x-2">
-          <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center">
-            <i className="fas fa-baby text-white"></i>
-          </div>
-          <Link href="/">
+          <Link href="/" className="flex items-center space-x-2">
+            <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center">
+              <i className="fas fa-baby text-white"></i>
+            </div>
             <span className="text-xl md:text-2xl font-montserrat font-semibold text-primary cursor-pointer">NauMah</span>
           </Link>
         </div>

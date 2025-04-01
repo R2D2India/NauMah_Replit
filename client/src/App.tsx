@@ -16,6 +16,9 @@ function Router() {
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/dashboard" component={Dashboard} />
+          <Route path="/tracker" component={() => import("./pages/Tracker")} />
+          <Route path="/resources" component={() => import("./pages/Resources")} />
+          <Route path="/journal" component={() => import("./pages/Journal")} />
           <Route component={NotFound} />
         </Switch>
       </main>
