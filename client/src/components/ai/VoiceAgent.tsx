@@ -24,9 +24,21 @@ export function VoiceAgent() {
     setLastQuery(userQuestion);
     
     try {
-      // Fetch audio response
+      // First get the text version for display
+      const textResponse = await apiRequest<{ response: string }>('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: userQuestion.trim() }),
+      });
+      
+      setAnswer(textResponse.response);
+      
+      // Fetch audio response using the same apiRequest pattern, but handle the blob response directly
       const response = await fetch('/api/voice/speech', {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -52,16 +64,6 @@ export function VoiceAgent() {
         };
       }
       
-      // Get the text version for display
-      const textResponse = await apiRequest<{ response: string }>('/api/chat', {
-        method: 'POST',
-        body: JSON.stringify({ message: userQuestion.trim() }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      setAnswer(textResponse.response);
       setUserQuestion('');
     } catch (error) {
       console.error('Error getting voice response:', error);

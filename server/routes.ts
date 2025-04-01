@@ -234,16 +234,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // First generate text response
       const textResponse = await generateChatResponse(message, context);
       
-      // Convert to speech
-      const audioBuffer = await generateSpeech(textResponse);
-      
-      // Send audio file
-      res.setHeader('Content-Type', 'audio/mpeg');
-      res.setHeader('Content-Length', audioBuffer.length);
-      res.send(audioBuffer);
+      try {
+        // Convert to speech
+        const audioBuffer = await generateSpeech(textResponse);
+        
+        // Send audio file
+        res.setHeader('Content-Type', 'audio/mpeg');
+        res.setHeader('Content-Length', audioBuffer.length);
+        res.setHeader('Cache-Control', 'no-cache');
+        return res.send(audioBuffer);
+      } catch (speechError) {
+        console.error("Error generating speech:", speechError);
+        // If speech generation fails, at least return the text response
+        return res.status(500).json({ 
+          message: "Failed to generate speech, but here's the text response",
+          textResponse 
+        });
+      }
     } catch (error) {
-      console.error("Error generating speech:", error);
-      res.status(500).json({ message: "Failed to generate speech response" });
+      console.error("Error in voice route:", error);
+      return res.status(500).json({ message: "Failed to process your request" });
     }
   });
 
