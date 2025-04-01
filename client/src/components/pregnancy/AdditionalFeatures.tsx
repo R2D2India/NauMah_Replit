@@ -17,8 +17,11 @@ const AdditionalFeatures = ({ currentWeek }: AdditionalFeaturesProps) => {
   // Medication check mutation
   const checkMedicationMutation = useMutation({
     mutationFn: async (data: { medicationName: string }) => {
-      const response = await apiRequest("POST", "/api/medication/check", data);
-      return response.json();
+      return await apiRequest("/api/medication/check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
     },
     onSuccess: (data) => {
       const variant = data.isSafe === true ? "default" : 

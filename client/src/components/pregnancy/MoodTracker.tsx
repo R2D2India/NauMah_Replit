@@ -15,8 +15,11 @@ const MoodTracker = ({ currentWeek }: MoodTrackerProps) => {
   // Mood entry mutation
   const createMoodEntryMutation = useMutation({
     mutationFn: async (data: { mood: string; note?: string }) => {
-      const response = await apiRequest("POST", "/api/mood", data);
-      return response.json();
+      return await apiRequest("/api/mood", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
     },
     onSuccess: () => {
       // Clear form and show success message

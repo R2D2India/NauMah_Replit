@@ -4,6 +4,8 @@ import { PgStorage } from "./pgStorage";
 import { pregnancyStageSchema, medicationCheckSchema, moodEntrySchema } from "@shared/schema";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
+import { generateChatResponse, generateSpeech, transcribeSpeech } from "./openai";
+import z from "zod";
 
 // Initialize the PostgreSQL storage
 const storage = new PgStorage();
@@ -171,6 +173,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error checking medication:", error);
       res.status(500).json({ message: "Failed to check medication" });
+    }
+  });
+  
+  // Chat with AI Assistant
+  const chatSchema = z.object({
+    message: z.string().min(1),
+    pregnancyWeek: z.number().optional(),
+  });
+  
+  app.post("/api/chat", validateRequest(chatSchema), async (req: Request, res: Response) => {
+    try {
+      const { message, pregnancyWeek } = req.validatedData;
+      
+      // Get pregnancy data if we don't have the week
+      let week = pregnancyWeek;
+      if (!week) {
+        const pregnancyData = await storage.getPregnancyData(demoUserId);
+        if (pregnancyData) {
+          week = pregnancyData.currentWeek;
+        }
+      }
+      
+      // Create a context with pregnancy week if available
+      let context = "You are NauMah, a knowledgeable and supportive AI pregnancy assistant providing guidance to expecting mothers.";
+      if (week) {
+        context += ` The user is currently at week ${week} of pregnancy. Tailor your responses to be relevant for this stage.`;
+      }
+      context += " Your responses should be compassionate, evidence-based, and medically sound, but always recommend consulting healthcare providers for personal medical advice.";
+      
+      const response = await generateChatResponse(message, context);
+      res.json({ response });
+    } catch (error) {
+      console.error("Error generating chat response:", error);
+      res.status(500).json({ message: "Failed to generate chat response" });
+    }
+  });
+  
+  // Generate text-to-speech from AI response
+  app.post("/api/voice/speech", validateRequest(chatSchema), async (req: Request, res: Response) => {
+    try {
+      const { message, pregnancyWeek } = req.validatedData;
+      
+      // Get pregnancy data if we don't have the week
+      let week = pregnancyWeek;
+      if (!week) {
+        const pregnancyData = await storage.getPregnancyData(demoUserId);
+        if (pregnancyData) {
+          week = pregnancyData.currentWeek;
+        }
+      }
+      
+      // Create a context with pregnancy week if available
+      let context = "You are NauMah, a knowledgeable and supportive AI pregnancy assistant providing guidance to expecting mothers.";
+      if (week) {
+        context += ` The user is currently at week ${week} of pregnancy. Tailor your responses to be relevant for this stage.`;
+      }
+      context += " Your responses should be compassionate, evidence-based, and medically sound, but always recommend consulting healthcare providers for personal medical advice. Keep responses concise (under 100 words) for voice output.";
+      
+      // First generate text response
+      const textResponse = await generateChatResponse(message, context);
+      
+      // Convert to speech
+      const audioBuffer = await generateSpeech(textResponse);
+      
+      // Send audio file
+      res.setHeader('Content-Type', 'audio/mpeg');
+      res.setHeader('Content-Length', audioBuffer.length);
+      res.send(audioBuffer);
+    } catch (error) {
+      console.error("Error generating speech:", error);
+      res.status(500).json({ message: "Failed to generate speech response" });
     }
   });
 

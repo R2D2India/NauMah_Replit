@@ -13,8 +13,11 @@ const WelcomeSection = () => {
 
   const updatePregnancyStageMutation = useMutation({
     mutationFn: async (data: { stageType: string; stageValue: string }) => {
-      const response = await apiRequest("POST", "/api/pregnancy/stage", data);
-      return response.json();
+      return await apiRequest("/api/pregnancy/stage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
     },
     onSuccess: () => {
       toast({
