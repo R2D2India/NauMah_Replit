@@ -9,14 +9,12 @@ import { useState } from "react";
 export default function Tracker() {
   const [date, setDate] = useState<Date | undefined>(new Date());
 
-  const weightData = {
-    labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
-    datasets: [{
-      label: "Weight (kg)",
-      data: [65, 65.5, 66, 66.2],
-      borderColor: "rgb(75, 192, 192)",
-    }]
-  };
+  const weightData = [
+    { week: "Week 1", weight: 65 },
+    { week: "Week 2", weight: 65.5 },
+    { week: "Week 3", weight: 66 },
+    { week: "Week 4", weight: 66.2 },
+  ];
 
   return (
     <div className="container mx-auto px-4 py-6">
