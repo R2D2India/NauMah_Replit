@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import Confetti from 'react-confetti';
-import { apiRequest } from '@/lib/utils';
+import { apiRequest } from '@/lib/queryClient';
 
 export const WaitlistSection = () => {
   const [showConfetti, setShowConfetti] = useState(false);
