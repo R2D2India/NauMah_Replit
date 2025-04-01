@@ -8,6 +8,7 @@ import { generateChatResponse, generateSpeech, transcribeSpeech } from "./openai
 import z from "zod";
 
 // Initialize the PostgreSQL storage
+import { waitlistSchema } from "../shared/schema";
 const storage = new PgStorage();
 
 // Extend the Request type to include validatedData
