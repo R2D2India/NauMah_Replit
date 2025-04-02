@@ -8,6 +8,8 @@ import Home from "@/pages/Home";
 import Dashboard from "@/pages/Dashboard";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import Privacy from "@/pages/Privacy";
+import Terms from "@/pages/Terms";
 
 function Router() {
   return (
@@ -21,6 +23,8 @@ function Router() {
             <Route path="/tracker" component={lazy(() => import("./pages/Tracker"))} />
             <Route path="/resources" component={lazy(() => import("./pages/Resources"))} />
             <Route path="/journal" component={lazy(() => import("./pages/Journal"))} />
+            <Route path="/privacy" component={Privacy} />
+            <Route path="/terms" component={Terms} />
             <Route component={NotFound} />
           </Switch>
         </Suspense>
