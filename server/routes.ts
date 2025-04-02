@@ -191,7 +191,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error generating chat response:", error);
       const errorMessage = error instanceof Error ? error.message : "Failed to generate chat response";
-      res.status(500).json({ 
+      const status = error.message?.includes('API key') ? 401 : 500;
+      res.status(status).json({ 
         message: errorMessage,
         error: process.env.NODE_ENV === 'development' ? String(error) : undefined 
       });

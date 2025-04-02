@@ -6,7 +6,7 @@ const openai = new OpenAI({
 });
 
 if (!process.env.OPENAI_API_KEY) {
-  console.error("Warning: OPENAI_API_KEY is not set. OpenAI features will not work.");
+  throw new Error("OpenAI API key is not configured. Please set OPENAI_API_KEY in your environment variables.");
 }
 
 // Assistant ID for the pregnancy companion
