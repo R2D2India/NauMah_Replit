@@ -1,13 +1,12 @@
-
 import React from 'react';
 
 export default function WelcomeSection() {
   return (
-    <section className="bg-gradient-to-b from-purple-50 to-white py-16">
+    <section className="bg-gradient-to-b from-pink-50 to-white py-16"> {/* Changed background colors */}
       <div className="container mx-auto px-4">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div>
-            <h1 className="text-4xl md:text-5xl font-montserrat font-bold text-primary mb-6">
+            <h1 className="text-4xl md:text-5xl font-montserrat font-bold text-pink-600 mb-6"> {/* Changed text color */}
               Your AI-Powered Pregnancy Journey Companion
             </h1>
             <p className="text-lg text-gray-600 mb-8">
@@ -17,12 +16,12 @@ export default function WelcomeSection() {
               <img 
                 src="/images/pregnancy/prenatal-care.jpg" 
                 alt="Prenatal Care"
-                className="w-full h-48 object-cover rounded-lg shadow-md hover:shadow-lg transition-shadow"
+                className="w-full h-48 object-cover rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:scale-102 border-2 border-pink-100"
               />
               <img 
                 src="/images/pregnancy/healthy-lifestyle.jpg" 
                 alt="Healthy Lifestyle"
-                className="w-full h-48 object-cover rounded-lg shadow-md hover:shadow-lg transition-shadow"
+                className="w-full h-48 object-cover rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:scale-102 border-2 border-pink-100"
               />
             </div>
           </div>
