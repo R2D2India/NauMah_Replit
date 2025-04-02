@@ -101,7 +101,27 @@ export function ChatAgent() {
                       : 'bg-gradient-to-r from-muted to-muted-foreground/10 shadow-md'
                   }`}
                 >
-                  <p className="text-sm">{message.content}</p>
+                  <p className="text-sm whitespace-pre-line">{message.content}</p>
+                  {message.role === 'assistant' && (
+                    <div className="mt-3 space-y-2">
+                      {message.content.split('?').slice(1).map((suggestion, i) => 
+                        suggestion.trim() && (
+                          <Button
+                            key={i}
+                            variant="ghost"
+                            size="sm"
+                            className="text-xs text-primary hover:text-primary-dark"
+                            onClick={() => {
+                              setInputValue(suggestion.trim() + '?');
+                              handleSendMessage();
+                            }}
+                          >
+                            {suggestion.trim() + '?'}
+                          </Button>
+                        )
+                      )}
+                    </div>
+                  )}
                   <p className="text-xs opacity-70 mt-1">
                     {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>

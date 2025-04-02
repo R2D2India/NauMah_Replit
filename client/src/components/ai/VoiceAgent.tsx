@@ -283,7 +283,27 @@ export function VoiceAgent() {
                 </Button>
               </div>
             </div>
-            <p className="text-sm p-2 bg-primary/10 rounded-md">{answer}</p>
+            <div className="space-y-3">
+              <p className="text-sm p-2 bg-primary/10 rounded-md whitespace-pre-line">{answer}</p>
+              <div className="space-y-2">
+                {answer.split('?').slice(1).map((suggestion, i) => 
+                  suggestion.trim() && (
+                    <Button
+                      key={i}
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs text-primary hover:text-primary-dark"
+                      onClick={() => {
+                        setUserQuestion(suggestion.trim() + '?');
+                        handleAskQuestion();
+                      }}
+                    >
+                      {suggestion.trim() + '?'}
+                    </Button>
+                  )
+                )}
+              </div>
+            </div>
           </div>
         )}
 
