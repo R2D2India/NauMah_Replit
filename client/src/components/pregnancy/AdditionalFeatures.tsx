@@ -57,13 +57,125 @@ const AdditionalFeatures = ({ currentWeek }: AdditionalFeaturesProps) => {
     checkMedicationMutation.mutate({ medicationName });
   };
 
-  const handleExploreNames = () => {
-    toast({
-      title: "Baby Name Explorer",
-      description: `Exploring ${selectedGender} from ${selectedOrigin}`,
-      variant: "default",
-    });
+  const [names, setNames] = useState<{ name: string; meaning: string }[]>([]);
+  const [isLoadingNames, setIsLoadingNames] = useState(false);
+
+  const handleExploreNames = async () => {
+    try {
+      setIsLoadingNames(true);
+      const response = await fetch('/api/baby-names', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          origin: selectedOrigin,
+          gender: selectedGender,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch names');
+      }
+
+      const data = await response.json();
+      setNames(Object.entries(data.meanings).map(([name, meaning]) => ({
+        name,
+        meaning: meaning as string,
+      })));
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to generate names. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingNames(false);
+    }
   };
+
+  // Add names display section after the button
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      {/* Medication Safety Checker */}
+      <div className="bg-white rounded-xl p-6 custom-shadow">
+        <h3 className="text-xl font-montserrat font-bold text-primary mb-4">
+          <i className="fas fa-pills mr-2"></i>Medication Safety Checker
+        </h3>
+        <p className="mb-4">Verify if a medication is safe to use during your pregnancy.</p>
+        
+        <div className="flex gap-3 mb-4">
+          <input 
+            type="text" 
+            className="flex-grow p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none" 
+            placeholder="Enter medication name..."
+            value={medicationName}
+            onChange={(e) => setMedicationName(e.target.value)}
+          />
+          <button 
+            className="bg-primary hover:bg-primary-dark text-white py-2 px-4 rounded-lg font-montserrat font-medium transition duration-300"
+            onClick={handleMedicationCheck}
+            disabled={checkMedicationMutation.isPending}
+          >
+            {checkMedicationMutation.isPending ? "Checking..." : "Check"}
+          </button>
+        </div>
+        
+        <p className="text-sm text-neutral-dark">Recently checked: Acetaminophen, Prenatal vitamins</p>
+      </div>
+      
+      {/* Baby Name Explorer */}
+      <div className="bg-white rounded-xl p-6 custom-shadow">
+        <h3 className="text-xl font-montserrat font-bold text-primary mb-4">
+          <i className="fas fa-baby mr-2"></i>Baby Name Explorer
+        </h3>
+        <p className="mb-4">Find the perfect name for your little one with our name database.</p>
+        
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <select 
+            className="p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+            value={selectedOrigin}
+            onChange={(e) => setSelectedOrigin(e.target.value)}
+          >
+            {NAME_ORIGINS.map(origin => (
+              <option key={origin} value={origin}>{origin}</option>
+            ))}
+          </select>
+          <select 
+            className="p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+            value={selectedGender}
+            onChange={(e) => setSelectedGender(e.target.value)}
+          >
+            {NAME_GENDERS.map(gender => (
+              <option key={gender} value={gender}>{gender}</option>
+            ))}
+          </select>
+        </div>
+        
+        <button 
+          className="w-full bg-primary hover:bg-primary-dark text-white py-2 px-4 rounded-lg font-montserrat font-medium transition duration-300"
+          onClick={handleExploreNames}
+          disabled={isLoadingNames}
+        >
+          {isLoadingNames ? "Generating Names..." : "Explore Names"}
+        </button>
+
+        {names.length > 0 && (
+          <div className="mt-4 space-y-2">
+            <h4 className="font-semibold mb-2">Generated Names:</h4>
+            <div className="max-h-60 overflow-y-auto">
+              {names.map((item, index) => (
+                <div key={index} className="border-b border-gray-100 py-2">
+                  <span className="font-medium text-primary">{item.name}</span>
+                  <p className="text-sm text-gray-600">{item.meaning}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">

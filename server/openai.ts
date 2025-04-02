@@ -154,9 +154,40 @@ export async function generateBabyNames(origin: string, gender: string): Promise
   names: string[];
   meanings: Record<string, string>;
 }> {
-  const prompt = `Generate 5 baby names from ${origin} origin for ${gender}. Format response as JSON with structure: { names: string[], meanings: Record<string, string> }. Include traditional and meaningful names.`;
-  
-  return generateStructuredResponse(prompt, "You are a cultural expert and naming consultant.");
+  try {
+    if (!openai) {
+      throw new Error("OpenAI client not initialized");
+    }
+    const prompt = `Generate 10 unique baby names with their meanings. Origin: ${origin}, Gender: ${gender}. 
+                   Make names culturally authentic and meaningful. 
+                   Format response as JSON with exact structure: { names: string[], meanings: Record<string, string> }.
+                   Names should be properly capitalized and meanings should be concise but meaningful.`;
+
+    const completion = await openai.chat.completions.create({
+      model: MODEL,
+      messages: [
+        {
+          role: "system",
+          content: "You are a cultural expert and naming consultant specializing in traditional and meaningful baby names."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.7,
+    });
+
+    const response = JSON.parse(completion.choices[0].message.content || "{}");
+    return {
+      names: response.names || [],
+      meanings: response.meanings || {}
+    };
+  } catch (error) {
+    console.error("Error generating baby names:", error);
+    throw new Error("Failed to generate baby names");
+  }
 }
 
 export async function generateStructuredResponse<T>(
