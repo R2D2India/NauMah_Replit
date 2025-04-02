@@ -1,7 +1,5 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
-const API_BASE_URL = import.meta.env.PROD ? process.env.REACT_APP_API_URL || '' : 'http://localhost:5000'; // Added environment variable support for production
-
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
@@ -10,10 +8,9 @@ async function throwIfResNotOk(res: Response) {
 }
 
 export async function apiRequest<T = any>(
-  endpoint: string,
+  url: string,
   options?: RequestInit
 ): Promise<T> {
-  const url = API_BASE_URL + endpoint; // Updated to use API_BASE_URL
   const res = await fetch(url, {
     credentials: "include",
     ...options
@@ -26,10 +23,9 @@ export async function apiRequest<T = any>(
 // Legacy version for backward compatibility
 export async function apiRequestLegacy(
   method: string,
-  endpoint: string,
+  url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  const url = API_BASE_URL + endpoint; // Updated to use API_BASE_URL
   const res = await fetch(url, {
     method,
     headers: data ? { "Content-Type": "application/json" } : {},
@@ -47,8 +43,7 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const url = API_BASE_URL + (queryKey[0] as string); // Updated to use API_BASE_URL
-    const res = await fetch(url, {
+    const res = await fetch(queryKey[0] as string, {
       credentials: "include",
     });
 
