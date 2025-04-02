@@ -30,9 +30,9 @@ const TabbedContent = ({ currentWeek }: TabbedContentProps) => {
         {/* Tabs Navigation */}
         <div className="flex overflow-x-auto bg-neutral-light">
           <button 
-            className={`tab-btn flex-none py-3 px-5 font-montserrat font-medium ${activeTab === "diet" 
-              ? "text-primary border-b-2 border-primary" 
-              : "text-neutral-dark hover:text-primary border-b-2 border-transparent"}`}
+            className={`tab-btn flex-none py-3 px-5 font-montserrat font-medium transition-all duration-300 ease-in-out ${activeTab === "diet" 
+              ? "text-primary border-b-2 border-primary scale-105 bg-primary/5" 
+              : "text-neutral-dark hover:text-primary hover:bg-primary/5 border-b-2 border-transparent"}`}
             onClick={() => setActiveTab("diet")}
           >
             <i className="fas fa-apple-alt mr-2"></i>Diet
