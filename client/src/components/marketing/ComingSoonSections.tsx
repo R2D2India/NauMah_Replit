@@ -32,20 +32,26 @@ export const ComingSoonSections = () => {
       <section className="py-12 bg-purple-50">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-8">Doctor Consultation</h2>
-          <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8">
-            <div className="w-24 h-24 bg-primary-light rounded-full mx-auto mb-6 flex items-center justify-center">
-              <i className="fas fa-stethoscope text-3xl text-primary"></i>
+          <div className="max-w-2xl mx-auto rounded-lg shadow-lg p-8 relative overflow-hidden">
+            <div 
+              className="absolute inset-0 bg-cover bg-center z-0 opacity-15" 
+              style={{ backgroundImage: `url('/images/pregnancy/doctor-consultation.jpg')` }}
+            ></div>
+            <div className="relative z-10 bg-white/80 p-8 rounded-lg backdrop-blur-sm">
+              <div className="w-24 h-24 bg-primary-light rounded-full mx-auto mb-6 flex items-center justify-center">
+                <i className="fas fa-stethoscope text-3xl text-primary"></i>
+              </div>
+              <h3 className="text-xl font-semibold mb-4">Expert Medical Consultations</h3>
+              <p className="text-gray-700 mb-6 font-medium">
+                Connect with experienced gynecologists and pregnancy specialists. Coming soon!
+              </p>
+              <button
+                className="bg-primary text-white px-6 py-3 rounded-lg opacity-50 cursor-not-allowed"
+                disabled
+              >
+                Coming Soon
+              </button>
             </div>
-            <h3 className="text-xl font-semibold mb-4">Expert Medical Consultations</h3>
-            <p className="text-gray-600 mb-6">
-              Connect with experienced gynecologists and pregnancy specialists. Coming soon!
-            </p>
-            <button
-              className="bg-primary text-white px-6 py-3 rounded-lg opacity-50 cursor-not-allowed"
-              disabled
-            >
-              Coming Soon
-            </button>
           </div>
         </div>
       </section>
