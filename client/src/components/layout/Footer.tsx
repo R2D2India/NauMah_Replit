@@ -15,7 +15,7 @@ const Footer = () => {
             <p className="text-sm text-neutral-dark mt-2 text-center md:text-left">Your AI Pregnancy Companion</p>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-x-8 gap-y-2">
+          <div className="flex flex-wrap justify-end gap-x-8 gap-y-2 md:mr-8">
             <Link href="/privacy">
               <span className="text-sm text-neutral-dark hover:text-primary transition cursor-pointer">Privacy Policy</span>
             </Link>
@@ -29,7 +29,7 @@ const Footer = () => {
         </div>
         
         <div className="mt-8 pt-6 border-t border-gray-200">
-          <div className="grid md:grid-cols-2 gap-8 mb-8">
+          <div className="grid md:grid-cols-2 gap-12 mb-8">
             <div className="space-y-4">
               <h3 className="text-xl font-semibold text-primary">Our Mission</h3>
               <p className="text-neutral-dark">
