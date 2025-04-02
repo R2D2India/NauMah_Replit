@@ -32,12 +32,12 @@ export const ComingSoonSections = () => {
       <section className="py-12 bg-purple-50">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-8">Doctor Consultation</h2>
-          <div className="max-w-2xl mx-auto rounded-lg shadow-lg p-8 relative overflow-hidden">
+          <div className="max-w-2xl mx-auto rounded-lg shadow-lg relative overflow-hidden">
             <div 
-              className="absolute inset-0 bg-cover bg-center z-0 opacity-15" 
+              className="absolute inset-0 bg-cover bg-center"
               style={{ backgroundImage: `url('/images/pregnancy/doctor-consultation.jpg')` }}
             ></div>
-            <div className="relative z-10 bg-white/80 p-8 rounded-lg backdrop-blur-sm">
+            <div className="relative z-10 bg-gradient-to-r from-white/90 to-white/75 p-8 backdrop-blur-sm">
               <div className="w-24 h-24 bg-primary-light rounded-full mx-auto mb-6 flex items-center justify-center">
                 <i className="fas fa-stethoscope text-3xl text-primary"></i>
               </div>
