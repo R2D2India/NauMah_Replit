@@ -19,12 +19,38 @@ export function VoiceAgent() {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Play welcome message on component mount
+    const welcomeMessage = "Hi, I'm NauMah. Your AI companion during this beautiful 9 month journey. How can I assist you today?";
+    const speak = async () => {
+      try {
+        const response = await fetch('/api/voice/speech', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ message: welcomeMessage }),
+        });
+
+        const audioBlob = await response.blob();
+        const audioUrl = URL.createObjectURL(audioBlob);
+        if (audioRef.current) {
+          audioRef.current.src = audioUrl;
+          audioRef.current.play();
+          setAnswer(welcomeMessage);
+        }
+      } catch (error) {
+        console.error('Error playing welcome message:', error);
+      }
+    };
+    speak();
+
     // Initialize Web Speech API
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
       recognition.current = new SpeechRecognition();
-      recognition.current.continuous = true;
-      recognition.current.interimResults = true;
+      recognition.current.continuous = false;
+      recognition.current.interimResults = false;
+      recognition.current.lang = 'en-US';
 
       recognition.current.onresult = (event: any) => {
         const transcript = Array.from(event.results)

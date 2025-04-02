@@ -202,7 +202,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       context += " Your responses should be compassionate, evidence-based, and medically sound, but always recommend consulting healthcare providers for personal medical advice.";
       
-      const response = await getAssistantResponse(message);
+      const response = await generateChatResponse(message, context);
       res.json({ response });
     } catch (error) {
       console.error("Error generating chat response:", error);
@@ -211,7 +211,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Generate text-to-speech from AI response
-  app.post("/api/voice/speech", validateRequest(chatSchema), async (req: Request, res: Response) => {
+  const speechSchema = z.object({
+    message: z.string().min(1),
+  });
+
+  app.post("/api/voice/speech", validateRequest(speechSchema), async (req: Request, res: Response) => {
     try {
       const { message, pregnancyWeek } = req.validatedData;
       
