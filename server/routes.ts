@@ -182,6 +182,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   app.post("/api/chat", validateRequest(chatSchema), async (req: Request, res: Response) => {
+    if (!process.env.OPENAI_API_KEY) {
+      return res.status(500).json({ message: "OpenAI API key not configured" });
+    }
     try {
       const { message, pregnancyWeek } = req.validatedData;
       
