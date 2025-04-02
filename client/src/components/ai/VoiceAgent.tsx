@@ -1,49 +1,55 @@
 import { useState, useRef, useEffect } from 'react';
 import { Mic, Square, PlayCircle, StopCircle, Volume2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 
 export function VoiceAgent() {
   const [isListening, setIsListening] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false); //Retained from original
+  const [isPlaying, setIsPlaying] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [userQuestion, setUserQuestion] = useState(''); //Retained from original
+  const [userQuestion, setUserQuestion] = useState('');
   const [lastQuery, setLastQuery] = useState('');
   const [answer, setAnswer] = useState('');
-  const audioRef = useRef<HTMLAudioElement | null>(null); //Retained from original
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const recognition = useRef<any>(null);
   const synthesis = useRef(window.speechSynthesis);
   const { toast } = useToast();
 
   useEffect(() => {
-    // Play welcome message on component mount
-    const welcomeMessage = "Hi, I'm NauMah. You AI companion for this beautiful 9 month journey. How can I assist you today? Ask questions about your pregnancy, health concerns, or baby development";
-    setAnswer(welcomeMessage); // Set initial message in UI
-    const speak = async () => {
+    // Fetch and play welcome message on component mount
+    const getWelcomeMessage = async () => {
       try {
-        const response = await fetch('/api/voice/speech', {
+        const response = await fetch('/api/voice/welcome'); // Assumed endpoint
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const welcomeMessage = await response.text();
+        setAnswer(welcomeMessage);
+        const audioBlob = await (await fetch('/api/voice/speech', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ message: welcomeMessage }),
-        });
-
-        const audioBlob = await response.blob();
+        })).blob();
         const audioUrl = URL.createObjectURL(audioBlob);
         if (audioRef.current) {
           audioRef.current.src = audioUrl;
           audioRef.current.play();
-          setAnswer(welcomeMessage);
         }
       } catch (error) {
-        console.error('Error playing welcome message:', error);
+        console.error('Error fetching or playing welcome message:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to play welcome message.',
+          variant: 'destructive',
+        });
       }
     };
-    speak();
+    getWelcomeMessage();
 
     // Initialize Web Speech API
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -136,7 +142,6 @@ export function VoiceAgent() {
     }
   };
 
-  // Handle manual text input (Retained from original, with modifications)
   const handleAskQuestion = async () => {
     if (!userQuestion.trim() || isProcessing) return;
 
@@ -154,13 +159,12 @@ export function VoiceAgent() {
 
       setAnswer(textResponse.response);
 
-      // Fetch audio response (Retained from original, with modifications)
       const response = await fetch('/api/voice/speech', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: userQuestion.trim() }),
+        body: JSON.stringify({ message: textResponse.response }),
       });
 
       if (!response.ok) throw new Error('Failed to get voice response');
@@ -212,7 +216,6 @@ export function VoiceAgent() {
     setIsListening(!isListening);
   };
 
-  // Stop playing the audio (Retained from original)
   const stopPlaying = () => {
     if (audioRef.current) {
       audioRef.current.pause();
@@ -221,7 +224,6 @@ export function VoiceAgent() {
     }
   };
 
-  // Play the audio again (Retained from original)
   const playAgain = () => {
     if (audioRef.current) {
       audioRef.current.play();

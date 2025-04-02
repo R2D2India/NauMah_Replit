@@ -205,6 +205,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { message } = req.validatedData;
       
+      // If this is the initial welcome message, use the exact welcome text
+      if (message === "WELCOME_MESSAGE") {
+        return res.json({ response: "Hi, I'm NauMah. You AI companion for this beautiful 9 month journey. How can I assist you today? Ask questions about your pregnancy, health concerns, or baby development" });
+      }
+      
       // Create base context for voice responses
       const context = "You are NauMah, a knowledgeable and supportive AI pregnancy assistant providing guidance to expecting mothers. Your responses should be compassionate, evidence-based, and medically sound, but always recommend consulting healthcare providers for personal medical advice. Keep responses concise (under 100 words) for voice output.";
       
