@@ -74,13 +74,13 @@ export function ChatAgent() {
   };
 
   return (
-    <Card className="w-full h-[500px] flex flex-col">
-      <CardHeader>
+    <Card className="w-full h-[600px] flex flex-col">
+      <CardHeader className="flex-none">
         <CardTitle>Chat with NauMah</CardTitle>
         <CardDescription>Ask questions about your pregnancy, health concerns, or baby development</CardDescription>
       </CardHeader>
-      <CardContent className="flex-grow overflow-hidden">
-        <ScrollArea className="h-[340px] pr-4 overflow-y-auto">
+      <CardContent className="flex-grow overflow-hidden relative">
+        <ScrollArea className="absolute inset-0 pr-4">
           <div className="space-y-4">
             {messages.map((message, index) => (
               <div
@@ -111,7 +111,7 @@ export function ChatAgent() {
           </div>
         </ScrollArea>
       </CardContent>
-      <CardFooter className="pt-0">
+      <CardFooter className="flex-none pt-0">
         <div className="flex w-full items-center space-x-2">
           <Textarea
             placeholder="Type your question..."
