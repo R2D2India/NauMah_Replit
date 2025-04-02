@@ -178,8 +178,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Chat with AI Assistant
   const chatSchema = z.object({
-    message: z.string().min(1),
-    pregnancyWeek: z.number().optional(),
+    message: z.string().min(1)
   });
   
   app.post("/api/chat", validateRequest(chatSchema), async (req: Request, res: Response) => {
@@ -204,23 +203,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/voice/speech", validateRequest(speechSchema), async (req: Request, res: Response) => {
     try {
-      const { message, pregnancyWeek } = req.validatedData;
+      const { message } = req.validatedData;
       
-      // Get pregnancy data if we don't have the week
-      let week = pregnancyWeek;
-      if (!week) {
-        const pregnancyData = await storage.getPregnancyData(demoUserId);
-        if (pregnancyData) {
-          week = pregnancyData.currentWeek;
-        }
-      }
-      
-      // Create a context with pregnancy week if available
-      let context = "You are NauMah, a knowledgeable and supportive AI pregnancy assistant providing guidance to expecting mothers.";
-      if (week) {
-        context += ` The user is currently at week ${week} of pregnancy. Tailor your responses to be relevant for this stage.`;
-      }
-      context += " Your responses should be compassionate, evidence-based, and medically sound, but always recommend consulting healthcare providers for personal medical advice. Keep responses concise (under 100 words) for voice output.";
+      // Create base context for voice responses
+      const context = "You are NauMah, a knowledgeable and supportive AI pregnancy assistant providing guidance to expecting mothers. Your responses should be compassionate, evidence-based, and medically sound, but always recommend consulting healthcare providers for personal medical advice. Keep responses concise (under 100 words) for voice output.";
       
       // First generate text response
       const textResponse = await generateChatResponse(message, context);
