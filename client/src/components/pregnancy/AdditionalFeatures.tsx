@@ -74,12 +74,11 @@ const AdditionalFeatures = ({ currentWeek }: AdditionalFeaturesProps) => {
         }),
       });
 
+      const data = await response.json();
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to fetch names');
+        throw new Error(data.message || 'Failed to fetch names');
       }
 
-      const data = await response.json();
       if (!data.names || !data.meanings) {
         throw new Error('Invalid response format');
       }

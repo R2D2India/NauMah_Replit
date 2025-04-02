@@ -168,11 +168,11 @@ const TabbedContent = ({ currentWeek }: TabbedContentProps) => {
                         body: JSON.stringify({ currentWeek })
                       });
                       
+                      const data = await response.json();
                       if (!response.ok) {
-                        throw new Error('Failed to generate meal plan');
+                        throw new Error(data.message || 'Failed to generate meal plan');
                       }
                       
-                      const data = await response.json();
                       setMealPlan(data);
                     } catch (err) {
                       console.error("Error generating meal plan:", err);
