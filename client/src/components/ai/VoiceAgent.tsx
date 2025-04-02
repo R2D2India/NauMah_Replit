@@ -1,51 +1,22 @@
 import { useState, useRef, useEffect } from 'react';
 import { Mic, Square, PlayCircle, StopCircle, Volume2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 
 export function VoiceAgent() {
   const [isListening, setIsListening] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false); //Retained from original
+  const [isPlaying, setIsPlaying] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [userQuestion, setUserQuestion] = useState(''); //Retained from original
   const [lastQuery, setLastQuery] = useState('');
   const [answer, setAnswer] = useState('');
-  const audioRef = useRef<HTMLAudioElement | null>(null); //Retained from original
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const recognition = useRef<any>(null);
   const synthesis = useRef(window.speechSynthesis);
   const { toast } = useToast();
 
   useEffect(() => {
-    // Play welcome message on component mount
-    const welcomeMessage = "Hi, I'm NauMah. You AI companion for this beautiful 9 month journey. How can I assist you today? Ask questions about your pregnancy, health concerns, or baby development";
-    setAnswer(welcomeMessage); // Set initial message in UI
-    const speak = async () => {
-      try {
-        const response = await fetch('/api/voice/speech', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ message: welcomeMessage }),
-        });
-
-        const audioBlob = await response.blob();
-        const audioUrl = URL.createObjectURL(audioBlob);
-        if (audioRef.current) {
-          audioRef.current.src = audioUrl;
-          audioRef.current.play();
-          setAnswer(welcomeMessage);
-        }
-      } catch (error) {
-        console.error('Error playing welcome message:', error);
-      }
-    };
-    speak();
-
-    // Initialize Web Speech API
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
       recognition.current = new SpeechRecognition();
@@ -68,7 +39,7 @@ export function VoiceAgent() {
         console.error('Speech recognition error:', event.error);
         setIsListening(false);
         let errorMessage = 'Failed to recognize speech. Please try again.';
-        
+
         switch(event.error) {
           case 'not-allowed':
             errorMessage = 'Please allow microphone access to use voice recognition.';
@@ -83,7 +54,7 @@ export function VoiceAgent() {
             errorMessage = 'No microphone detected. Please check your device settings.';
             break;
         }
-        
+
         toast({
           title: 'Speech Recognition Error',
           description: errorMessage,
@@ -127,7 +98,6 @@ export function VoiceAgent() {
       const data = await response.json();
       setAnswer(data.response);
 
-      // Convert response to speech
       const audioResponse = await fetch('/api/voice/speech', {
         method: 'POST',
         headers: {
@@ -140,13 +110,8 @@ export function VoiceAgent() {
       const audioUrl = URL.createObjectURL(audioBlob);
       if (audioRef.current) {
         audioRef.current.src = audioUrl;
-        audioRef.current.onloadedmetadata = () => {
-          audioRef.current?.play();
-          setIsPlaying(true);
-        };
-        audioRef.current.onended = () => {
-          setIsPlaying(false);
-        };
+        audioRef.current.play();
+        setIsPlaying(true);
       }
     } catch (error) {
       console.error('Error processing voice input:', error);
@@ -156,69 +121,11 @@ export function VoiceAgent() {
         description: errorMessage,
         variant: 'destructive',
       });
-      setAnswer("I apologize, but I encountered an error. Please try again or use text input instead.");
+      setAnswer("I apologize, but I encountered an error. Please try again.");
     } finally {
       setIsProcessing(false);
     }
   };
-
-  // Handle manual text input (Retained from original, with modifications)
-  const handleAskQuestion = async () => {
-    if (!userQuestion.trim() || isProcessing) return;
-
-    setIsProcessing(true);
-    setLastQuery(userQuestion);
-
-    try {
-      const textResponse = await apiRequest<{ response: string }>('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message: userQuestion.trim() }),
-      });
-
-      setAnswer(textResponse.response);
-
-      // Fetch audio response (Retained from original, with modifications)
-      const response = await fetch('/api/voice/speech', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message: userQuestion.trim() }),
-      });
-
-      if (!response.ok) throw new Error('Failed to get voice response');
-
-      const audioBlob = await response.blob();
-      const audioUrl = URL.createObjectURL(audioBlob);
-
-      if (audioRef.current) {
-        audioRef.current.src = audioUrl;
-        audioRef.current.onloadedmetadata = () => {
-          audioRef.current?.play();
-          setIsPlaying(true);
-        };
-
-        audioRef.current.onended = () => {
-          setIsPlaying(false);
-        };
-      }
-
-      setUserQuestion('');
-    } catch (error) {
-      console.error('Error getting voice response:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to get a voice response. Please try again.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
 
   const toggleListening = () => {
     if (!recognition.current) {
@@ -235,11 +142,9 @@ export function VoiceAgent() {
         recognition.current.stop();
         setIsListening(false);
       } else {
-        // Set initial greeting
         const greeting = "Hi. I'm NauMah. You AI companion for this beautiful nine month journey. How can I help you today? Ask questions about your pregnancy, health concerns, or baby development.";
         setAnswer(greeting);
-        
-        // Play greeting audio
+
         fetch('/api/voice/speech', {
           method: 'POST',
           headers: {
@@ -274,7 +179,6 @@ export function VoiceAgent() {
     }
   };
 
-  // Stop playing the audio (Retained from original)
   const stopPlaying = () => {
     if (audioRef.current) {
       audioRef.current.pause();
@@ -283,7 +187,6 @@ export function VoiceAgent() {
     }
   };
 
-  // Play the audio again (Retained from original)
   const playAgain = () => {
     if (audioRef.current) {
       audioRef.current.play();
@@ -292,108 +195,79 @@ export function VoiceAgent() {
   };
 
   return (
-    <Card className="w-full h-[500px] flex flex-col">
-      <CardHeader>
-        <CardTitle>Voice Assistant</CardTitle>
-        <CardDescription>Speak with NauMah, your pregnancy AI companion</CardDescription>
+    <Card className="w-full h-[500px] flex flex-col bg-gradient-to-br from-primary/5 via-background to-primary/5">
+      <CardHeader className="text-center">
+        <CardTitle className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-dark">Voice Assistant</CardTitle>
+        <CardDescription className="max-w-md mx-auto">Speak with NauMah, your pregnancy AI companion. Just tap the microphone and start talking.</CardDescription>
       </CardHeader>
-      <CardContent className="flex-grow flex flex-col">
-        <audio ref={audioRef} className="hidden" />
+      <CardContent className="flex-grow flex flex-col items-center justify-center relative">
+        <audio ref={audioRef} className="hidden" onEnded={() => setIsPlaying(false)} />
 
-        <div className="flex flex-col items-center justify-center mb-6 flex-grow">
+        <div className="flex flex-col items-center justify-center mb-6">
           <Button
             variant="outline"
             size="icon"
-            className={`h-24 w-24 rounded-full ${isListening ? 'bg-red-100 text-red-500 border-red-300' : ''}`}
+            className={`h-32 w-32 rounded-full transition-all duration-300 ${
+              isListening 
+                ? 'bg-red-100 text-red-500 border-red-300 animate-pulse shadow-lg'
+                : 'hover:bg-primary/10 hover:scale-105 shadow-md'
+            }`}
             onClick={toggleListening}
-            disabled={isProcessing || isPlaying}
+            disabled={isProcessing}
           >
             {isListening ? (
-              <Square className="h-8 w-8" />
+              <Square className="h-12 w-12" />
             ) : (
-              <Mic className="h-8 w-8" />
+              <Mic className="h-12 w-12" />
             )}
           </Button>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {isListening ? 'Tap to stop listening' : 'Tap to start conversation'}
+          <p className="mt-4 text-sm text-muted-foreground animate-fade-in">
+            {isListening ? 'Listening...' : 'Tap to start conversation'}
           </p>
         </div>
 
-        {lastQuery && (
-          <div className="mb-4">
-            <h3 className="text-sm font-medium mb-1">You said:</h3>
-            <p className="text-sm p-2 bg-muted rounded-md">{lastQuery}</p>
-          </div>
-        )}
-
-        {answer && (
-          <div className="mb-4">
-            <div className="flex items-center justify-between mb-1">
-              <h3 className="text-sm font-medium">NauMah's response:</h3>
-              <div className="flex space-x-1">
-                {isPlaying ? (
-                  <Button variant="ghost" size="icon" onClick={stopPlaying} className="h-6 w-6">
-                    <StopCircle className="h-4 w-4" />
-                  </Button>
-                ) : (
-                  <Button variant="ghost" size="icon" onClick={playAgain} className="h-6 w-6" disabled={!audioRef.current?.src}>
-                    <PlayCircle className="h-4 w-4" />
-                  </Button>
-                )}
-                <Button variant="ghost" size="icon" className="h-6 w-6" disabled>
-                  <Volume2 className="h-4 w-4" />
-                </Button>
+        {(lastQuery || answer) && (
+          <div className="w-full max-w-lg mx-auto space-y-4 animate-fade-in">
+            {lastQuery && (
+              <div className="bg-primary/10 p-4 rounded-lg">
+                <p className="text-sm font-medium">You said:</p>
+                <p className="text-sm mt-1">{lastQuery}</p>
               </div>
-            </div>
-            <div className="space-y-3">
-              <p className="text-sm p-2 bg-primary/10 rounded-md whitespace-pre-line">{answer}</p>
-              <div className="space-y-2">
-                {answer.split('?').slice(1).map((suggestion, i) => 
-                  suggestion.trim() && (
-                    <Button
-                      key={i}
-                      variant="ghost"
-                      size="sm"
-                      className="text-xs text-primary hover:text-primary-dark"
-                      onClick={() => {
-                        setUserQuestion(suggestion.trim() + '?');
-                        handleAskQuestion();
-                      }}
-                    >
-                      {suggestion.trim() + '?'}
+            )}
+            {answer && (
+              <div className="bg-background border p-4 rounded-lg shadow-sm">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm font-medium">NauMah's response:</p>
+                  <div className="flex space-x-2">
+                    {isPlaying ? (
+                      <Button variant="ghost" size="icon" onClick={stopPlaying} className="h-8 w-8">
+                        <StopCircle className="h-4 w-4" />
+                      </Button>
+                    ) : (
+                      <Button variant="ghost" size="icon" onClick={playAgain} className="h-8 w-8" disabled={!audioRef.current?.src}>
+                        <PlayCircle className="h-4 w-4" />
+                      </Button>
+                    )}
+                    <Button variant="ghost" size="icon" className="h-8 w-8" disabled>
+                      <Volume2 className="h-4 w-4" />
                     </Button>
-                  )
-                )}
+                  </div>
+                </div>
+                <p className="text-sm whitespace-pre-line">{answer}</p>
               </div>
-            </div>
+            )}
           </div>
         )}
 
         {isProcessing && (
-          <div className="flex justify-center items-center py-4">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
-            <span className="ml-2 text-sm">Processing your request...</span>
+          <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+            <div className="flex items-center space-x-2">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              <span className="text-sm">Processing your request...</span>
+            </div>
           </div>
         )}
       </CardContent>
-      <CardFooter>
-        <div className="flex w-full items-center space-x-2">
-          <Input
-            placeholder="Type your question..."
-            value={userQuestion}
-            onChange={(e) => setUserQuestion(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleAskQuestion()}
-            disabled={isProcessing || isListening}
-          />
-          <Button
-            type="submit"
-            onClick={handleAskQuestion}
-            disabled={isProcessing || isListening || !userQuestion.trim()}
-          >
-            Ask
-          </Button>
-        </div>
-      </CardFooter>
     </Card>
   );
 }
