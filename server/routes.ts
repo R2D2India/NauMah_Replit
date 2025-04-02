@@ -1,6 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { PgStorage } from "./pgStorage";
+import { generateMealPlan, checkMedicationSafety, generateBabyNames } from "./openai";
 import { pregnancyStageSchema, medicationCheckSchema, moodEntrySchema, waitlistSchema } from "@shared/schema";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
@@ -270,16 +271,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/meal-plan", validateRequest(mealPlanSchema), async (req: Request, res: Response) => {
     try {
       const { currentWeek } = req.validatedData;
-      
-      const prompt = `Generate a detailed pregnancy meal plan for week ${currentWeek}. Include 3 meals and 2 snacks with specific foods and portions. Focus on essential nutrients needed during pregnancy week ${currentWeek}. Format response as a JSON object with exactly this structure: { breakfast: string, lunch: string, dinner: string, snacks: string[] }. Make meals nutritious and pregnancy-safe.`;
-      
-      const mealPlan = await generateStructuredResponse<{
-        breakfast: string;
-        lunch: string;
-        dinner: string;
-        snacks: string[];
-      }>(prompt, "You are a certified nutritionist specializing in pregnancy nutrition. Provide detailed, nutritious meal plans that are safe for pregnant women.");
-      
+      const mealPlan = await generateMealPlan(currentWeek);
       res.json(mealPlan);
     } catch (error) {
       console.error("Error generating meal plan:", error);
@@ -307,6 +299,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error generating baby names:", error);
       res.status(500).json({ message: "Failed to generate baby names" });
+    }
+  });
+
+  // Medication check schema
+  const medicationNameSchema = z.object({
+    medicationName: z.string()
+  });
+
+  app.post("/api/medication/check", validateRequest(medicationNameSchema), async (req: Request, res: Response) => {
+    try {
+      const { medicationName } = req.validatedData;
+      const safetyInfo = await checkMedicationSafety(medicationName);
+      res.json(safetyInfo);
+    } catch (error) {
+      console.error("Error checking medication:", error);
+      res.status(500).json({ message: "Failed to check medication" });
     }
   });
 
