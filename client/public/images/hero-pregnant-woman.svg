@@ -1,0 +1,9 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <style>
+    .pregnant-woman{fill:#FFB6C1}.baby{fill:#FFC0CB}.glow{fill:#FFF;opacity:0.2}
+  </style>
+  <circle class="glow" cx="400" cy="300" r="250"/>
+  <path class="pregnant-woman" d="M400 150c-30 0-54.5 24.5-54.5 54.5s24.5 54.5 54.5 54.5 54.5-24.5 54.5-54.5S430 150 400 150zm0 150c-60 0-150 75-150 225h300c0-150-90-225-150-225z"/>
+  <circle class="baby" cx="400" cy="350" r="40"/>
+</svg>

@@ -8,7 +8,7 @@ const BabyDevelopment = ({ currentWeek }: BabyDevelopmentProps) => {
   // Get baby size for current week
   const babySize = BABY_SIZE_COMPARISONS.find(item => item.week === currentWeek) || 
                   BABY_SIZE_COMPARISONS[0]; // Default to first week if not found
-  
+
   // Get development milestones for current week
   const milestones = DEVELOPMENT_MILESTONES[currentWeek as keyof typeof DEVELOPMENT_MILESTONES] ||
                     {
@@ -20,8 +20,15 @@ const BabyDevelopment = ({ currentWeek }: BabyDevelopmentProps) => {
   return (
     <div className="mb-8">
       <div className="bg-white rounded-xl p-6 custom-shadow">
-        <div className="flex flex-col md:flex-row">
-          <div className="md:w-2/5 mb-6 md:mb-0 flex justify-center">
+        <div className="flex flex-col md:flex-row items-center gap-8"> {/* Added items-center and gap-8 for better layout */}
+          <div className="md:w-1/2 mb-6 md:mb-0"> {/* Adjusted width for better image placement */}
+            <img 
+              src="/images/baby-development.svg" 
+              alt="Baby Development Stage" 
+              className="w-full max-w-sm mx-auto"
+            />
+          </div>
+          <div className="md:w-1/2"> {/* Adjusted width for text content */}
             <div className="relative">
               <div className="rounded-lg shadow-md flex items-center justify-center bg-neutral-light h-[300px] w-[300px] text-center">
                 <div className="flex flex-col items-center">
@@ -33,12 +40,10 @@ const BabyDevelopment = ({ currentWeek }: BabyDevelopmentProps) => {
                 <span className="text-primary font-montserrat font-medium">Size: {babySize.size}</span>
               </div>
             </div>
-          </div>
-          <div className="md:w-3/5 md:pl-6">
-            <h2 className="text-2xl font-montserrat font-bold text-primary mb-3">Your Baby This Week</h2>
+            <h2 className="text-2xl font-montserrat font-bold text-primary mb-3 mt-6">Your Baby This Week</h2> {/*Added mt-6 for spacing */}
             <div className="space-y-4">
               <p>{milestones.description}</p>
-              
+
               <div className="bg-neutral-light rounded-lg p-4">
                 <h3 className="font-montserrat font-medium text-lg mb-2">Key Developments</h3>
                 <ul className="space-y-2">
@@ -50,7 +55,7 @@ const BabyDevelopment = ({ currentWeek }: BabyDevelopmentProps) => {
                   ))}
                 </ul>
               </div>
-              
+
               {milestones.funFact && (
                 <p className="text-neutral-dark italic">{milestones.funFact}</p>
               )}
