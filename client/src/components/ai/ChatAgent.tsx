@@ -57,9 +57,12 @@ export function ChatAgent() {
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
       console.error('Error sending message:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to get a response';
       toast({
         title: 'Error',
-        description: 'Failed to get a response. Please try again.',
+        description: process.env.NODE_ENV === 'production' 
+          ? 'An error occurred. Please try again.' 
+          : errorMessage,
         variant: 'destructive',
       });
     } finally {

@@ -1,12 +1,17 @@
 import OpenAI from "openai";
 
 // Initialize the OpenAI client with error handling
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || '',
-});
-
-if (!process.env.OPENAI_API_KEY) {
-  throw new Error("OpenAI API key is not configured. Please set OPENAI_API_KEY in your environment variables.");
+let openai: OpenAI;
+try {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error("OpenAI API key is not configured");
+  }
+  openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY
+  });
+} catch (error) {
+  console.error("Error initializing OpenAI client:", error);
+  throw error;
 }
 
 // Assistant ID for the pregnancy companion
