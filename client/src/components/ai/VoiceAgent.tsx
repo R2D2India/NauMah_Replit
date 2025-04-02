@@ -226,38 +226,13 @@ export function VoiceAgent() {
           </p>
         </div>
 
-        {(lastQuery || answer) && (
-          <div className="w-full max-w-lg mx-auto space-y-4 animate-fade-in">
-            {lastQuery && (
-              <div className="bg-primary/10 p-4 rounded-lg">
-                <p className="text-sm font-medium">You said:</p>
-                <p className="text-sm mt-1">{lastQuery}</p>
-              </div>
-            )}
-            {answer && (
-              <div className="bg-background border p-4 rounded-lg shadow-sm">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm font-medium">NauMah's response:</p>
-                  <div className="flex space-x-2">
-                    {isPlaying ? (
-                      <Button variant="ghost" size="icon" onClick={stopPlaying} className="h-8 w-8">
-                        <StopCircle className="h-4 w-4" />
-                      </Button>
-                    ) : (
-                      <Button variant="ghost" size="icon" onClick={playAgain} className="h-8 w-8" disabled={!audioRef.current?.src}>
-                        <PlayCircle className="h-4 w-4" />
-                      </Button>
-                    )}
-                    <Button variant="ghost" size="icon" className="h-8 w-8" disabled>
-                      <Volume2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-                <p className="text-sm whitespace-pre-line">{answer}</p>
-              </div>
-            )}
-          </div>
-        )}
+        <div className="flex space-x-2 mt-4 justify-center">
+          {isPlaying && (
+            <Button variant="ghost" size="icon" onClick={stopPlaying} className="h-8 w-8">
+              <StopCircle className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
 
         {isProcessing && (
           <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm">
