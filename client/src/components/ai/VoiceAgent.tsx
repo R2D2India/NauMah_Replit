@@ -68,15 +68,35 @@ export function VoiceAgent() {
         console.error('Speech recognition error:', event.error);
         setIsListening(false);
         let errorMessage = 'Failed to recognize speech. Please try again.';
-        if (event.error === 'not-allowed') {
-          errorMessage = 'Please allow microphone access to use voice recognition.';
-        } else if (event.error === 'network') {
-          errorMessage = 'Network error. Please check your connection.';
+        
+        switch(event.error) {
+          case 'not-allowed':
+            errorMessage = 'Please allow microphone access to use voice recognition.';
+            break;
+          case 'network':
+            errorMessage = 'Network error. Please check your connection.';
+            break;
+          case 'no-speech':
+            errorMessage = 'No speech detected. Please try speaking again.';
+            break;
+          case 'audio-capture':
+            errorMessage = 'No microphone detected. Please check your device settings.';
+            break;
         }
+        
         toast({
-          title: 'Error',
+          title: 'Speech Recognition Error',
           description: errorMessage,
           variant: 'destructive',
+        });
+      };
+
+      recognition.current.onstart = () => {
+        setIsListening(true);
+        toast({
+          title: 'Listening',
+          description: 'I can hear you now. Please start speaking.',
+          variant: 'default',
         });
       };
     }
@@ -210,12 +230,25 @@ export function VoiceAgent() {
       return;
     }
 
-    if (isListening) {
-      recognition.current.stop();
-    } else {
-      recognition.current.start();
+    try {
+      if (isListening) {
+        recognition.current.stop();
+        setIsListening(false);
+      } else {
+        recognition.current.continuous = false;
+        recognition.current.interimResults = false;
+        recognition.current.maxAlternatives = 1;
+        recognition.current.start();
+      }
+    } catch (error) {
+      console.error('Error toggling speech recognition:', error);
+      setIsListening(false);
+      toast({
+        title: 'Error',
+        description: 'Failed to start voice recognition. Please try again.',
+        variant: 'destructive',
+      });
     }
-    setIsListening(!isListening);
   };
 
   // Stop playing the audio (Retained from original)
