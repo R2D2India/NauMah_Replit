@@ -75,18 +75,24 @@ const AdditionalFeatures = ({ currentWeek }: AdditionalFeaturesProps) => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch names');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to fetch names');
       }
 
       const data = await response.json();
-      const namesList = data.names || [];
-      const meanings = data.meanings || {};
+      if (!data.names || !data.meanings) {
+        throw new Error('Invalid response format');
+      }
+
+      const namesList = data.names;
+      const meanings = data.meanings;
       
       setNames(namesList.map(name => ({
         name,
         meaning: meanings[name] || 'A beautiful name',
       })));
     } catch (error) {
+      console.error('Error fetching names:', error);
       toast({
         title: "Error",
         description: "Failed to generate names. Please try again.",
