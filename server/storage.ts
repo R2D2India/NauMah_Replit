@@ -25,6 +25,7 @@ export interface IStorage {
   // Medication check methods
   getMedicationChecks(userId: number): Promise<MedicationCheck[]>;
   createMedicationCheck(check: InsertMedicationCheck): Promise<MedicationCheck>;
+  createWaitlistEntry(entry: { name: string; mobile: string; email: string }): Promise<any>;
 }
 
 export class MemStorage implements IStorage {
@@ -168,6 +169,17 @@ export class MemStorage implements IStorage {
     checks.push(check);
     
     return check;
+  }
+
+  async createWaitlistEntry(entry: { name: string; mobile: string; email: string }): Promise<any> {
+    const result = await db.insert(waitlistTable)
+      .values({
+        name: entry.name,
+        mobile: entry.mobile,
+        email: entry.email
+      })
+      .returning();
+    return result[0];
   }
 }
 

@@ -18,11 +18,11 @@ export const WaitlistSection = () => {
         body: JSON.stringify(formData)
       });
       setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 5000);
+      setTimeout(() => setShowConfetti(false), 8000);
       setFormData({ name: '', mobile: '', email: '' });
       toast({
-        title: 'Success!',
-        description: 'You have been added to our waitlist.',
+        title: 'Thank you for joining our waitlist!',
+        description: 'Team NauMah will contact you soon!',
       });
     } catch (error) {
       toast({
@@ -35,7 +35,13 @@ export const WaitlistSection = () => {
 
   return (
     <section className="py-12 bg-gradient-to-r from-purple-100 to-pink-100">
-      {showConfetti && <Confetti recycle={false} numberOfPieces={200} colors={['#FFD700', '#FFA500']} />}
+      {showConfetti && <Confetti 
+        recycle={false} 
+        numberOfPieces={300} 
+        colors={['#FFD700', '#FFA500', '#FFB74D', '#FFC107']}
+        gravity={0.3}
+        tweenDuration={4000}
+      />}
       <div className="container mx-auto px-4">
         <h2 className="text-3xl font-bold text-center mb-8">Join Our Waitlist</h2>
         <form onSubmit={handleSubmit} className="max-w-md mx-auto space-y-4">
