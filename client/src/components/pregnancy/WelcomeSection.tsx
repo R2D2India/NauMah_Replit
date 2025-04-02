@@ -27,9 +27,9 @@ export default function WelcomeSection() {
           </div>
           <div className="relative">
             <img
-              src="/images/pregnancy/hero-pregnant-woman.jpg"
+              src="/images/pregnancy/hero-pregnant-woman-unsplash.jpg"
               alt="Pregnancy Journey"
-              className="w-full h-[600px] object-cover rounded-xl shadow-lg hover:shadow-xl transition-shadow"
+              className="w-full h-[600px] object-cover rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300"
             />
           </div>
         </div>
