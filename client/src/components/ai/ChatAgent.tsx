@@ -139,7 +139,29 @@ export function ChatAgent() {
           </div>
         </ScrollArea>
       </CardContent>
-      
+      <CardFooter className="border-t p-4">
+        <div className="flex w-full items-center space-x-2">
+          <Textarea
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Type your message..."
+            className="min-h-[60px] flex-1"
+            disabled={isLoading}
+          />
+          <Button 
+            onClick={handleSendMessage}
+            disabled={isLoading || !inputValue.trim()}
+            className="h-[60px] w-[60px]"
+          >
+            {isLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Send className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
+      </CardFooter>
     </Card>
   );
 }
