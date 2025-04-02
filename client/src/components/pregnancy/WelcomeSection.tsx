@@ -12,12 +12,7 @@ export default function WelcomeSection() {
             <p className="text-lg text-gray-600 mb-8">
               Navigate your pregnancy journey with personalized AI guidance, tracking tools, and expert insights.
             </p>
-            <div className="grid grid-cols-3 gap-4 mt-8">
-              <img 
-                src="https://images.unsplash.com/photo-1538678867871-8a43e7487746"
-                alt="Pregnancy Journey"
-                className="w-full h-48 object-cover rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:scale-102 border-2 border-pink-100"
-              />
+            <div className="grid grid-cols-2 gap-4 mt-8">
               <img 
                 src="/images/pregnancy/prenatal-care.jpg" 
                 alt="Prenatal Care"
