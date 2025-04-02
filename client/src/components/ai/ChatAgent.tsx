@@ -82,13 +82,13 @@ export function ChatAgent() {
 
   return (
     <Card className="w-full h-[600px] flex flex-col">
-      <CardHeader className="flex-none">
+      <CardHeader className="shrink-0">
         <CardTitle>Chat with NauMah</CardTitle>
         <CardDescription>Ask questions about your pregnancy, health concerns, or baby development</CardDescription>
       </CardHeader>
-      <CardContent className="flex-grow overflow-hidden relative">
-        <ScrollArea className="absolute inset-0 pr-4">
-          <div className="space-y-4">
+      <CardContent className="flex-1 overflow-hidden">
+        <ScrollArea className="h-[calc(600px-10rem)]">
+          <div className="space-y-4 pr-4">
             {messages.map((message, index) => (
               <div
                 key={index}
