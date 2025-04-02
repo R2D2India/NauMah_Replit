@@ -1,12 +1,15 @@
 import OpenAI from "openai";
 
 // Initialize the OpenAI client
-if (!process.env.OPENAI_API_KEY) {
-  console.warn('Warning: OPENAI_API_KEY environment variable is not set');
+const apiKey = process.env.OPENAI_API_KEY;
+console.log("Initializing OpenAI client. API Key status:", apiKey ? "Present" : "Missing");
+
+if (!apiKey) {
+  console.error('Error: OPENAI_API_KEY environment variable is not set');
 }
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || '',
+  apiKey: apiKey || '',
 });
 
 // Assistant ID for the pregnancy companion
