@@ -79,9 +79,12 @@ const AdditionalFeatures = ({ currentWeek }: AdditionalFeaturesProps) => {
       }
 
       const data = await response.json();
-      setNames(Object.entries(data.meanings).map(([name, meaning]) => ({
+      const namesList = data.names || [];
+      const meanings = data.meanings || {};
+      
+      setNames(namesList.map(name => ({
         name,
-        meaning: meaning as string,
+        meaning: meanings[name] || 'A beautiful name',
       })));
     } catch (error) {
       toast({

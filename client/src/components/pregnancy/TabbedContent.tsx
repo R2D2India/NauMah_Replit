@@ -159,7 +159,23 @@ const TabbedContent = ({ currentWeek }: TabbedContentProps) => {
               <div className="mt-5 text-center">
                 <button 
                   className="bg-primary hover:bg-primary-dark text-white py-2 px-6 rounded-lg font-montserrat font-medium transition duration-300"
-                  onClick={handleGenerateMealPlan}
+                  onClick={() => {
+                    setIsGeneratingMealPlan(true);
+                    fetch('/api/meal-plan', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ currentWeek })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                      setMealPlan(data);
+                      setIsGeneratingMealPlan(false);
+                    })
+                    .catch(err => {
+                      console.error("Error generating meal plan:", err);
+                      setIsGeneratingMealPlan(false);
+                    });
+                  }}
                   disabled={isGeneratingMealPlan}
                 >
                   {isGeneratingMealPlan ? "Generating..." : "Generate Complete Meal Plan"}
