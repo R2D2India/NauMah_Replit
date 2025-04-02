@@ -13,7 +13,7 @@ function Router() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
-      <main className="flex-grow container mx-auto px-4 py-6">
+      <main className="flex-grow">
         <Suspense fallback={<div>Loading...</div>}>
           <Switch>
           <Route path="/" component={Home} />
