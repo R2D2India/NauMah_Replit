@@ -37,7 +37,7 @@ export const ComingSoonSections = () => {
               className="absolute inset-0 bg-cover bg-center"
               style={{ backgroundImage: `url('/images/pregnancy/doctor-consultation.jpg')` }}
             ></div>
-            <div className="relative z-10 bg-gradient-to-r from-white/90 to-white/75 p-8 backdrop-blur-sm">
+            <div className="relative z-10 bg-gradient-to-r from-white/70 to-white/50 p-8 backdrop-blur-[2px]">
               <div className="w-24 h-24 bg-primary-light rounded-full mx-auto mb-6 flex items-center justify-center">
                 <i className="fas fa-stethoscope text-3xl text-primary"></i>
               </div>
