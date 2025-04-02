@@ -1,6 +1,6 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
-const API_BASE_URL = import.meta.env.PROD ? '' : 'http://0.0.0.0:5000'; // Updated to use 0.0.0.0 instead of localhost
+const API_BASE_URL = import.meta.env.PROD ? '/api' : 'http://0.0.0.0:5000/api';
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -13,7 +13,7 @@ export async function apiRequest<T = any>(
   endpoint: string,
   options?: RequestInit
 ): Promise<T> {
-  const url = API_BASE_URL + endpoint; // Updated to use API_BASE_URL
+  const url = API_BASE_URL + endpoint;
   const res = await fetch(url, {
     credentials: "include",
     ...options
@@ -29,7 +29,7 @@ export async function apiRequestLegacy(
   endpoint: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  const url = API_BASE_URL + endpoint; // Updated to use API_BASE_URL
+  const url = API_BASE_URL + endpoint;
   const res = await fetch(url, {
     method,
     headers: data ? { "Content-Type": "application/json" } : {},
@@ -47,7 +47,7 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const url = API_BASE_URL + (queryKey[0] as string); // Updated to use API_BASE_URL
+    const url = API_BASE_URL + (queryKey[0] as string);
     const res = await fetch(url, {
       credentials: "include",
     });
