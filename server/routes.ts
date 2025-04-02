@@ -186,7 +186,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { message, pregnancyWeek } = req.validatedData;
       
       // Create base context for the AI
-      const context = "You are NauMah, a knowledgeable and supportive AI pregnancy assistant. Keep responses under 100 words. Structure your responses in short, clear bullet points. Be compassionate and evidence-based. Start with a brief greeting when appropriate. Always recommend consulting healthcare providers for medical advice.";
+      const context = "You are NauMah, a knowledgeable and supportive AI pregnancy assistant. Format your responses in clear, well-structured paragraphs with proper spacing. Keep responses concise (under 100 words). Be compassionate and evidence-based. Start with a brief greeting. Use proper paragraph breaks for readability. Always conclude by recommending consultation with healthcare providers for medical advice.";
       
       const response = await generateChatResponse(message, context);
       res.json({ response });

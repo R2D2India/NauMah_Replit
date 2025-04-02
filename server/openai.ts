@@ -83,7 +83,7 @@ export async function generateChatResponse(
       messages: [
         {
           role: "system",
-          content: context + " Format your response with line breaks between points using '\n• ' for each new point."
+          content: context + " Format your response with double line breaks between paragraphs using '\n\n' for clear separation."
         },
         {
           role: "user", 
