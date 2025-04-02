@@ -4,7 +4,7 @@ import { VoiceAgent } from "./VoiceAgent";
 
 export function AIAssistantSection() {
   return (
-    <div className="w-full max-w-6xl mx-auto mb-12">
+    <div className="w-full max-w-4xl mx-auto mb-12">
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold mb-2">Your AI Pregnancy Companion</h2>
         <p className="text-muted-foreground">

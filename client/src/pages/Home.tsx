@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
@@ -10,21 +11,16 @@ import { Loader2 } from "lucide-react";
 const Home = () => {
   const [, setLocation] = useLocation();
 
-  // Check if pregnancy data exists and redirect if needed
-  // Both initial check and effect for redirect are combined
   const { data: pregnancyData, isLoading } = useQuery({
     queryKey: ["/api/pregnancy"],
-    // No onSuccess handler here to prevent duplication
   });
 
-  // Handle redirection in a single useEffect that always runs
   useEffect(() => {
     if (pregnancyData && typeof pregnancyData === 'object' && 'currentWeek' in pregnancyData) {
       setLocation("/dashboard");
     }
   }, [pregnancyData, setLocation]);
 
-  // Don't show welcome section if redirecting
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-[300px]">
@@ -36,15 +32,42 @@ const Home = () => {
     );
   }
 
-  // Show welcome section and AI assistant if no pregnancy data
   return (
-    <div className="flex flex-col">
-      <div className="container mx-auto px-4 py-8">
-        <WelcomeSection />
-        <AIAssistantSection />
-      </div>
-      <WaitlistSection />
-      <ComingSoonSections />
+    <div className="flex flex-col min-h-screen">
+      <main className="flex-grow">
+        <section className="bg-gradient-to-b from-purple-50 to-white py-16 md:py-24">
+          <div className="container mx-auto px-4 grid md:grid-cols-2 gap-8 items-center">
+            <div>
+              <h1 className="text-4xl md:text-5xl font-montserrat font-bold text-primary mb-6">
+                Your AI-Powered Pregnancy Journey Companion
+              </h1>
+              <p className="text-lg mb-8 text-neutral-dark">
+                Navigate your pregnancy journey with personalized guidance, expert insights, and supportive tracking tools.
+              </p>
+              <img 
+                src="https://illustrations.popsy.co/purple/pregnant-woman.svg" 
+                alt="Pregnant woman illustration"
+                className="w-full max-w-md mx-auto md:hidden"
+              />
+            </div>
+            <div className="hidden md:block">
+              <img 
+                src="https://illustrations.popsy.co/purple/pregnant-woman.svg" 
+                alt="Pregnant woman illustration"
+                className="w-full max-w-lg mx-auto"
+              />
+            </div>
+          </div>
+        </section>
+
+        <div className="container mx-auto px-4 py-8">
+          <WelcomeSection />
+          <AIAssistantSection />
+        </div>
+
+        <WaitlistSection />
+        <ComingSoonSections />
+      </main>
     </div>
   );
 };

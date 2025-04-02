@@ -55,8 +55,8 @@ const WelcomeSection = () => {
   };
 
   return (
-    <div className="mb-8">
-      <div className="bg-white rounded-xl p-6 custom-shadow">
+    <div className="mb-8 max-w-4xl mx-auto">
+      <div className="bg-white rounded-xl p-8 custom-shadow">
         <h2 className="text-2xl md:text-3xl font-montserrat font-bold text-primary mb-4">Welcome to NauMah</h2>
         <p className="text-lg mb-6">Your Personalized AI Pregnancy Companion! I'm here to support and guide you through every step of your pregnancy journey.</p>
         
