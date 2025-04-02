@@ -14,9 +14,11 @@ export const ComingSoonSections = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {products.map((product, idx) => (
               <div key={idx} className="rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition">
-                <div className="h-48 bg-gray-200 flex items-center justify-center">
-                  <span className="text-gray-500">Image Coming Soon</span>
-                </div>
+                <img 
+                  src={product.image} 
+                  alt={product.name}
+                  className="w-full h-48 object-cover"
+                />
                 <div className="p-4">
                   <h3 className="font-semibold text-lg">{product.name}</h3>
                   <p className="text-sm text-gray-600 mt-2">Coming Soon</p>
