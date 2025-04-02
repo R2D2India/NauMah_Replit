@@ -1,18 +1,9 @@
 import OpenAI from "openai";
 
 // Initialize the OpenAI client
-let openai: OpenAI | null = null;
-try {
-  if (!process.env.OPENAI_API_KEY) {
-    console.warn('Warning: OPENAI_API_KEY environment variable is not set');
-  } else {
-    openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
-  }
-} catch (error) {
-  console.error('Error initializing OpenAI client:', error);
-}
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY || '',
+});
 
 // Assistant ID for the pregnancy companion
 const ASSISTANT_ID = "asst_zwfWiYjLCIqIVlUN0617YRZQ";
@@ -74,9 +65,8 @@ export async function generateChatResponse(
   context: string = "You are a helpful pregnancy assistant providing guidance and support to expecting mothers."
 ): Promise<string> {
   try {
-    if (!openai || !process.env.OPENAI_API_KEY) {
-      console.error("OpenAI configuration missing");
-      return "I apologize, but I'm not properly configured at the moment. Please try again later.";
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error("OpenAI API key is not configured");
     }
     const completion = await openai.chat.completions.create({
       model: MODEL,

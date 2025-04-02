@@ -67,9 +67,15 @@ export function VoiceAgent() {
       recognition.current.onerror = (event: any) => {
         console.error('Speech recognition error:', event.error);
         setIsListening(false);
+        let errorMessage = 'Failed to recognize speech. Please try again.';
+        if (event.error === 'not-allowed') {
+          errorMessage = 'Please allow microphone access to use voice recognition.';
+        } else if (event.error === 'network') {
+          errorMessage = 'Network error. Please check your connection.';
+        }
         toast({
           title: 'Error',
-          description: 'Failed to recognize speech. Please try again.',
+          description: errorMessage,
           variant: 'destructive',
         });
       };
