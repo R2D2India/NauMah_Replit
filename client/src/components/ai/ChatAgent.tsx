@@ -84,7 +84,7 @@ export function ChatAgent() {
     <Card className="w-full h-[600px] flex flex-col">
       <CardHeader className="shrink-0">
         <CardTitle>Chat with NauMah</CardTitle>
-        <CardDescription>Ask questions about your pregnancy, health concerns, or baby development</CardDescription>
+        <CardDescription>Hi, I'm NauMah. You AI companion for this beautiful 9 month journey. How can I assist you today? Ask questions about your pregnancy, health concerns, or baby development</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 overflow-hidden">
         <ScrollArea className="h-[calc(600px-10rem)]">
