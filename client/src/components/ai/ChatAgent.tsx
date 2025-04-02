@@ -16,7 +16,7 @@ interface Message {
 export function ChatAgent() {
   const [messages, setMessages] = useState<Message[]>([{
     role: 'assistant',
-    content: "Hi, Im NauMah , your AI companion through this beautiful journey of 9 months. How can I help you today ?",
+    content: "Hi, I'm NauMah, your AI companion through this beautiful journey of 9 months. How can I help you today?",
     timestamp: new Date()
   }]);
   const [inputValue, setInputValue] = useState('');
