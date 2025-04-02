@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import Confetti from 'react-confetti';
@@ -8,6 +7,7 @@ import useWindowSize from 'react-use/lib/useWindowSize';
 export const WaitlistSection = () => {
   const [showConfetti, setShowConfetti] = useState(false);
   const [formData, setFormData] = useState({ name: '', mobile: '', email: '' });
+  const [confettiConfig, setConfettiConfig] = useState({ numberOfPieces: 0, recycle: false }); // Added state for confetti config
   const { toast } = useToast();
   const { width, height } = useWindowSize();
 
@@ -19,13 +19,17 @@ export const WaitlistSection = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
-      setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 8000);
-      setFormData({ name: '', mobile: '', email: '' });
       toast({
         title: 'Thank you for joining our waitlist!',
         description: 'Team NauMah will contact you soon!',
       });
+      setConfettiConfig({ numberOfPieces: 500, recycle: true });
+      setShowConfetti(true);
+      setTimeout(() => {
+        setConfettiConfig({ numberOfPieces: 0, recycle: false });
+        setTimeout(() => setShowConfetti(false), 1000);
+      }, 3000);
+      setFormData({ name: '', mobile: '', email: '' });
     } catch (error) {
       toast({
         title: 'Error',
@@ -40,8 +44,7 @@ export const WaitlistSection = () => {
       {showConfetti && <Confetti 
         width={width}
         height={height}
-        recycle={false}
-        numberOfPieces={500}
+        {...confettiConfig} // Apply confettiConfig
         colors={['#FFD700', '#DAA520', '#FFC107', '#FFB74D', '#FFA500']}
         gravity={0.15}
         tweenDuration={8000}
