@@ -175,6 +175,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!process.env.OPENAI_API_KEY) {
         throw new Error("OpenAI API key not configured");
       }
+      const { message } = req.validatedData;
+      const response = await getAssistantResponse(message);
+      res.json({ response });
+    } catch (error) {
+      console.error("Error in chat:", error);
+      res.status(500).json({ 
+        message: "Failed to process chat",
+        error: process.env.NODE_ENV === 'development' ? String(error) : undefined 
+      });
+    }
+});
+
+app.post("/api/voice/transcribe", async (req: Request, res: Response) => {
+    try {
+      const audioData = req.body;
+      const transcription = await transcribeAudio(Buffer.from(audioData));
+      const response = await getAssistantResponse(transcription);
+      const audioResponse = await generateSpeech(response);
+      res.json({ 
+        text: transcription,
+        response,
+        audio: audioResponse.toString('base64')
+      });
+    } catch (error) {
+      console.error("Error in voice transcription:", error);
+      res.status(500).json({ 
+        message: "Failed to process voice input",
+        error: process.env.NODE_ENV === 'development' ? String(error) : undefined 
+      });
+    }
+});
+
+app.post("/api/baby-names", validateRequest(babyNamesSchema), async (req: Request, res: Response) => {
+    try {
+      const { origin, gender } = req.validatedData;
+      const names = await generateBabyNames(origin, gender);
+      res.json(names);
+    } catch (error) {
+      console.error("Error generating baby names:", error);
+      res.status(500).json({ 
+        message: "Failed to generate baby names",
+        error: process.env.NODE_ENV === 'development' ? String(error) : undefined 
+      });
+    }
+});
+
+app.post("/api/meal-plan", validateRequest(mealPlanSchema), async (req: Request, res: Response) => {
+    try {
+      const { currentWeek } = req.validatedData;
+      const mealPlan = await generateMealPlan(currentWeek);
+      res.json(mealPlan);
+    } catch (error) {
+      console.error("Error generating meal plan:", error);
+      res.status(500).json({ 
+        message: "Failed to generate meal plan",
+        error: process.env.NODE_ENV === 'development' ? String(error) : undefined 
+      });
+    }
+});
 
       const { message } = req.validatedData;
       

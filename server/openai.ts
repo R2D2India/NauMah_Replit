@@ -16,46 +16,32 @@ try {
 
 // Assistant ID for the pregnancy companion
 const ASSISTANT_ID = "asst_zwfWiYjLCIqIVlUN0617YRZQ";
+const MODEL = "gpt-4";
 
 export async function getAssistantResponse(message: string): Promise<string> {
   try {
-    // Create a thread
     const thread = await openai.beta.threads.create();
+    await openai.beta.threads.messages.create(thread.id, { 
+      role: "user", 
+      content: message 
+    });
 
-    // Add the user's message
-    await openai.beta.threads.messages.create(
-      thread.id,
-      { role: "user", content: message }
-    );
+    const run = await openai.beta.threads.runs.create(thread.id, { 
+      assistant_id: ASSISTANT_ID 
+    });
 
-    // Run the assistant
-    const run = await openai.beta.threads.runs.create(
-      thread.id,
-      { assistant_id: ASSISTANT_ID }
-    );
-
-    // Wait for completion
     while (true) {
-      const runStatus = await openai.beta.threads.runs.retrieve(
-        thread.id,
-        run.id
-      );
-      if (runStatus.status === "completed") {
-        break;
-      } else if (runStatus.status === "failed") {
-        throw new Error("Assistant run failed");
-      }
+      const runStatus = await openai.beta.threads.runs.retrieve(thread.id, run.id);
+      if (runStatus.status === "completed") break;
+      if (runStatus.status === "failed") throw new Error("Assistant run failed");
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
-    // Get the assistant's reply
     const messages = await openai.beta.threads.messages.list(thread.id);
     const assistantMessage = messages.data.find(msg => msg.role === "assistant");
-
     if (!assistantMessage?.content[0]?.text?.value) {
       throw new Error("No response from assistant");
     }
-
     return assistantMessage.content[0].text.value;
   } catch (error) {
     console.error("Error in getAssistantResponse:", error);
@@ -63,8 +49,97 @@ export async function getAssistantResponse(message: string): Promise<string> {
   }
 }
 
+export async function generateBabyNames(origin: string, gender: string): Promise<{
+  names: string[];
+  meanings: Record<string, string>;
+}> {
+  try {
+    const prompt = `Generate 10 unique baby names with their meanings. Origin: ${origin}, Gender: ${gender}. 
+                   Make names culturally authentic and meaningful.`;
+
+    const completion = await openai.chat.completions.create({
+      model: MODEL,
+      messages: [
+        {
+          role: "system",
+          content: "You are a cultural expert specializing in traditional and meaningful baby names."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      response_format: { type: "json_object" },
+    });
+
+    return JSON.parse(completion.choices[0].message.content || "{}");
+  } catch (error) {
+    console.error("Error generating baby names:", error);
+    throw new Error("Failed to generate baby names");
+  }
+}
+
+export async function generateMealPlan(week: number): Promise<{
+  breakfast: string;
+  lunch: string;
+  dinner: string;
+  snacks: string[];
+}> {
+  try {
+    const prompt = `Generate a detailed pregnancy meal plan for week ${week} with specific nutritional requirements.`;
+
+    const completion = await openai.chat.completions.create({
+      model: MODEL,
+      messages: [
+        {
+          role: "system",
+          content: "You are a certified nutritionist specializing in pregnancy nutrition."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      response_format: { type: "json_object" },
+    });
+
+    return JSON.parse(completion.choices[0].message.content || "{}");
+  } catch (error) {
+    console.error("Error generating meal plan:", error);
+    throw new Error("Failed to generate meal plan");
+  }
+}
+
+export async function transcribeAudio(audioBuffer: Buffer): Promise<string> {
+  try {
+    const file = new File([audioBuffer], "audio.webm", { type: "audio/webm" });
+    const transcription = await openai.audio.transcriptions.create({
+      file,
+      model: "whisper-1",
+    });
+    return transcription.text;
+  } catch (error) {
+    console.error("Error transcribing audio:", error);
+    throw new Error("Failed to transcribe audio");
+  }
+}
+
+export async function generateSpeech(text: string): Promise<Buffer> {
+  try {
+    const mp3 = await openai.audio.speech.create({
+      model: "tts-1",
+      voice: "alloy",
+      input: text,
+    });
+    return Buffer.from(await mp3.arrayBuffer());
+  } catch (error) {
+    console.error("Error generating speech:", error);
+    throw new Error("Failed to generate speech");
+  }
+}
+
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const MODEL = "gpt-4o";
+const OLD_MODEL = "gpt-4o";
 
 /**
  * Generate a text response from OpenAI
@@ -78,7 +153,7 @@ export async function generateChatResponse(
       throw new Error("OpenAI API key is not configured");
     }
     const completion = await openai.chat.completions.create({
-      model: MODEL,
+      model: OLD_MODEL,
       messages: [
         {
           role: "system",
@@ -103,7 +178,7 @@ export async function generateChatResponse(
 /**
  * Generate a JSON structured response from OpenAI
  */
-export async function generateMealPlan(week: number): Promise<{
+export async function generateMealPlanOld(week: number): Promise<{
   breakfast: string;
   lunch: string;
   dinner: string;
@@ -116,7 +191,7 @@ export async function generateMealPlan(week: number): Promise<{
     const prompt = `Generate a detailed pregnancy meal plan for week ${week}. Include specific nutritional requirements for this stage of pregnancy. Focus on nutritious, pregnancy-safe meals.`;
     
     const completion = await openai.chat.completions.create({
-      model: MODEL,
+      model: OLD_MODEL,
       messages: [
         {
           role: "system",
@@ -155,46 +230,6 @@ export async function checkMedicationSafety(medicationName: string): Promise<{
   return generateStructuredResponse(prompt, "You are a pharmacist with expertise in pregnancy medication safety.");
 }
 
-export async function generateBabyNames(origin: string, gender: string): Promise<{
-  names: string[];
-  meanings: Record<string, string>;
-}> {
-  try {
-    if (!openai) {
-      throw new Error("OpenAI client not initialized");
-    }
-    const prompt = `Generate 10 unique baby names with their meanings. Origin: ${origin}, Gender: ${gender}. 
-                   Make names culturally authentic and meaningful. 
-                   Format response as JSON with exact structure: { names: string[], meanings: Record<string, string> }.
-                   Names should be properly capitalized and meanings should be concise but meaningful.`;
-
-    const completion = await openai.chat.completions.create({
-      model: MODEL,
-      messages: [
-        {
-          role: "system",
-          content: "You are a cultural expert and naming consultant specializing in traditional and meaningful baby names."
-        },
-        {
-          role: "user",
-          content: prompt
-        }
-      ],
-      response_format: { type: "json_object" },
-      temperature: 0.7,
-    });
-
-    const response = JSON.parse(completion.choices[0].message.content || "{}");
-    return {
-      names: response.names || [],
-      meanings: response.meanings || {}
-    };
-  } catch (error) {
-    console.error("Error generating baby names:", error);
-    throw new Error("Failed to generate baby names");
-  }
-}
-
 export async function generateStructuredResponse<T>(
   prompt: string,
   context: string = "You are a helpful pregnancy assistant providing guidance and support to expecting mothers."
@@ -204,7 +239,7 @@ export async function generateStructuredResponse<T>(
       throw new Error("OpenAI client not initialized");
     }
     const completion = await openai.chat.completions.create({
-      model: MODEL,
+      model: OLD_MODEL,
       messages: [
         {
           role: "system",
