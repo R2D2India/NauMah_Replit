@@ -284,12 +284,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/meal-plan", validateRequest(mealPlanSchema), async (req: Request, res: Response) => {
     try {
+      if (!process.env.OPENAI_API_KEY) {
+        throw new Error("OpenAI API key not configured");
+      }
       const { currentWeek } = req.validatedData;
       const mealPlan = await generateMealPlan(currentWeek);
       res.json(mealPlan);
     } catch (error) {
       console.error("Error generating meal plan:", error);
-      res.status(500).json({ message: "Failed to generate meal plan" });
+      const errorMessage = error instanceof Error ? error.message : "Failed to generate meal plan";
+      const status = error.message?.includes('API key') ? 401 : 500;
+      res.status(status).json({ 
+        message: errorMessage,
+        error: process.env.NODE_ENV === 'development' ? String(error) : undefined 
+      });
     }
   });
 

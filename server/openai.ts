@@ -104,9 +104,39 @@ export async function generateMealPlan(week: number): Promise<{
   dinner: string;
   snacks: string[];
 }> {
-  const prompt = `Generate a detailed pregnancy meal plan for week ${week}. Include specific nutritional requirements for this stage of pregnancy. Format response as a JSON object with exactly this structure: { breakfast: string, lunch: string, dinner: string, snacks: string[] }. Make meals nutritious and pregnancy-safe.`;
-  
-  return generateStructuredResponse(prompt, "You are a certified nutritionist specializing in pregnancy nutrition.");
+  try {
+    if (!openai) {
+      throw new Error("OpenAI client not initialized");
+    }
+    const prompt = `Generate a detailed pregnancy meal plan for week ${week}. Include specific nutritional requirements for this stage of pregnancy. Focus on nutritious, pregnancy-safe meals.`;
+    
+    const completion = await openai.chat.completions.create({
+      model: MODEL,
+      messages: [
+        {
+          role: "system",
+          content: "You are a certified nutritionist specializing in pregnancy nutrition. Provide specific, safe meal suggestions."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.7,
+    });
+
+    const response = JSON.parse(completion.choices[0].message.content || "{}");
+    return {
+      breakfast: response.breakfast || "Oatmeal with fruits and nuts",
+      lunch: response.lunch || "Grilled chicken salad with quinoa",
+      dinner: response.dinner || "Baked salmon with vegetables",
+      snacks: response.snacks || ["Greek yogurt with berries", "Mixed nuts", "Apple with peanut butter"]
+    };
+  } catch (error) {
+    console.error("Error generating meal plan:", error);
+    throw new Error("Failed to generate meal plan");
+  }
 }
 
 export async function checkMedicationSafety(medicationName: string): Promise<{
