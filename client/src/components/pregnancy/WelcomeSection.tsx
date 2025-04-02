@@ -22,6 +22,7 @@ export default function WelcomeSection() {
                 src="/images/pregnancy/healthy-lifestyle.jpg" 
                 alt="Healthy Lifestyle"
                 className="w-full h-48 object-cover rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:scale-102 border-2 border-pink-100"
+                loading="eager"
               />
             </div>
           </div>
