@@ -233,7 +233,7 @@ export function VoiceAgent() {
     <Card className="w-full h-[500px] flex flex-col">
       <CardHeader>
         <CardTitle>Voice Assistant</CardTitle>
-        <CardDescription>Hi, I'm NauMah. You AI companion for this beautiful 9 month journey. How can I assist you today? Ask questions about your pregnancy, health concerns, or baby development</CardDescription>
+        <CardDescription>Speak with NauMah, your pregnancy AI companion</CardDescription>
       </CardHeader>
       <CardContent className="flex-grow flex flex-col">
         <audio ref={audioRef} className="hidden" />
