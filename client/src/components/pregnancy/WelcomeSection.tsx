@@ -14,7 +14,7 @@ export default function WelcomeSection() {
             </p>
             <div className="grid grid-cols-2 gap-4 mt-8">
               <img 
-                src="/images/pregnancy/prenatal-care.jpg" 
+                src="/images/pregnancy/prenatal-care-check.jpg" 
                 alt="Prenatal Care"
                 className="w-full h-48 object-cover rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:scale-102 border-2 border-pink-100"
               />
