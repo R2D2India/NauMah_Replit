@@ -25,6 +25,7 @@ function Router() {
             <Route path="/journal" component={lazy(() => import("./pages/Journal"))} />
             <Route path="/privacy" component={Privacy} />
             <Route path="/terms" component={Terms} />
+            <Route path="/disclaimer" component={lazy(() => import("./pages/Disclaimer"))} />
             <Route component={NotFound} />
           </Switch>
         </Suspense>
