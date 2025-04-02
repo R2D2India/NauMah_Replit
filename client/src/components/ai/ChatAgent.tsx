@@ -40,8 +40,7 @@ export function ChatAgent() {
       const response = await apiRequest('/api/chat', {
         method: 'POST',
         body: JSON.stringify({ 
-          message: userMessage.content,
-          useAssistant: true // Enable OpenAI Assistant
+          message: userMessage.content
         }),
         headers: {
           'Content-Type': 'application/json',

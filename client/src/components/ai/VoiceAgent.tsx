@@ -123,11 +123,13 @@ export function VoiceAgent() {
       }
     } catch (error) {
       console.error('Error processing voice input:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to process your request';
       toast({
         title: 'Error',
-        description: 'Failed to process your request. Please try again.',
+        description: errorMessage,
         variant: 'destructive',
       });
+      setAnswer("I apologize, but I encountered an error. Please try again or use text input instead.");
     } finally {
       setIsProcessing(false);
     }
