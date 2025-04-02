@@ -15,22 +15,22 @@ export default function WelcomeSection() {
             </p>
             <div className="grid grid-cols-2 gap-4 mt-8">
               <img 
-                src="/images/sections/prenatal-care.svg" 
+                src="/images/pregnancy/prenatal-care.jpg" 
                 alt="Prenatal Care"
-                className="w-full rounded-lg shadow-md"
+                className="w-full h-48 object-cover rounded-lg shadow-md hover:shadow-lg transition-shadow"
               />
               <img 
-                src="/images/sections/healthy-lifestyle.svg" 
+                src="/images/pregnancy/healthy-lifestyle.jpg" 
                 alt="Healthy Lifestyle"
-                className="w-full rounded-lg shadow-md"
+                className="w-full h-48 object-cover rounded-lg shadow-md hover:shadow-lg transition-shadow"
               />
             </div>
           </div>
           <div className="relative">
             <img
-              src="/images/hero-pregnant-woman.svg"
+              src="/images/pregnancy/hero-pregnant-woman.jpg"
               alt="Pregnancy Journey"
-              className="w-full max-w-md mx-auto transform hover:scale-105 transition-transform duration-300"
+              className="w-full h-[600px] object-cover rounded-xl shadow-lg hover:shadow-xl transition-shadow"
             />
           </div>
         </div>
