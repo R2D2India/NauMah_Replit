@@ -186,21 +186,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { message, pregnancyWeek } = req.validatedData;
       
-      // Get pregnancy data if we don't have the week
-      let week = pregnancyWeek;
-      if (!week) {
-        const pregnancyData = await storage.getPregnancyData(demoUserId);
-        if (pregnancyData) {
-          week = pregnancyData.currentWeek;
-        }
-      }
-      
-      // Create a context with pregnancy week if available
-      let context = "You are NauMah, a knowledgeable and supportive AI pregnancy assistant providing guidance to expecting mothers.";
-      if (week) {
-        context += ` The user is currently at week ${week} of pregnancy. Tailor your responses to be relevant for this stage.`;
-      }
-      context += " Your responses should be compassionate, evidence-based, and medically sound, but always recommend consulting healthcare providers for personal medical advice.";
+      // Create base context for the AI
+      const context = "You are NauMah, a knowledgeable and supportive AI pregnancy assistant providing guidance to expecting mothers. Your responses should be compassionate, evidence-based, and medically sound, but always recommend consulting healthcare providers for personal medical advice.";
       
       const response = await generateChatResponse(message, context);
       res.json({ response });
