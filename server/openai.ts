@@ -74,8 +74,9 @@ export async function generateChatResponse(
   context: string = "You are a helpful pregnancy assistant providing guidance and support to expecting mothers."
 ): Promise<string> {
   try {
-    if (!openai) {
-      throw new Error("OpenAI client not initialized");
+    if (!openai || !process.env.OPENAI_API_KEY) {
+      console.error("OpenAI configuration missing");
+      return "I apologize, but I'm not properly configured at the moment. Please try again later.";
     }
     const completion = await openai.chat.completions.create({
       model: MODEL,
