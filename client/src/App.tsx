@@ -16,13 +16,13 @@ function Router() {
       <main className="flex-grow">
         <Suspense fallback={<div>Loading...</div>}>
           <Switch>
-          <Route path="/" component={Home} />
-          <Route path="/dashboard" component={Dashboard} />
-          <Route path="/tracker" component={lazy(() => import("./pages/Tracker"))} />
-          <Route path="/resources" component={lazy(() => import("./pages/Resources"))} />
-          <Route path="/journal" component={lazy(() => import("./pages/Journal"))} />
-          <Route component={NotFound} />
-        </Switch>
+            <Route path="/" component={Home} />
+            <Route path="/dashboard" component={Dashboard} />
+            <Route path="/tracker" component={lazy(() => import("./pages/Tracker"))} />
+            <Route path="/resources" component={lazy(() => import("./pages/Resources"))} />
+            <Route path="/journal" component={lazy(() => import("./pages/Journal"))} />
+            <Route component={NotFound} />
+          </Switch>
         </Suspense>
       </main>
       <Footer />
