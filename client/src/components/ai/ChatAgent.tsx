@@ -81,7 +81,7 @@ export function ChatAgent() {
   }, [messages]);
 
   return (
-    <Card className="w-full h-[600px] flex flex-col">
+    <Card className="w-full h-[600px] flex flex-col rounded-xl shadow-[0_20px_50px_rgba(8,_112,_184,_0.7)] transform-gpu hover:scale-[1.02] transition-all duration-300">
       <CardHeader className="shrink-0">
         <CardTitle>Chat with NauMah</CardTitle>
         <CardDescription>Hi, I'm NauMah. You AI companion for this beautiful 9 month journey. How can I assist you today? Ask questions about your pregnancy, health concerns, or baby development</CardDescription>
@@ -139,29 +139,7 @@ export function ChatAgent() {
           </div>
         </ScrollArea>
       </CardContent>
-      <CardFooter className="flex-none pt-0">
-        <div className="flex w-full items-center space-x-2">
-          <Textarea
-            placeholder="Type your question..."
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            className="min-h-[60px]"
-          />
-          <Button 
-            type="submit" 
-            size="icon" 
-            onClick={handleSendMessage}
-            disabled={isLoading || !inputValue.trim()}
-          >
-            {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Send className="h-4 w-4" />
-            )}
-          </Button>
-        </div>
-      </CardFooter>
+      
     </Card>
   );
 }
