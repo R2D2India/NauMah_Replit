@@ -39,7 +39,10 @@ export function ChatAgent() {
     try {
       const response = await apiRequest('/api/chat', {
         method: 'POST',
-        body: JSON.stringify({ message: userMessage.content }),
+        body: JSON.stringify({ 
+          message: userMessage.content,
+          useAssistant: true // Enable OpenAI Assistant
+        }),
         headers: {
           'Content-Type': 'application/json',
         },
@@ -48,7 +51,7 @@ export function ChatAgent() {
       // Add assistant message
       const assistantMessage: Message = {
         role: 'assistant',
-        content: response.response as string,
+        content: response.response,
         timestamp: new Date()
       };
       setMessages(prev => [...prev, assistantMessage]);

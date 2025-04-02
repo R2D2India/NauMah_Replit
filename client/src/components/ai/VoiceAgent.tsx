@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Mic, Square, PlayCircle, StopCircle, Volume2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,24 +7,114 @@ import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 
 export function VoiceAgent() {
-  const [isRecording, setIsRecording] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false); //Retained from original
   const [isProcessing, setIsProcessing] = useState(false);
-  const [userQuestion, setUserQuestion] = useState('');
+  const [userQuestion, setUserQuestion] = useState(''); //Retained from original
   const [lastQuery, setLastQuery] = useState('');
   const [answer, setAnswer] = useState('');
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null); //Retained from original
+  const recognition = useRef<any>(null);
+  const synthesis = useRef(window.speechSynthesis);
   const { toast } = useToast();
 
-  // Handle manual text input
+  useEffect(() => {
+    // Initialize Web Speech API
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognition.current = new SpeechRecognition();
+      recognition.current.continuous = true;
+      recognition.current.interimResults = true;
+
+      recognition.current.onresult = (event: any) => {
+        const transcript = Array.from(event.results)
+          .map((result: any) => result[0])
+          .map(result => result.transcript)
+          .join('');
+
+        if (event.results[0].isFinal) {
+          handleVoiceInput(transcript);
+        }
+      };
+
+      recognition.current.onerror = (event: any) => {
+        console.error('Speech recognition error:', event.error);
+        setIsListening(false);
+        toast({
+          title: 'Error',
+          description: 'Failed to recognize speech. Please try again.',
+          variant: 'destructive',
+        });
+      };
+    }
+
+    return () => {
+      if (recognition.current) {
+        recognition.current.stop();
+      }
+      if (synthesis.current) {
+        synthesis.current.cancel();
+      }
+    };
+  }, []);
+
+  const handleVoiceInput = async (transcript: string) => {
+    setLastQuery(transcript);
+    setIsProcessing(true);
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: transcript }),
+      });
+
+      const data = await response.json();
+      setAnswer(data.response);
+
+      // Convert response to speech
+      const audioResponse = await fetch('/api/voice/speech', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: data.response }),
+      });
+
+      const audioBlob = await audioResponse.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      if (audioRef.current) {
+        audioRef.current.src = audioUrl;
+        audioRef.current.onloadedmetadata = () => {
+          audioRef.current?.play();
+          setIsPlaying(true);
+        };
+        audioRef.current.onended = () => {
+          setIsPlaying(false);
+        };
+      }
+    } catch (error) {
+      console.error('Error processing voice input:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to process your request. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Handle manual text input (Retained from original, with modifications)
   const handleAskQuestion = async () => {
     if (!userQuestion.trim() || isProcessing) return;
-    
+
     setIsProcessing(true);
     setLastQuery(userQuestion);
-    
+
     try {
-      // First get the text version for display
       const textResponse = await apiRequest<{ response: string }>('/api/chat', {
         method: 'POST',
         headers: {
@@ -32,38 +122,35 @@ export function VoiceAgent() {
         },
         body: JSON.stringify({ message: userQuestion.trim() }),
       });
-      
+
       setAnswer(textResponse.response);
-      
-      // Fetch audio response using the same apiRequest pattern, but handle the blob response directly
+
+      // Fetch audio response (Retained from original, with modifications)
       const response = await fetch('/api/voice/speech', {
         method: 'POST',
-        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ message: userQuestion.trim() }),
       });
-      
+
       if (!response.ok) throw new Error('Failed to get voice response');
-      
-      // Create audio blob and URL
+
       const audioBlob = await response.blob();
       const audioUrl = URL.createObjectURL(audioBlob);
-      
-      // Set audio source and play
+
       if (audioRef.current) {
         audioRef.current.src = audioUrl;
         audioRef.current.onloadedmetadata = () => {
           audioRef.current?.play();
           setIsPlaying(true);
         };
-        
+
         audioRef.current.onended = () => {
           setIsPlaying(false);
         };
       }
-      
+
       setUserQuestion('');
     } catch (error) {
       console.error('Error getting voice response:', error);
@@ -77,52 +164,26 @@ export function VoiceAgent() {
     }
   };
 
-  // Start recording audio
-  const startRecording = () => {
-    setIsRecording(true);
-    // Placeholder for recording functionality
-    // Would need to use the Web Audio API and MediaRecorder
-    toast({
-      title: 'Recording',
-      description: 'Voice recording feature will be implemented in a future update.',
-    });
-    
-    // Simulate recording for demo purposes
-    setTimeout(() => {
-      stopRecording();
-    }, 3000);
+
+  const toggleListening = () => {
+    if (!recognition.current) {
+      toast({
+        title: 'Error',
+        description: 'Speech recognition is not supported in your browser.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (isListening) {
+      recognition.current.stop();
+    } else {
+      recognition.current.start();
+    }
+    setIsListening(!isListening);
   };
 
-  // Stop recording audio
-  const stopRecording = () => {
-    setIsRecording(false);
-    // Placeholder for stopping recording and processing audio
-    toast({
-      title: 'Processing',
-      description: 'Processing your voice input...',
-    });
-    
-    // Simulate processing for demo purposes
-    setIsProcessing(true);
-    setTimeout(() => {
-      setIsProcessing(false);
-      setLastQuery("What nutritional supplements should I take during pregnancy?");
-      setAnswer("During pregnancy, it's recommended to take a prenatal vitamin with folic acid, iron, calcium, vitamin D, and DHA. Folic acid is crucial for preventing neural tube defects, especially in the first trimester. Always consult with your healthcare provider before starting any supplements, as they can recommend the right formulation based on your specific needs and health history.");
-      // Create a demo audio response
-      if (audioRef.current) {
-        audioRef.current.src = "https://media.geeksforgeeks.org/wp-content/uploads/20190531135120/beep.mp3"; // Demo sound
-        audioRef.current.onloadedmetadata = () => {
-          audioRef.current?.play();
-          setIsPlaying(true);
-        };
-        audioRef.current.onended = () => {
-          setIsPlaying(false);
-        };
-      }
-    }, 2000);
-  };
-
-  // Stop playing the audio
+  // Stop playing the audio (Retained from original)
   const stopPlaying = () => {
     if (audioRef.current) {
       audioRef.current.pause();
@@ -131,7 +192,7 @@ export function VoiceAgent() {
     }
   };
 
-  // Play the audio again
+  // Play the audio again (Retained from original)
   const playAgain = () => {
     if (audioRef.current) {
       audioRef.current.play();
@@ -143,41 +204,41 @@ export function VoiceAgent() {
     <Card className="w-full h-[500px] flex flex-col">
       <CardHeader>
         <CardTitle>Voice Assistant</CardTitle>
-        <CardDescription>Speak with NauMah or type your questions</CardDescription>
+        <CardDescription>Have a conversation with NauMah or type your questions</CardDescription>
       </CardHeader>
       <CardContent className="flex-grow flex flex-col">
         <audio ref={audioRef} className="hidden" />
-        
+
         <div className="flex flex-col items-center justify-center mb-6 flex-grow">
           <Button
             variant="outline"
             size="icon"
-            className={`h-24 w-24 rounded-full ${isRecording ? 'bg-red-100 text-red-500 border-red-300' : ''}`}
-            onClick={isRecording ? stopRecording : startRecording}
+            className={`h-24 w-24 rounded-full ${isListening ? 'bg-red-100 text-red-500 border-red-300' : ''}`}
+            onClick={toggleListening}
             disabled={isProcessing || isPlaying}
           >
-            {isRecording ? (
+            {isListening ? (
               <Square className="h-8 w-8" />
             ) : (
               <Mic className="h-8 w-8" />
             )}
           </Button>
           <p className="mt-2 text-sm text-muted-foreground">
-            {isRecording ? 'Tap to stop recording' : 'Tap to start recording'}
+            {isListening ? 'Tap to stop listening' : 'Tap to start conversation'}
           </p>
         </div>
-        
+
         {lastQuery && (
           <div className="mb-4">
-            <h3 className="text-sm font-medium mb-1">Your question:</h3>
+            <h3 className="text-sm font-medium mb-1">You said:</h3>
             <p className="text-sm p-2 bg-muted rounded-md">{lastQuery}</p>
           </div>
         )}
-        
+
         {answer && (
           <div className="mb-4">
             <div className="flex items-center justify-between mb-1">
-              <h3 className="text-sm font-medium">NauMah's answer:</h3>
+              <h3 className="text-sm font-medium">NauMah's response:</h3>
               <div className="flex space-x-1">
                 {isPlaying ? (
                   <Button variant="ghost" size="icon" onClick={stopPlaying} className="h-6 w-6">
@@ -196,11 +257,11 @@ export function VoiceAgent() {
             <p className="text-sm p-2 bg-primary/10 rounded-md">{answer}</p>
           </div>
         )}
-        
+
         {isProcessing && (
           <div className="flex justify-center items-center py-4">
             <Loader2 className="h-6 w-6 animate-spin text-primary" />
-            <span className="ml-2 text-sm">Processing your question...</span>
+            <span className="ml-2 text-sm">Processing your request...</span>
           </div>
         )}
       </CardContent>
@@ -211,12 +272,12 @@ export function VoiceAgent() {
             value={userQuestion}
             onChange={(e) => setUserQuestion(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAskQuestion()}
-            disabled={isProcessing || isRecording}
+            disabled={isProcessing || isListening}
           />
           <Button
             type="submit"
             onClick={handleAskQuestion}
-            disabled={isProcessing || isRecording || !userQuestion.trim()}
+            disabled={isProcessing || isListening || !userQuestion.trim()}
           >
             Ask
           </Button>
