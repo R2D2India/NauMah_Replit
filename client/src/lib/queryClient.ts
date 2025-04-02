@@ -1,6 +1,6 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
-const API_BASE_URL = import.meta.env.PROD ? process.env.REACT_APP_API_URL || '' : 'http://localhost:5000'; // Added environment variable support for production
+const API_BASE_URL = import.meta.env.PROD ? '' : 'http://localhost:5000'; // Added environment variable support for production
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
