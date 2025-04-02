@@ -1,4 +1,4 @@
-import { WelcomeSection } from "@/components/pregnancy/WelcomeSection";
+import WelcomeSection from "@/components/pregnancy/WelcomeSection";
 import { AIAssistantSection } from "@/components/ai/AIAssistantSection";
 import { WaitlistSection } from "@/components/marketing/WaitlistSection";
 import { ComingSoonSections } from "@/components/marketing/ComingSoonSections";
