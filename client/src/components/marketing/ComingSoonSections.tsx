@@ -2,7 +2,7 @@
 export const ComingSoonSections = () => {
   const products = [
     { name: 'Maternity Dresses', image: '/images/pregnancy/maternity-dress.jpg' },
-    { name: 'Healthy Snacks', image: '/images/pregnancy-food.jpg' },
+    { name: 'Healthy Snacks', image: '/images/pregnancy/healthy-snacks.jpg' },
     { name: 'Prenatal Vitamins', image: '/images/vitamins.jpg' },
   ];
 
