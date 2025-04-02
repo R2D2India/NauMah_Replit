@@ -182,13 +182,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   app.post("/api/chat", validateRequest(chatSchema), async (req: Request, res: Response) => {
-    const apiKey = process.env.OPENAI_API_KEY;
-    console.log("OpenAI API Key status:", apiKey ? "Present" : "Missing");
-    
-    if (!apiKey) {
-      console.error("OpenAI API key is missing in environment");
-      return res.status(500).json({ message: "OpenAI API key not configured" });
-    }
     try {
       const { message, pregnancyWeek } = req.validatedData;
       
