@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
+import { ProfileDialog } from "@/components/profile/ProfileDialog";
 
 const Header = () => {
   const [location] = useLocation();
@@ -43,9 +44,9 @@ const Header = () => {
         </nav>
         
         <div className="flex items-center space-x-3">
-          <button className="hidden md:block bg-primary hover:bg-primary-dark text-white font-medium py-2 px-4 rounded-lg transition duration-300">
-            My Profile
-          </button>
+          <div className="hidden md:block">
+            <ProfileDialog />
+          </div>
           <button 
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="md:hidden text-primary text-xl"

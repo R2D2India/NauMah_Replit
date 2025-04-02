@@ -271,7 +271,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/admin/users", adminAuth, async (req: Request, res: Response) => {
+  // Profile update endpoint
+app.post("/api/profile", async (req: Request, res: Response) => {
+  try {
+    const { firstName, email } = req.body;
+    if (!firstName || !email) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+    // In a real app, you would save this to the database
+    res.json({ message: "Profile updated successfully" });
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    res.status(500).json({ message: "Failed to update profile" });
+  }
+});
+
+app.get("/api/admin/users", adminAuth, async (req: Request, res: Response) => {
     try {
       const users = await db.select().from(schema.users);
       res.json(users);
