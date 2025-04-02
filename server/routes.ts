@@ -172,16 +172,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/chat", validateRequest(chatSchema), async (req: Request, res: Response) => {
     try {
-      const { message, pregnancyWeek } = req.validatedData;
+      if (!process.env.OPENAI_API_KEY) {
+        throw new Error("OpenAI API key not configured");
+      }
+
+      const { message } = req.validatedData;
       
       // Create base context for the AI
       const context = "You are NauMah, a knowledgeable and supportive AI pregnancy assistant. Format your responses in clear, well-structured paragraphs. Keep responses concise (under 100 words). Be compassionate and evidence-based. Start with a brief greeting. After answering the question, always suggest 1-2 relevant follow-up topics based on pregnancy stage and current conversation context (e.g. 'Would you like to know about recommended tests for this trimester?' or 'Would you like to learn about baby development at this stage?'). Use proper paragraph breaks for readability. End with a gentle healthcare provider consultation reminder.";
       
       const response = await generateChatResponse(message, context);
+      
+      if (!response) {
+        throw new Error("No response generated");
+      }
+      
       res.json({ response });
     } catch (error) {
       console.error("Error generating chat response:", error);
-      res.status(500).json({ message: "Failed to generate chat response" });
+      const errorMessage = error instanceof Error ? error.message : "Failed to generate chat response";
+      res.status(500).json({ 
+        message: errorMessage,
+        error: process.env.NODE_ENV === 'development' ? String(error) : undefined 
+      });
     }
   });
   

@@ -1,9 +1,13 @@
 import OpenAI from "openai";
 
-// Initialize the OpenAI client
+// Initialize the OpenAI client with error handling
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || '',
 });
+
+if (!process.env.OPENAI_API_KEY) {
+  console.error("Warning: OPENAI_API_KEY is not set. OpenAI features will not work.");
+}
 
 // Assistant ID for the pregnancy companion
 const ASSISTANT_ID = "asst_zwfWiYjLCIqIVlUN0617YRZQ";
