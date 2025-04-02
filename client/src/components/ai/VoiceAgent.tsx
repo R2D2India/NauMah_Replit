@@ -142,10 +142,12 @@ export function VoiceAgent() {
         recognition.current.stop();
         setIsListening(false);
       } else {
-        const greeting = "Hi. I'm NauMah. You AI companion for this beautiful nine month journey. How can I help you today? Ask questions about your pregnancy, health concerns, or baby development.";
+        const greeting = "Hi, I'm NauMah. How can I help you today?";
         setAnswer(greeting);
 
+        // Preload audio for faster initial response
         fetch('/api/voice/speech', {
+          priority: 'high',
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
