@@ -148,6 +148,8 @@ export function VoiceAgent() {
         // Preload audio for faster initial response
         fetch('/api/voice/speech', {
           priority: 'high',
+          cache: 'no-store',
+          keepalive: true,
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

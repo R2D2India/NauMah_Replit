@@ -169,10 +169,11 @@ export async function generateSpeech(text: string): Promise<Buffer> {
       throw new Error("OpenAI client not initialized");
     }
     const mp3 = await openai.audio.speech.create({
-      model: "tts-1-hd", // Using HD model for faster processing
-      voice: "nova", // Using nova voice which tends to be faster
+      model: "tts-1", // Standard model for faster initial response
+      voice: "alloy", // Default voice with consistent performance
       input: text,
-      speed: 1.2, // Slightly faster speech rate
+      speed: 1.0, // Normal speech rate
+      response_format: "mp3", // Optimized format
     });
 
     // Convert the response to a buffer
