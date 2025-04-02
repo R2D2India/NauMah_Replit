@@ -83,7 +83,7 @@ export async function generateChatResponse(
       messages: [
         {
           role: "system",
-          content: context + " Format your response with double line breaks between paragraphs using '\n\n' for clear separation."
+          content: context + " Format your response in clear paragraphs with proper spacing. Use '\n\n' between paragraphs. Keep responses focused and structured. End with 1-2 relevant follow-up questions based on the current context."
         },
         {
           role: "user", 
