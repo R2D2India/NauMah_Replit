@@ -207,23 +207,37 @@ export function VoiceAgent() {
           <Button
             variant="outline"
             size="icon"
-            className={`h-40 w-40 rounded-full transition-all duration-300 shadow-[0_10px_20px_rgba(0,_0,_0,_0.2)] ${
+            className={`h-48 w-48 rounded-full transition-all duration-300 shadow-[0_10px_20px_rgba(0,_0,_0,_0.2)] ${
               isListening 
                 ? 'bg-red-100 text-red-500 border-red-300 animate-pulse shadow-lg'
-                : 'hover:bg-primary/10 hover:scale-105 shadow-md'
+                : 'bg-gradient-to-r from-primary/20 to-primary hover:scale-105 shadow-md'
             }`}
             onClick={toggleListening}
             disabled={isProcessing}
           >
             {isListening ? (
-              <Square className="h-12 w-12" />
+              <Square className="h-16 w-16 text-red-500" />
             ) : (
-              <Mic className="h-12 w-12" />
+              <Mic className="h-16 w-16 text-primary-foreground" />
             )}
           </Button>
           <p className="mt-4 text-sm text-muted-foreground animate-fade-in">
             {isListening ? 'Listening...' : 'Tap to start conversation'}
           </p>
+          
+          {isListening && (
+            <Button 
+              variant="destructive"
+              size="lg"
+              onClick={() => {
+                recognition.current?.stop();
+                setIsListening(false);
+              }}
+              className="mt-4 px-8 py-2 rounded-full shadow-md"
+            >
+              Stop Conversation
+            </Button>
+          )}
         </div>
 
         <div className="flex space-x-2 mt-4 justify-center">
