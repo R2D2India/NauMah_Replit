@@ -20,7 +20,7 @@ export function VoiceAgent() {
 
   useEffect(() => {
     // Play welcome message on component mount
-    const welcomeMessage = "Hi, I'm NauMah, your AI pregnancy assistant. How can I help you today?";
+    const welcomeMessage = "Hi, Im NauMah , your AI companion through this beautiful journey of 9 months. How can I help you today ?";
     setAnswer(welcomeMessage); // Set initial message in UI
     const speak = async () => {
       try {
