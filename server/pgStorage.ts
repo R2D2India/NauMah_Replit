@@ -1,11 +1,12 @@
-import { eq } from 'drizzle-orm';
+import { eq, desc } from 'drizzle-orm';
 import { db } from './db';
 import { 
   users, type User, type InsertUser,
   pregnancyData, type PregnancyData, type InsertPregnancyData,
   moodEntries, type MoodEntry, type InsertMoodEntry,
   medicationChecks, type MedicationCheck, type InsertMedicationCheck,
-  type PregnancyStageUpdate
+  type PregnancyStageUpdate,
+  waitlistTable // Assumed schema import
 } from "@shared/schema";
 import { IStorage } from './storage';
 import { addWeeks } from "date-fns";
@@ -36,7 +37,7 @@ export class PgStorage implements IStorage {
   async updatePregnancyStage(userId: number, update: PregnancyStageUpdate): Promise<PregnancyData> {
     // Calculate current week based on the provided stage type and value
     let currentWeek = 1;
-    
+
     if (update.stageType === "week") {
       currentWeek = parseInt(update.stageValue);
     } else if (update.stageType === "month") {
@@ -47,14 +48,14 @@ export class PgStorage implements IStorage {
       const trimesterValue = parseInt(update.stageValue);
       currentWeek = trimesterValue === 1 ? 7 : trimesterValue === 2 ? 20 : 33; // Middle of each trimester
     }
-    
+
     // Calculate due date based on current week (40 weeks total for pregnancy)
     const weeksLeft = 40 - currentWeek;
     const dueDate = addWeeks(new Date(), weeksLeft);
-    
+
     // Check if data exists
     const existingData = await this.getPregnancyData(userId);
-    
+
     if (existingData) {
       // Update existing record
       const results = await db.update(pregnancyData)
@@ -93,11 +94,22 @@ export class PgStorage implements IStorage {
 
   // Medication check methods
   async getMedicationChecks(userId: number): Promise<MedicationCheck[]> {
-    return await db.select().from(medicationChecks).where(eq(medicationChecks.userId, userId));
+    const results = await db.select().from(medicationChecks).where(eq(medicationChecks.userId, userId));
+    return results;
   }
 
   async createMedicationCheck(insertCheck: InsertMedicationCheck): Promise<MedicationCheck> {
     const results = await db.insert(medicationChecks).values(insertCheck).returning();
     return results[0];
+  }
+
+  // Waitlist methods
+  async createWaitlistEntry(entry: { name: string; mobile: string; email: string }): Promise<any> {
+    const results = await db.insert(waitlistTable).values(entry).returning();
+    return results[0];
+  }
+
+  async getWaitlistEntries(): Promise<any[]> {
+    return await db.select().from(waitlistTable).orderBy(desc(waitlistTable.createdAt));
   }
 }

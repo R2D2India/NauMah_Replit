@@ -269,5 +269,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin routes
+  const adminAuth = (req: Request, res: Response, next: NextFunction) => {
+    const adminKey = process.env.ADMIN_KEY;
+    const authHeader = req.headers.authorization;
+
+    if (!adminKey || authHeader !== `Bearer ${adminKey}`) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    next();
+  };
+
+  // Admin routes for data access
+  app.get("/api/admin/waitlist", adminAuth, async (req: Request, res: Response) => {
+    try {
+      const entries = await storage.getWaitlistEntries();
+      res.json(entries);
+    } catch (error) {
+      console.error("Error getting waitlist entries:", error);
+      res.status(500).json({ message: "Failed to get waitlist entries" });
+    }
+  });
+
+  app.get("/api/admin/users", adminAuth, async (req: Request, res: Response) => {
+    try {
+      const users = await db.select().from(schema.users);
+      res.json(users);
+    } catch (error) {
+      console.error("Error getting users:", error);
+      res.status(500).json({ message: "Failed to get users" });
+    }
+  });
+
+  app.get("/api/admin/pregnancy-data", adminAuth, async (req: Request, res: Response) => {
+    try {
+      const data = await db.select().from(schema.pregnancyData);
+      res.json(data);
+    } catch (error) {
+      console.error("Error getting pregnancy data:", error);
+      res.status(500).json({ message: "Failed to get pregnancy data" });
+    }
+  });
+
+  app.get("/api/admin/mood-entries", adminAuth, async (req: Request, res: Response) => {
+    try {
+      const entries = await db.select().from(schema.moodEntries);
+      res.json(entries);
+    } catch (error) {
+      console.error("Error getting mood entries:", error);
+      res.status(500).json({ message: "Failed to get mood entries" });
+    }
+  });
+
+  app.get("/api/admin/medication-checks", adminAuth, async (req: Request, res: Response) => {
+    try {
+      const checks = await db.select().from(schema.medicationChecks);
+      res.json(checks);
+    } catch (error) {
+      console.error("Error getting medication checks:", error);
+      res.status(500).json({ message: "Failed to get medication checks" });
+    }
+  });
+
   return httpServer;
 }

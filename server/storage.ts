@@ -14,6 +14,10 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   
+  // Waitlist methods
+  createWaitlistEntry(entry: { name: string; mobile: string; email: string }): Promise<any>;
+  getWaitlistEntries(): Promise<any[]>;
+  
   // Pregnancy data methods
   getPregnancyData(userId: number): Promise<PregnancyData | undefined>;
   updatePregnancyStage(userId: number, update: PregnancyStageUpdate): Promise<PregnancyData>;
