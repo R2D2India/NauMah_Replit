@@ -20,7 +20,7 @@ export function VoiceAgent() {
 
   useEffect(() => {
     // Play welcome message on component mount
-    const welcomeMessage = "Hi, I'm NauMah, your AI companion through this beautiful journey of 9 months. How can I help you today?";
+    const welcomeMessage = "Hi, I'm NauMah. You AI companion for this beautiful 9 month journey. How can I assist you today? Ask questions about your pregnancy, health concerns, or baby development";
     setAnswer(welcomeMessage); // Set initial message in UI
     const speak = async () => {
       try {
@@ -233,7 +233,7 @@ export function VoiceAgent() {
     <Card className="w-full h-[500px] flex flex-col">
       <CardHeader>
         <CardTitle>Voice Assistant</CardTitle>
-        <CardDescription>Have a conversation with NauMah or type your questions</CardDescription>
+        <CardDescription>Hi, I'm NauMah. You AI companion for this beautiful 9 month journey. How can I assist you today? Ask questions about your pregnancy, health concerns, or baby development</CardDescription>
       </CardHeader>
       <CardContent className="flex-grow flex flex-col">
         <audio ref={audioRef} className="hidden" />
