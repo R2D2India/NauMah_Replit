@@ -83,14 +83,15 @@ export async function generateChatResponse(
       messages: [
         {
           role: "system",
-          content: context
+          content: context + " Format your response with line breaks between points using '\n• ' for each new point."
         },
         {
           role: "user", 
           content: prompt
         }
       ],
-      max_tokens: 500,
+      max_tokens: 250,
+      temperature: 0.7,
     });
 
     return completion.choices[0].message.content || "I'm sorry, I couldn't generate a response.";
