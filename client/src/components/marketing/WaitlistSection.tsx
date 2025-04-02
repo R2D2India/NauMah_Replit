@@ -1,13 +1,15 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import Confetti from 'react-confetti';
 import { apiRequest } from '@/lib/queryClient';
+import useWindowSize from 'react-use/lib/useWindowSize';
 
 export const WaitlistSection = () => {
   const [showConfetti, setShowConfetti] = useState(false);
   const [formData, setFormData] = useState({ name: '', mobile: '', email: '' });
   const { toast } = useToast();
+  const { width, height } = useWindowSize();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,11 +38,16 @@ export const WaitlistSection = () => {
   return (
     <section className="py-12 bg-gradient-to-r from-purple-100 to-pink-100">
       {showConfetti && <Confetti 
-        recycle={false} 
-        numberOfPieces={300} 
-        colors={['#FFD700', '#FFA500', '#FFB74D', '#FFC107']}
-        gravity={0.3}
-        tweenDuration={4000}
+        width={width}
+        height={height}
+        recycle={false}
+        numberOfPieces={500}
+        colors={['#FFD700', '#DAA520', '#FFC107', '#FFB74D', '#FFA500']}
+        gravity={0.15}
+        tweenDuration={8000}
+        confettiSource={{x: width/2, y: height/2}}
+        initialVelocityY={15}
+        wind={0.01}
       />}
       <div className="container mx-auto px-4">
         <h2 className="text-3xl font-bold text-center mb-8">Join Our Waitlist</h2>
