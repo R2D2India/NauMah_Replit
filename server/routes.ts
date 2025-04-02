@@ -141,35 +141,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Check medication safety for pregnancy
   app.post("/api/medication/check", validateRequest(medicationCheckSchema), async (req: Request, res: Response) => {
     try {
-      // In a real app, we would get the userId from the authenticated session
       const userId = demoUserId;
       const { medicationName } = req.validatedData;
       
-      // In a real app, this would call a medical API to check safety
-      // For now, we'll use a simple simulation
-      const medications = {
-        "acetaminophen": { isSafe: true, notes: "Generally considered safe during pregnancy when used as directed." },
-        "ibuprofen": { isSafe: false, notes: "Not recommended during pregnancy, especially in the third trimester." },
-        "prenatal vitamins": { isSafe: true, notes: "Recommended during pregnancy to support maternal and fetal health." },
-      };
-      
-      const lowercaseMedName = medicationName.toLowerCase();
-      let isSafe: boolean | null = null;
-      let notes = "Information not available. Please consult your healthcare provider.";
-      
-      if (lowercaseMedName in medications) {
-        isSafe = medications[lowercaseMedName as keyof typeof medications].isSafe;
-        notes = medications[lowercaseMedName as keyof typeof medications].notes;
-      }
+      const safetyInfo = await checkMedicationSafety(medicationName);
       
       const check = await storage.createMedicationCheck({
         userId,
         medicationName,
-        isSafe,
-        notes,
+        isSafe: safetyInfo.isSafe,
+        notes: safetyInfo.notes,
       });
       
-      res.json(check);
+      res.json({
+        ...check,
+        risks: safetyInfo.risks,
+        alternatives: safetyInfo.alternatives
+      });
     } catch (error) {
       console.error("Error checking medication:", error);
       res.status(500).json({ message: "Failed to check medication" });
@@ -304,6 +292,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error getting users:", error);
       res.status(500).json({ message: "Failed to get users" });
     }
+
+  // Generate baby names
+  const babyNamesSchema = z.object({
+    origin: z.string(),
+    gender: z.string()
+  });
+
+  app.post("/api/baby-names", validateRequest(babyNamesSchema), async (req: Request, res: Response) => {
+    try {
+      const { origin, gender } = req.validatedData;
+      const names = await generateBabyNames(origin, gender);
+      res.json(names);
+    } catch (error) {
+      console.error("Error generating baby names:", error);
+      res.status(500).json({ message: "Failed to generate baby names" });
+    }
+  });
+
+
   });
 
   app.get("/api/admin/pregnancy-data", adminAuth, async (req: Request, res: Response) => {

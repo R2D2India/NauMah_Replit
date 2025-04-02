@@ -94,6 +94,37 @@ export async function generateChatResponse(
 /**
  * Generate a JSON structured response from OpenAI
  */
+export async function generateMealPlan(week: number): Promise<{
+  breakfast: string;
+  lunch: string;
+  dinner: string;
+  snacks: string[];
+}> {
+  const prompt = `Generate a detailed pregnancy meal plan for week ${week}. Include specific nutritional requirements for this stage of pregnancy. Format response as a JSON object with exactly this structure: { breakfast: string, lunch: string, dinner: string, snacks: string[] }. Make meals nutritious and pregnancy-safe.`;
+  
+  return generateStructuredResponse(prompt, "You are a certified nutritionist specializing in pregnancy nutrition.");
+}
+
+export async function checkMedicationSafety(medicationName: string): Promise<{
+  isSafe: boolean | null;
+  notes: string;
+  risks?: string;
+  alternatives?: string[];
+}> {
+  const prompt = `Analyze the safety of ${medicationName} during pregnancy. Format response as JSON with structure: { isSafe: boolean | null, notes: string, risks?: string, alternatives?: string[] }. Include scientific evidence when available.`;
+  
+  return generateStructuredResponse(prompt, "You are a pharmacist with expertise in pregnancy medication safety.");
+}
+
+export async function generateBabyNames(origin: string, gender: string): Promise<{
+  names: string[];
+  meanings: Record<string, string>;
+}> {
+  const prompt = `Generate 5 baby names from ${origin} origin for ${gender}. Format response as JSON with structure: { names: string[], meanings: Record<string, string> }. Include traditional and meaningful names.`;
+  
+  return generateStructuredResponse(prompt, "You are a cultural expert and naming consultant.");
+}
+
 export async function generateStructuredResponse<T>(
   prompt: string,
   context: string = "You are a helpful pregnancy assistant providing guidance and support to expecting mothers."
