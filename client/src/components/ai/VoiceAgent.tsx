@@ -235,6 +235,29 @@ export function VoiceAgent() {
         recognition.current.stop();
         setIsListening(false);
       } else {
+        // Set initial greeting
+        const greeting = "Hi. I'm NauMah. You AI companion for this beautiful nine month journey. How can I help you today? Ask questions about your pregnancy, health concerns, or baby development.";
+        setAnswer(greeting);
+        
+        // Play greeting audio
+        fetch('/api/voice/speech', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ message: greeting }),
+        })
+        .then(response => response.blob())
+        .then(audioBlob => {
+          const audioUrl = URL.createObjectURL(audioBlob);
+          if (audioRef.current) {
+            audioRef.current.src = audioUrl;
+            audioRef.current.play();
+            setIsPlaying(true);
+          }
+        })
+        .catch(console.error);
+
         recognition.current.continuous = false;
         recognition.current.interimResults = false;
         recognition.current.maxAlternatives = 1;
