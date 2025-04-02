@@ -14,10 +14,39 @@ interface TabbedContentProps {
 
 const TabbedContent = ({ currentWeek }: TabbedContentProps) => {
   const [activeTab, setActiveTab] = useState("diet");
+  const [isGeneratingMealPlan, setIsGeneratingMealPlan] = useState(false);
+  const [mealPlan, setMealPlan] = useState<{
+    breakfast: string;
+    lunch: string;
+    dinner: string;
+    snacks: string[];
+  } | null>(null);
+
+  const handleGenerateMealPlan = async () => {
+    try {
+      setIsGeneratingMealPlan(true);
+      const response = await fetch("/api/meal-plan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentWeek }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate meal plan");
+      }
+
+      const data = await response.json();
+      setMealPlan(data);
+    } catch (error) {
+      console.error("Error generating meal plan:", error);
+    } finally {
+      setIsGeneratingMealPlan(false);
+    }
+  };
 
   // Get trimester for recommendations
   const trimester = getTrimeasterFromWeek(currentWeek);
-  
+
   // Get recommendations based on trimester
   const dietRecs = DIET_RECOMMENDATIONS[trimester];
   const exerciseRecs = EXERCISE_RECOMMENDATIONS[trimester];
@@ -70,14 +99,14 @@ const TabbedContent = ({ currentWeek }: TabbedContentProps) => {
             <i className="fas fa-book mr-2"></i>Resources
           </button>
         </div>
-        
+
         {/* Tab Content */}
         <div className="p-6">
           {/* Diet Tab Content */}
           {activeTab === "diet" && (
             <div>
               <h3 className="text-xl font-montserrat font-bold text-primary mb-4">Recommended Diet for Week {currentWeek}</h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-neutral-light rounded-lg p-4">
                   <h4 className="font-montserrat font-medium text-lg mb-3">Focus Nutrients</h4>
@@ -93,7 +122,7 @@ const TabbedContent = ({ currentWeek }: TabbedContentProps) => {
                     ))}
                   </ul>
                 </div>
-                
+
                 <div className="bg-neutral-light rounded-lg p-4">
                   <h4 className="font-montserrat font-medium text-lg mb-3">Sample Meal Plan</h4>
                   <div className="space-y-3">
@@ -116,7 +145,7 @@ const TabbedContent = ({ currentWeek }: TabbedContentProps) => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="mt-6 p-4 bg-secondary-light rounded-lg border border-secondary">
                 <div className="flex items-start">
                   <i className="fas fa-lightbulb text-primary mt-1 mr-3"></i>
@@ -126,20 +155,33 @@ const TabbedContent = ({ currentWeek }: TabbedContentProps) => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="mt-5 text-center">
-                <button className="bg-primary hover:bg-primary-dark text-white py-2 px-6 rounded-lg font-montserrat font-medium transition duration-300">
-                  Generate Complete Meal Plan
+                <button 
+                  className="bg-primary hover:bg-primary-dark text-white py-2 px-6 rounded-lg font-montserrat font-medium transition duration-300"
+                  onClick={handleGenerateMealPlan}
+                  disabled={isGeneratingMealPlan}
+                >
+                  {isGeneratingMealPlan ? "Generating..." : "Generate Complete Meal Plan"}
                 </button>
+                {mealPlan && (
+                  <div>
+                    <h3>Generated Meal Plan:</h3>
+                    <p>Breakfast: {mealPlan.breakfast}</p>
+                    <p>Lunch: {mealPlan.lunch}</p>
+                    <p>Dinner: {mealPlan.dinner}</p>
+                    <p>Snacks: {mealPlan.snacks.join(", ")}</p>
+                  </div>
+                )}
               </div>
             </div>
           )}
-          
+
           {/* Exercise Tab Content */}
           {activeTab === "exercise" && (
             <div>
               <h3 className="text-xl font-montserrat font-bold text-primary mb-4">Safe Exercises for Week {currentWeek}</h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 {exerciseRecs.map((exercise, index) => (
                   <div key={index} className="bg-neutral-light rounded-lg p-4 text-center">
@@ -151,7 +193,7 @@ const TabbedContent = ({ currentWeek }: TabbedContentProps) => {
                   </div>
                 ))}
               </div>
-              
+
               <div className="bg-neutral-light rounded-lg p-4 mb-6">
                 <h4 className="font-montserrat font-medium text-lg mb-3">Exercise Guidelines</h4>
                 <ul className="space-y-2">
@@ -173,7 +215,7 @@ const TabbedContent = ({ currentWeek }: TabbedContentProps) => {
                   </li>
                 </ul>
               </div>
-              
+
               <div className="bg-secondary-light rounded-lg p-4 border border-secondary mb-5">
                 <div className="flex items-start">
                   <i className="fas fa-exclamation-circle text-yellow-500 mt-1 mr-3 text-lg"></i>
@@ -183,7 +225,7 @@ const TabbedContent = ({ currentWeek }: TabbedContentProps) => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="text-center">
                 <button className="bg-primary hover:bg-primary-dark text-white py-2 px-6 rounded-lg font-montserrat font-medium transition duration-300">
                   View Exercise Videos
@@ -191,12 +233,12 @@ const TabbedContent = ({ currentWeek }: TabbedContentProps) => {
               </div>
             </div>
           )}
-          
+
           {/* Tests Tab Content */}
           {activeTab === "tests" && (
             <div>
               <h3 className="text-xl font-montserrat font-bold text-primary mb-4">Recommended Tests for Week {currentWeek}</h3>
-              
+
               <div className="mb-6 bg-neutral-light rounded-lg p-4">
                 <h4 className="font-montserrat font-medium text-lg mb-3">Key Tests This Period</h4>
                 <div className="space-y-4">
@@ -213,7 +255,7 @@ const TabbedContent = ({ currentWeek }: TabbedContentProps) => {
                   ))}
                 </div>
               </div>
-              
+
               <div className="bg-neutral-light rounded-lg p-4 mb-5">
                 <h4 className="font-montserrat font-medium text-lg mb-3">Questions to Ask Your Doctor</h4>
                 <ul className="space-y-2">
@@ -231,7 +273,7 @@ const TabbedContent = ({ currentWeek }: TabbedContentProps) => {
                   </li>
                 </ul>
               </div>
-              
+
               <div className="text-center">
                 <button className="bg-primary hover:bg-primary-dark text-white py-2 px-6 rounded-lg font-montserrat font-medium transition duration-300">
                   Track My Test Results
@@ -239,12 +281,12 @@ const TabbedContent = ({ currentWeek }: TabbedContentProps) => {
               </div>
             </div>
           )}
-          
+
           {/* Symptoms Tab Content */}
           {activeTab === "symptoms" && (
             <div>
               <h3 className="text-xl font-montserrat font-bold text-primary mb-4">Common Symptoms in Week {currentWeek}</h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div className="bg-neutral-light rounded-lg p-4">
                   <h4 className="font-montserrat font-medium text-lg mb-3">Physical Symptoms</h4>
@@ -264,7 +306,7 @@ const TabbedContent = ({ currentWeek }: TabbedContentProps) => {
                     ))}
                   </div>
                 </div>
-                
+
                 <div className="bg-neutral-light rounded-lg p-4">
                   <h4 className="font-montserrat font-medium text-lg mb-3">Emotional Changes</h4>
                   <div className="space-y-3">
@@ -288,7 +330,7 @@ const TabbedContent = ({ currentWeek }: TabbedContentProps) => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="bg-secondary-light rounded-lg p-4 border border-secondary mb-5">
                 <div className="flex items-start">
                   <i className="fas fa-exclamation-triangle text-red-500 mt-1 mr-3"></i>
@@ -304,7 +346,7 @@ const TabbedContent = ({ currentWeek }: TabbedContentProps) => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="text-center">
                 <button className="bg-primary hover:bg-primary-dark text-white py-2 px-6 rounded-lg font-montserrat font-medium transition duration-300">
                   Track My Symptoms
@@ -312,12 +354,12 @@ const TabbedContent = ({ currentWeek }: TabbedContentProps) => {
               </div>
             </div>
           )}
-          
+
           {/* Resources Tab Content */}
           {activeTab === "resources" && (
             <div>
               <h3 className="text-xl font-montserrat font-bold text-primary mb-4">Recommended Resources for Week {currentWeek}</h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div className="bg-neutral-light rounded-lg p-4">
                   <h4 className="font-montserrat font-medium text-lg mb-3">
@@ -342,7 +384,7 @@ const TabbedContent = ({ currentWeek }: TabbedContentProps) => {
                     ))}
                   </ul>
                 </div>
-                
+
                 <div className="bg-neutral-light rounded-lg p-4">
                   <h4 className="font-montserrat font-medium text-lg mb-3">
                     <i className="fas fa-film mr-2 text-primary"></i>Movie & Documentary Suggestions
@@ -367,7 +409,7 @@ const TabbedContent = ({ currentWeek }: TabbedContentProps) => {
                   </ul>
                 </div>
               </div>
-              
+
               <div className="bg-neutral-light rounded-lg p-4 mb-5">
                 <h4 className="font-montserrat font-medium text-lg mb-3">
                   <i className="fas fa-podcast mr-2 text-primary"></i>Podcasts for Parents-to-Be
@@ -386,7 +428,7 @@ const TabbedContent = ({ currentWeek }: TabbedContentProps) => {
                   ))}
                 </div>
               </div>
-              
+
               <div className="text-center">
                 <button className="bg-primary hover:bg-primary-dark text-white py-2 px-6 rounded-lg font-montserrat font-medium transition duration-300">
                   Discover More Resources

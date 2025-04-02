@@ -272,6 +272,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const users = await db.select().from(schema.users);
       res.json(users);
+
+
+  // Generate meal plan
+  const mealPlanSchema = z.object({
+    currentWeek: z.number(),
+  });
+
+  app.post("/api/meal-plan", validateRequest(mealPlanSchema), async (req: Request, res: Response) => {
+    try {
+      const { currentWeek } = req.validatedData;
+      
+      const prompt = `Generate a detailed pregnancy meal plan for week ${currentWeek}. Include 3 meals and 2 snacks with specific foods and portions. Focus on essential nutrients needed at this stage. Format as JSON with structure: { breakfast: string, lunch: string, dinner: string, snacks: string[] }`;
+      
+      const response = await generateStructuredResponse(prompt);
+      res.json(response);
+    } catch (error) {
+      console.error("Error generating meal plan:", error);
+      res.status(500).json({ message: "Failed to generate meal plan" });
+    }
+  });
+
+
     } catch (error) {
       console.error("Error getting users:", error);
       res.status(500).json({ message: "Failed to get users" });
