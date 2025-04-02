@@ -23,9 +23,9 @@ const BabyDevelopment = ({ currentWeek }: BabyDevelopmentProps) => {
         <div className="flex flex-col md:flex-row items-center gap-8"> {/* Added items-center and gap-8 for better layout */}
           <div className="md:w-1/2 mb-6 md:mb-0"> {/* Adjusted width for better image placement */}
             <img 
-              src="/images/baby-development.svg" 
+              src="https://images.unsplash.com/photo-1610122748280-d0ae76b10750?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8Y3V0ZSUyMGJhYnl8ZW58MHx8MHx8fDA%3D" 
               alt="Baby Development Stage" 
-              className="w-full max-w-sm mx-auto"
+              className="w-full max-w-sm mx-auto rounded-lg"
             />
           </div>
           <div className="md:w-1/2"> {/* Adjusted width for text content */}
