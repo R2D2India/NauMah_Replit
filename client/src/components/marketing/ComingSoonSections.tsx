@@ -32,17 +32,17 @@ export const ComingSoonSections = () => {
       <section className="py-12 bg-purple-50">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-8">Doctor Consultation</h2>
-          <div className="max-w-2xl mx-auto rounded-lg shadow-lg relative overflow-hidden">
+          <div className="max-w-2xl mx-auto rounded-lg shadow-xl relative overflow-hidden transform hover:scale-[1.02] transition-transform duration-300" style={{ perspective: '1000px' }}>
             <div 
               className="absolute inset-0 bg-cover bg-center"
               style={{ backgroundImage: `url('/images/pregnancy/doctor-consultation.jpg')` }}
             ></div>
-            <div className="relative z-10 bg-gradient-to-r from-white/70 to-white/50 p-8 backdrop-blur-[2px]">
+            <div className="relative z-10 bg-gradient-to-r from-white/40 to-white/30 p-8 backdrop-blur-[1px] hover:backdrop-blur-[2px] transition-all duration-300">
               <div className="w-24 h-24 bg-primary-light rounded-full mx-auto mb-6 flex items-center justify-center">
                 <i className="fas fa-stethoscope text-3xl text-primary"></i>
               </div>
-              <h3 className="text-xl font-semibold mb-4">Expert Medical Consultations</h3>
-              <p className="text-gray-700 mb-6 font-medium">
+              <h3 className="text-xl font-bold mb-4 text-gray-900">Expert Medical Consultations</h3>
+              <p className="text-gray-800 mb-6 font-semibold">
                 Connect with experienced gynecologists and pregnancy specialists. Coming soon!
               </p>
               <button
