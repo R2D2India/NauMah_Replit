@@ -117,7 +117,7 @@ export function ChatAgent() {
     <Card className="w-full h-[600px] flex flex-col bg-background rounded-xl shadow-[0_20px_50px_rgba(8,_112,_184,_0.7)] transform-gpu hover:scale-[1.02] transition-all duration-300">
       <CardHeader className="shrink-0">
         <CardTitle className="text-primary">Chat with NauMah</CardTitle>
-        <CardDescription className="mt-1.5 text-foreground/80">Hi, I'm NauMah. Your AI companion for this beautiful 9 month journey. How can I assist you today?</CardDescription>
+        <CardDescription className="mt-1.5 text-foreground/80">Your AI companion for this beautiful 9-month journey</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 overflow-hidden p-0">
         <ScrollArea className="h-[calc(600px-10rem)] px-6">
@@ -128,13 +128,13 @@ export function ChatAgent() {
                 className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} animate-fadeIn`}
               >
                 <div
-                  className={`max-w-[80%] rounded-lg px-4 py-3 transition-all duration-200 hover:scale-[1.02] ${
+                  className={`max-w-[75%] rounded-lg px-4 py-3 transition-all duration-200 hover:scale-[1.01] ${
                     message.role === 'user'
                       ? 'bg-primary text-primary-foreground shadow-lg'
                       : 'bg-muted/90 shadow-md'
                   }`}
                 >
-                  <div className="text-sm text-current whitespace-pre-line">
+                  <div className="text-sm text-current overflow-hidden break-words">
                     {message.content.replace(/\n{3,}/g, '\n\n').split('\n\n').map((paragraph, idx) => (
                       <p key={idx} className="mb-2 leading-relaxed">
                         {paragraph}
@@ -174,7 +174,7 @@ export function ChatAgent() {
             ))}
             {isLoading && (
               <div className="flex justify-start">
-                <div className="max-w-[80%] rounded-lg px-4 py-2 bg-muted">
+                <div className="max-w-[75%] rounded-lg px-4 py-2 bg-muted">
                   <Loader2 className="h-4 w-4 animate-spin" />
                 </div>
               </div>
