@@ -62,6 +62,8 @@ export function ChatAgent() {
         },
         signal: controller.signal
       });
+      
+      console.log("Chat response received:", response);
 
       // Clear timeout if we used the fallback method
       if (timeoutId) clearTimeout(timeoutId);

@@ -138,6 +138,8 @@ export function VoiceAgent() {
         signal: chatController.signal,
       });
       
+      console.log("Voice chat response received:", data);
+      
       // Clear the timeout since we got a response
       if (chatTimeoutId) clearTimeout(chatTimeoutId);
 
@@ -261,9 +263,6 @@ export function VoiceAgent() {
         const preloadTimeoutId = window.setTimeout(() => preloadController.abort(), 10000);
 
         fetch('/api/voice/speech', {
-          priority: 'high',
-          cache: 'no-store',
-          keepalive: true,
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
