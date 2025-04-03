@@ -185,12 +185,63 @@ const TabbedContent = ({ currentWeek }: TabbedContentProps) => {
                   {isGeneratingMealPlan ? "Generating..." : "Generate Complete Meal Plan"}
                 </button>
                 {mealPlan && (
-                  <div>
-                    <h3>Generated Meal Plan:</h3>
-                    <p>Breakfast: {mealPlan.breakfast}</p>
-                    <p>Lunch: {mealPlan.lunch}</p>
-                    <p>Dinner: {mealPlan.dinner}</p>
-                    <p>Snacks: {mealPlan.snacks.join(", ")}</p>
+                  <div className="mt-6 text-left max-w-3xl mx-auto bg-neutral-light rounded-lg p-6 shadow-md">
+                    <h3 className="text-xl font-montserrat font-bold text-primary mb-4 text-center">Your Personalized Meal Plan</h3>
+                    
+                    <div className="mb-4">
+                      <h4 className="font-montserrat font-semibold text-lg text-primary-dark mb-2 border-b border-primary-light pb-1">
+                        <i className="fas fa-sun mr-2"></i>Breakfast
+                      </h4>
+                      <ul className="ml-6">
+                        <li className="flex items-start mb-1">
+                          <span className="text-primary mr-2">•</span>
+                          <span>{mealPlan.breakfast}</span>
+                        </li>
+                      </ul>
+                    </div>
+                    
+                    <div className="mb-4">
+                      <h4 className="font-montserrat font-semibold text-lg text-primary-dark mb-2 border-b border-primary-light pb-1">
+                        <i className="fas fa-utensils mr-2"></i>Lunch
+                      </h4>
+                      <ul className="ml-6">
+                        <li className="flex items-start mb-1">
+                          <span className="text-primary mr-2">•</span>
+                          <span>{mealPlan.lunch}</span>
+                        </li>
+                      </ul>
+                    </div>
+                    
+                    <div className="mb-4">
+                      <h4 className="font-montserrat font-semibold text-lg text-primary-dark mb-2 border-b border-primary-light pb-1">
+                        <i className="fas fa-moon mr-2"></i>Dinner
+                      </h4>
+                      <ul className="ml-6">
+                        <li className="flex items-start mb-1">
+                          <span className="text-primary mr-2">•</span>
+                          <span>{mealPlan.dinner}</span>
+                        </li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-montserrat font-semibold text-lg text-primary-dark mb-2 border-b border-primary-light pb-1">
+                        <i className="fas fa-apple-alt mr-2"></i>Snacks
+                      </h4>
+                      <ul className="ml-6">
+                        {mealPlan.snacks.map((snack, index) => (
+                          <li key={index} className="flex items-start mb-1">
+                            <span className="text-primary mr-2">•</span>
+                            <span>{snack}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    
+                    <div className="mt-4 text-center text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
+                      <i className="fas fa-info-circle mr-1"></i>
+                      This meal plan is tailored for week {currentWeek} of your pregnancy to provide optimal nutrition.
+                    </div>
                   </div>
                 )}
               </div>
