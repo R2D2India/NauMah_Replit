@@ -44,7 +44,7 @@ export function ProfileDialog() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="primary" className="bg-primary hover:bg-primary-dark text-white">
+        <Button variant="default" className="bg-primary hover:bg-primary/90 text-white">
           {localStorage.getItem('userName') || 'My Profile'}
         </Button>
       </DialogTrigger>

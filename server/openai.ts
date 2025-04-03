@@ -42,10 +42,23 @@ export async function getAssistantResponse(message: string): Promise<string> {
 
     const messages = await openai.beta.threads.messages.list(thread.id);
     const assistantMessage = messages.data.find(msg => msg.role === "assistant");
-    if (!assistantMessage?.content[0]?.text?.value) {
+    
+    if (!assistantMessage || !assistantMessage.content.length) {
       throw new Error("No response from assistant");
     }
-    return assistantMessage.content[0].text.value;
+    
+    try {
+      // Using any here to bypass TypeScript errors with the OpenAI API types
+      const content = assistantMessage.content[0] as any;
+      if (content && content.text && content.text.value) {
+        return content.text.value;
+      } else {
+        throw new Error("Unexpected content structure from assistant");
+      }
+    } catch (contentError) {
+      console.error("Error parsing assistant message content:", contentError);
+      throw new Error("Failed to parse assistant response");
+    }
   } catch (error) {
     console.error("Error in getAssistantResponse:", error);
     throw error;
