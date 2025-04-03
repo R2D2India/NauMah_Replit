@@ -127,20 +127,6 @@ export async function transcribeAudio(audioBuffer: Buffer): Promise<string> {
   }
 }
 
-export async function generateSpeech(text: string): Promise<Buffer> {
-  try {
-    const mp3 = await openai.audio.speech.create({
-      model: "tts-1",
-      voice: "alloy",
-      input: text,
-    });
-    return Buffer.from(await mp3.arrayBuffer());
-  } catch (error) {
-    console.error("Error generating speech:", error);
-    throw new Error("Failed to generate speech");
-  }
-}
-
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const OLD_MODEL = "gpt-4o";
 
