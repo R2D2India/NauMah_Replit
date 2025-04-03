@@ -132,9 +132,17 @@ export function VoiceAgent() {
       const chatController = new AbortController();
       const chatTimeoutId = window.setTimeout(() => chatController.abort(), 30000);
       
+      // Ensure we have a valid message before sending
+      if (!transcript || transcript.trim() === '') {
+        throw new Error("No valid transcript to send");
+      }
+      
       const data = await apiRequest('/api/chat', {
         method: 'POST',
-        body: JSON.stringify({ message: transcript }),
+        body: JSON.stringify({ message: transcript.trim() }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
         signal: chatController.signal,
       });
       
@@ -154,12 +162,17 @@ export function VoiceAgent() {
         const controller = new AbortController();
         const timeoutId = window.setTimeout(() => controller.abort(), 15000);
         
+        // Ensure data.response exists before sending
+        if (!data.response) {
+          throw new Error("No response data available for speech synthesis");
+        }
+        
         const audioResponse = await fetch('/api/voice/speech', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ message: data.response }),
+          body: JSON.stringify({ message: data.response.trim() }),
           signal: controller.signal
         });
         
@@ -262,6 +275,7 @@ export function VoiceAgent() {
         const preloadController = new AbortController();
         const preloadTimeoutId = window.setTimeout(() => preloadController.abort(), 10000);
 
+        // We still need to use fetch for blob response
         fetch('/api/voice/speech', {
           method: 'POST',
           headers: {

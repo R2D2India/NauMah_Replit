@@ -136,6 +136,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const speechSchema = z.object({
     message: z.string().min(1),
   });
+  
+  // While this endpoint accepts binary data, we'll add basic validation in the route handler
 
   // Check medication safety for pregnancy
   app.post("/api/medication/check", validateRequest(medicationCheckSchema), async (req: Request, res: Response) => {
@@ -199,8 +201,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/voice/transcribe", async (req: Request, res: Response) => {
     try {
       const audioData = req.body;
+      
+      // Basic validation of audio data
+      if (!audioData || !Buffer.isBuffer(audioData)) {
+        return res.status(400).json({ 
+          message: "Invalid audio data. Must provide binary audio data in the request body." 
+        });
+      }
+      
+      // Check if OpenAI API key is configured
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(401).json({
+          message: "OpenAI API key not configured. Please set up your API key."
+        });
+      }
+      
       // Use transcribeSpeech instead of transcribeAudio for consistency
       const transcription = await transcribeSpeech(Buffer.from(audioData));
+      
+      // Ensure we have a transcription
+      if (!transcription || transcription.trim() === '') {
+        return res.status(422).json({
+          message: "Could not transcribe audio. The audio may be too short, unclear, or in an unsupported format."
+        });
+      }
       
       // Create base context for voice responses
       const context = "You are NauMah, a knowledgeable and supportive AI pregnancy assistant providing guidance to expecting mothers. Your responses should be compassionate, evidence-based, and medically sound, but always recommend consulting healthcare providers for personal medical advice. Keep responses concise (under 100 words) for voice output.";
@@ -215,8 +239,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Error in voice transcription:", error);
-      res.status(500).json({ 
-        message: "Failed to process voice input",
+      const errorMessage = error instanceof Error ? error.message : "Failed to process voice input";
+      const status = (error instanceof Error && error.message?.includes('API key')) ? 401 : 500;
+      
+      res.status(status).json({ 
+        message: errorMessage,
         error: process.env.NODE_ENV === 'development' ? String(error) : undefined 
       });
     }
