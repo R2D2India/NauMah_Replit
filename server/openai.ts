@@ -3,11 +3,14 @@ import OpenAI from "openai";
 // Initialize the OpenAI client with error handling
 let openai: OpenAI;
 try {
-  if (!process.env.OPENAI_API_KEY) {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
     throw new Error("OpenAI API key is not configured");
   }
   openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY
+    apiKey,
+    timeout: 30000, // 30 second timeout
+    maxRetries: 3,  // Retry failed requests 3 times
   });
 } catch (error) {
   console.error("Error initializing OpenAI client:", error);

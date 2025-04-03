@@ -37,6 +37,9 @@ export function ChatAgent() {
     setInputValue('');
     setIsLoading(true);
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+
     try {
       const response = await apiRequest('/api/chat', {
         method: 'POST',
