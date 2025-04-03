@@ -115,6 +115,39 @@ export type WaitlistEntry = typeof waitlistTable.$inferSelect;
 export type InsertWaitlistEntry = typeof waitlistTable.$inferInsert;
 // Existing imports...
 
+// Weight tracking table
+export const weightTrackingTable = pgTable("weight_tracking", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  weight: integer("weight").notNull(),
+  date: timestamp("date").notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Symptoms table
+export const symptomsTable = pgTable("symptoms", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  symptom: text("symptom").notNull(),
+  severity: integer("severity").notNull(),
+  notes: text("notes"),
+  date: timestamp("date").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Appointments table
+export const appointmentsTable = pgTable("appointments", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  title: text("title").notNull(),
+  type: text("type").notNull(),
+  location: text("location"),
+  notes: text("notes"),
+  date: timestamp("date").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export interface WeightEntry {
   id: number;
   userId: number;
