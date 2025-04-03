@@ -1,20 +1,20 @@
 import OpenAI from "openai";
 
 // Initialize the OpenAI client with error handling
-let openai: OpenAI;
+let openai: OpenAI | null = null;
 try {
   const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    throw new Error("OpenAI API key is not configured");
+  if (apiKey) {
+    openai = new OpenAI({
+      apiKey,
+      timeout: 30000, // 30 second timeout
+      maxRetries: 3,  // Retry failed requests 3 times
+    });
+  } else {
+    console.warn("OPENAI_API_KEY not found. Some AI features will be disabled.");
   }
-  openai = new OpenAI({
-    apiKey,
-    timeout: 30000, // 30 second timeout
-    maxRetries: 3,  // Retry failed requests 3 times
-  });
 } catch (error) {
   console.error("Error initializing OpenAI client:", error);
-  throw error;
 }
 
 // Assistant ID for the pregnancy companion
