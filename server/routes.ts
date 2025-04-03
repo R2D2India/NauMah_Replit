@@ -349,7 +349,11 @@ app.get("/api/admin/users", adminAuth, async (req: Request, res: Response) => {
     try {
       const users = await db.select().from(schema.users);
       res.json(users);
-
+    } catch (error) {
+      console.error("Error getting users:", error);
+      res.status(500).json({ message: "Failed to get users" });
+    }
+  });
 
   // Generate meal plan
   const mealPlanSchema = z.object({
@@ -374,12 +378,6 @@ app.get("/api/admin/users", adminAuth, async (req: Request, res: Response) => {
       });
     }
   });
-
-
-    } catch (error) {
-      console.error("Error getting users:", error);
-      res.status(500).json({ message: "Failed to get users" });
-    }
 
   // Generate baby names
   const babyNamesSchema = z.object({
