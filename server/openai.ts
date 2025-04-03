@@ -20,7 +20,8 @@ try {
 
 // Assistant ID for the pregnancy companion
 const ASSISTANT_ID = "asst_zwfWiYjLCIqIVlUN0617YRZQ";
-const MODEL = "gpt-4";
+// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+const MODEL = "gpt-4o";
 
 export async function getAssistantResponse(message: string): Promise<string> {
   try {
@@ -153,9 +154,6 @@ export async function transcribeAudio(audioBuffer: Buffer): Promise<string> {
   }
 }
 
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const OLD_MODEL = "gpt-4o";
-
 /**
  * Generate a text response from OpenAI
  */
@@ -168,7 +166,7 @@ export async function generateChatResponse(
       return "I apologize, but I'm not available right now. Please try again later or contact support.";
     }
     const completion = await openai.chat.completions.create({
-      model: OLD_MODEL,
+      model: MODEL,
       messages: [
         {
           role: "system",
@@ -206,7 +204,7 @@ export async function generateMealPlanOld(week: number): Promise<{
     const prompt = `Generate a detailed pregnancy meal plan for week ${week}. Include specific nutritional requirements for this stage of pregnancy. Focus on nutritious, pregnancy-safe meals.`;
     
     const completion = await openai.chat.completions.create({
-      model: OLD_MODEL,
+      model: MODEL,
       messages: [
         {
           role: "system",
@@ -254,7 +252,7 @@ export async function generateStructuredResponse<T>(
       throw new Error("OpenAI client not initialized");
     }
     const completion = await openai.chat.completions.create({
-      model: OLD_MODEL,
+      model: MODEL,
       messages: [
         {
           role: "system",
