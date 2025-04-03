@@ -222,6 +222,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Generate text-to-speech from AI response
   app.post("/api/voice/speech", validateRequest(speechSchema), async (req: Request, res: Response) => {
     try {
+      // Check if OpenAI API key is configured
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(401).json({
+          message: "OpenAI API key not configured. Please set up your API key."
+        });
+      }
+
       const { message } = req.validatedData;
 
       // Create base context for voice responses
@@ -234,10 +241,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Convert to speech
         const audioBuffer = await generateSpeech(textResponse);
 
-        // Send audio file
+        // Send audio file with proper CORS headers for deployed environments
         res.setHeader('Content-Type', 'audio/mpeg');
         res.setHeader('Content-Length', audioBuffer.length);
         res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
         return res.send(audioBuffer);
       } catch (speechError) {
         console.error("Error generating speech:", speechError);
@@ -249,7 +258,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error) {
       console.error("Error in voice route:", error);
-      return res.status(500).json({ message: "Failed to process your request" });
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      return res.status(500).json({ 
+        message: "Failed to process your request", 
+        error: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+      });
     }
   });
 

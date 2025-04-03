@@ -27,29 +27,48 @@ export function ChatAgent() {
   const handleSendMessage = async () => {
     if (!inputValue.trim() || isLoading) return;
 
+    // Store the input value to handle reference within async operations
+    const currentInput = inputValue.trim();
+    
     // Add user message
     const userMessage: Message = {
       role: 'user',
-      content: inputValue.trim(),
+      content: currentInput,
       timestamp: new Date()
     };
+    
+    // Update UI immediately
     setMessages(prev => [...prev, userMessage]);
     setInputValue('');
     setIsLoading(true);
 
+    // Setup timeout and abort controller for the request
+    // Setup request timeout
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+    let timeoutId: number | null = null;
+    
+    // Always use setTimeout for compatibility 
+    timeoutId = window.setTimeout(() => controller.abort(), 30000);
 
     try {
-      const response = await apiRequest('/api/chat', {
+      console.log("Sending chat request:", currentInput);
+      const response = await apiRequest<{response: string}>('/api/chat', {
         method: 'POST',
         body: JSON.stringify({ 
-          message: userMessage.content
+          message: currentInput
         }),
         headers: {
           'Content-Type': 'application/json',
         },
+        signal: controller.signal
       });
+
+      // Clear timeout if we used the fallback method
+      if (timeoutId) clearTimeout(timeoutId);
+      
+      if (!response || !response.response) {
+        throw new Error("Empty or invalid response from server");
+      }
 
       // Add assistant message
       const assistantMessage: Message = {
@@ -109,7 +128,14 @@ export function ChatAgent() {
                 >
                   <div className="text-sm whitespace-pre-line">
                     {message.content.split('\n\n').map((paragraph, idx) => (
-                      <p key={idx} className="mb-2">{paragraph}</p>
+                      <p key={idx} className="mb-2">
+                        {paragraph.split('\n').map((line, lineIdx) => (
+                          <span key={lineIdx}>
+                            {lineIdx > 0 && <br />}
+                            {line}
+                          </span>
+                        ))}
+                      </p>
                     ))}
                   </div>
                   {message.role === 'assistant' && (

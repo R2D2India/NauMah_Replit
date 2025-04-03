@@ -25,117 +25,213 @@ export function VoiceAgent() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      recognition.current = new SpeechRecognition();
-      recognition.current.continuous = false;
-      recognition.current.interimResults = false;
-      recognition.current.lang = 'en-US';
+    // Ensure we're in browser environment - SpeechRecognition is not available in server-side rendering
+    if (typeof window === 'undefined') return;
+    
+    try {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        recognition.current = new SpeechRecognition();
+        recognition.current.continuous = false;
+        recognition.current.interimResults = false;
+        recognition.current.lang = 'en-US';
+        
+        // Only set event handlers if recognition is available
+        recognition.current.onresult = (event: any) => {
+          const transcript = Array.from(event.results)
+            .map((result: any) => result[0])
+            .map(result => result.transcript)
+            .join('');
 
-      recognition.current.onresult = (event: any) => {
-        const transcript = Array.from(event.results)
-          .map((result: any) => result[0])
-          .map(result => result.transcript)
-          .join('');
+          if (event.results[0].isFinal) {
+            handleVoiceInput(transcript);
+          }
+        };
 
-        if (event.results[0].isFinal) {
-          handleVoiceInput(transcript);
-        }
-      };
+        recognition.current.onerror = (event: any) => {
+          console.error('Speech recognition error:', event.error);
+          setIsListening(false);
+          let errorMessage = 'Failed to recognize speech. Please try again.';
 
-      recognition.current.onerror = (event: any) => {
-        console.error('Speech recognition error:', event.error);
-        setIsListening(false);
-        let errorMessage = 'Failed to recognize speech. Please try again.';
+          switch(event.error) {
+            case 'not-allowed':
+              errorMessage = 'Please allow microphone access to use voice recognition.';
+              break;
+            case 'network':
+              errorMessage = 'Network error. Please check your connection.';
+              break;
+            case 'no-speech':
+              // Don't show a toast for no-speech errors as they're common and expected
+              console.log('No speech detected. Try speaking louder or check your microphone.');
+              return;
+            case 'audio-capture':
+              errorMessage = 'No microphone detected. Please check your device settings.';
+              break;
+          }
 
-        switch(event.error) {
-          case 'not-allowed':
-            errorMessage = 'Please allow microphone access to use voice recognition.';
-            break;
-          case 'network':
-            errorMessage = 'Network error. Please check your connection.';
-            break;
-          case 'no-speech':
-            // Don't show a toast for no-speech errors as they're common and expected
-            console.log('No speech detected. Try speaking louder or check your microphone.');
-            return;
-          case 'audio-capture':
-            errorMessage = 'No microphone detected. Please check your device settings.';
-            break;
-        }
+          toast({
+            title: 'Speech Recognition Error',
+            description: errorMessage,
+            variant: 'destructive',
+          });
+        };
 
+        recognition.current.onstart = () => {
+          setIsListening(true);
+          toast({
+            title: 'Listening',
+            description: 'I can hear you now. Please start speaking.',
+            variant: 'default',
+          });
+        };
+      } else {
+        console.warn("Speech Recognition API not supported in this browser");
+        // Notify the user that their browser doesn't support speech recognition
         toast({
-          title: 'Speech Recognition Error',
-          description: errorMessage,
+          title: 'Browser Compatibility Issue',
+          description: 'Your browser does not support speech recognition. Try using Chrome, Edge, or Safari for the best experience.',
           variant: 'destructive',
         });
-      };
-
-      recognition.current.onstart = () => {
-        setIsListening(true);
-        toast({
-          title: 'Listening',
-          description: 'I can hear you now. Please start speaking.',
-          variant: 'default',
-        });
-      };
+      }
+    } catch (error) {
+      console.error("Error initializing speech recognition:", error);
+      toast({
+        title: 'Speech Recognition Error',
+        description: 'Could not initialize speech recognition. Please try a different browser.',
+        variant: 'destructive',
+      });
     }
-
+    
     return () => {
       if (recognition.current) {
-        recognition.current.stop();
+        try {
+          recognition.current.stop();
+        } catch (e) {
+          console.error("Error stopping speech recognition:", e);
+        }
       }
       if (synthesis.current) {
-        synthesis.current.cancel();
+        try {
+          synthesis.current.cancel();
+        } catch (e) {
+          console.error("Error cancelling speech synthesis:", e);
+        }
       }
     };
-  }, []);
+  }, [toast]);
 
   const handleVoiceInput = async (transcript: string) => {
     setLastQuery(transcript);
     setIsProcessing(true);
 
     try {
-      // Use apiRequest for the chat request for consistency with the rest of the app
+      // First get the text response via API
+      console.log("Processing voice input:", transcript);
+      
+      // Setup timeout for the main API request
+      const chatController = new AbortController();
+      const chatTimeoutId = window.setTimeout(() => chatController.abort(), 30000);
+      
       const data = await apiRequest('/api/chat', {
         method: 'POST',
         body: JSON.stringify({ message: transcript }),
+        signal: chatController.signal,
       });
+      
+      // Clear the timeout since we got a response
+      if (chatTimeoutId) clearTimeout(chatTimeoutId);
 
+      // Update the UI with the text response right away
       setAnswer(data.response);
-
-      // For binary responses like audio, we still need to use fetch directly
-      const audioResponse = await fetch('/api/voice/speech', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message: data.response }),
-      });
-
-      if (!audioResponse.ok) {
-        throw new Error(`Audio response error: ${audioResponse.status}`);
-      }
-
-      const audioBlob = await audioResponse.blob();
-      const audioUrl = URL.createObjectURL(audioBlob);
-      if (audioRef.current) {
-        audioRef.current.src = audioUrl;
-        audioRef.current.play().catch(err => {
-          console.error("Error playing audio:", err);
-          // Still mark as playing in case of autoplay restrictions
-          setIsPlaying(true);
+      
+      try {
+        // Then try to get the audio version - if this fails, we still have the text response
+        console.log("Getting speech response");
+        
+        // Setup timeout for audio fetch
+        const controller = new AbortController();
+        const timeoutId = window.setTimeout(() => controller.abort(), 15000);
+        
+        const audioResponse = await fetch('/api/voice/speech', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ message: data.response }),
+          signal: controller.signal
         });
-        setIsPlaying(true);
+        
+        clearTimeout(timeoutId);
+
+        if (!audioResponse.ok) {
+          console.warn(`Audio response error: ${audioResponse.status}`);
+          if (audioResponse.status === 401) {
+            toast({
+              title: 'API Key Required',
+              description: 'OpenAI API key is missing or invalid. Voice output is unavailable.',
+              variant: 'destructive',
+            });
+          }
+          return; // Exit but don't throw - we already have text response displayed
+        }
+
+        const contentType = audioResponse.headers.get('Content-Type');
+        if (!contentType || !contentType.includes('audio/')) {
+          console.warn("Response is not audio:", contentType);
+          // Could be an error response with JSON instead of audio
+          const errorText = await audioResponse.text();
+          console.warn("Error response:", errorText);
+          return;
+        }
+
+        const audioBlob = await audioResponse.blob();
+        if (audioBlob.size === 0) {
+          console.warn("Received empty audio blob");
+          return;
+        }
+        
+        const audioUrl = URL.createObjectURL(audioBlob);
+        if (audioRef.current) {
+          audioRef.current.src = audioUrl;
+          audioRef.current.play().catch(err => {
+            console.error("Error playing audio:", err);
+            
+            // Check if it's an autoplay restriction
+            if (err.name === 'NotAllowedError') {
+              toast({
+                title: 'Autoplay Blocked',
+                description: 'Your browser blocked audio autoplay. Click the play button to hear the response.',
+                variant: 'default',
+              });
+            }
+            
+            // Still mark as playing so the UI shows play controls
+            setIsPlaying(true);
+          });
+          setIsPlaying(true);
+        }
+      } catch (audioError) {
+        console.error('Error getting speech response:', audioError);
+        // Don't show a toast for audio errors - we already have the text response
       }
     } catch (error) {
       console.error('Error processing voice input:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to process your request';
+      
+      let errorMessage = 'Could not process your request. Please try again.';
+      if (error instanceof Error) {
+        if (error.message.includes('network') || error.message.includes('fetch')) {
+          errorMessage = 'Network error. Please check your internet connection.';
+        } else if (error.message.includes('timeout')) {
+          errorMessage = 'Request timed out. The server might be busy.';
+        }
+      }
+      
       toast({
         title: 'Error',
-        description: 'Could not process your request. Please try again.',
+        description: errorMessage,
         variant: 'destructive',
       });
+      
       setAnswer("I apologize, but I encountered an error. Please try again.");
     } finally {
       setIsProcessing(false);
@@ -161,6 +257,9 @@ export function VoiceAgent() {
         setAnswer(greeting);
 
         // Preload audio for faster initial response
+        const preloadController = new AbortController();
+        const preloadTimeoutId = window.setTimeout(() => preloadController.abort(), 10000);
+
         fetch('/api/voice/speech', {
           priority: 'high',
           cache: 'no-store',
@@ -170,17 +269,46 @@ export function VoiceAgent() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ message: greeting }),
+          signal: preloadController.signal
         })
-        .then(response => response.blob())
+        .then(response => {
+          if (!response.ok) {
+            console.warn(`Audio response error: ${response.status}`);
+            return null;
+          }
+          
+          const contentType = response.headers.get('Content-Type');
+          if (!contentType || !contentType.includes('audio/')) {
+            console.warn("Response is not audio:", contentType);
+            return null;
+          }
+          
+          return response.blob();
+        })
         .then(audioBlob => {
+          // Clear the timeout since we got a response
+          if (preloadTimeoutId) clearTimeout(preloadTimeoutId);
+          
+          if (!audioBlob || audioBlob.size === 0) {
+            console.warn("Received empty or invalid audio blob");
+            return;
+          }
+          
           const audioUrl = URL.createObjectURL(audioBlob);
           if (audioRef.current) {
             audioRef.current.src = audioUrl;
-            audioRef.current.play();
+            audioRef.current.play().catch(err => {
+              console.error("Error playing audio:", err);
+              // Still mark as playing even if autoplay fails
+              setIsPlaying(true);
+            });
             setIsPlaying(true);
           }
         })
-        .catch(console.error);
+        .catch(error => {
+          console.error("Error preloading audio:", error);
+          // Silent failure - we still have the text interface
+        });
 
         recognition.current.continuous = false;
         recognition.current.interimResults = false;
