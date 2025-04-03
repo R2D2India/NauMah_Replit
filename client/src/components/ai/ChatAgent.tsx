@@ -136,9 +136,9 @@ export function ChatAgent() {
                       : 'bg-muted/90 shadow-md'
                   }`}
                 >
-                  <div className="text-sm whitespace-pre-line">
+                  <div className="text-sm whitespace-pre-wrap break-words">
                     {message.content.split('\n\n').map((paragraph, idx) => (
-                      <p key={idx} className="mb-2">
+                      <p key={idx} className="mb-2 leading-relaxed">
                         {paragraph.split('\n').map((line, lineIdx) => (
                           <span key={lineIdx}>
                             {lineIdx > 0 && <br />}
@@ -149,7 +149,7 @@ export function ChatAgent() {
                     ))}
                   </div>
                   {message.role === 'assistant' && (
-                    <div className="mt-3 space-y-2">
+                    <div className="mt-3 flex flex-wrap gap-2">
                       {message.content.includes('?') && 
                         message.content
                           .split('?')
@@ -158,9 +158,9 @@ export function ChatAgent() {
                             suggestion.trim() && (
                               <Button
                                 key={i}
-                                variant="ghost"
+                                variant="outline"
                                 size="sm"
-                                className="text-xs text-primary hover:text-primary/80"
+                                className="text-xs border-primary/20 text-primary hover:bg-primary/5 hover:text-primary/90 px-3 py-1 h-auto"
                                 onClick={() => {
                                   setInputValue(suggestion.trim() + '?');
                                   handleSendMessage();
