@@ -264,6 +264,122 @@ export default function Resources() {
               </AccordionContent>
             </AccordionItem>
             
+            <AccordionItem value="first-trimester" className="border-b">
+              <AccordionTrigger className="px-4 py-4 hover:bg-gray-50 text-left font-medium">
+                <div className="flex items-start">
+                  <span className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs mr-3 flex-shrink-0">
+                    Q
+                  </span>
+                  <span>What are the key changes during the first trimester?</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 py-3 bg-gray-50">
+                <div className="flex items-start ml-9">
+                  <span className="h-6 w-6 rounded-full bg-primary flex items-center justify-center text-white text-xs mr-3 flex-shrink-0">
+                    A
+                  </span>
+                  <div className="text-neutral-dark space-y-2">
+                    <p>The first trimester (weeks 1-12) brings several significant changes:</p>
+                    <ul className="list-disc ml-5 space-y-1">
+                      <li>Morning sickness and nausea (typically peaks around week 9)</li>
+                      <li>Frequent urination</li>
+                      <li>Fatigue and mood changes</li>
+                      <li>Breast tenderness</li>
+                      <li>Food aversions and cravings</li>
+                    </ul>
+                    <p>This is also when major organ development occurs in your baby. Regular prenatal care is crucial during this period.</p>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="second-trimester" className="border-b">
+              <AccordionTrigger className="px-4 py-4 hover:bg-gray-50 text-left font-medium">
+                <div className="flex items-start">
+                  <span className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs mr-3 flex-shrink-0">
+                    Q
+                  </span>
+                  <span>What should I expect in the second trimester?</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 py-3 bg-gray-50">
+                <div className="flex items-start ml-9">
+                  <span className="h-6 w-6 rounded-full bg-primary flex items-center justify-center text-white text-xs mr-3 flex-shrink-0">
+                    A
+                  </span>
+                  <div className="text-neutral-dark space-y-2">
+                    <p>The second trimester (weeks 13-26) is often called the "golden period" of pregnancy:</p>
+                    <ul className="list-disc ml-5 space-y-1">
+                      <li>Morning sickness usually subsides</li>
+                      <li>Energy levels increase</li>
+                      <li>Baby's first movements felt (around week 18-20)</li>
+                      <li>Visible bump appears</li>
+                      <li>Gender can be determined via ultrasound</li>
+                    </ul>
+                    <p>This is a good time to start pregnancy exercises and prepare for the baby's arrival.</p>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="third-trimester" className="border-b">
+              <AccordionTrigger className="px-4 py-4 hover:bg-gray-50 text-left font-medium">
+                <div className="flex items-start">
+                  <span className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs mr-3 flex-shrink-0">
+                    Q
+                  </span>
+                  <span>What are the challenges of the third trimester?</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 py-3 bg-gray-50">
+                <div className="flex items-start ml-9">
+                  <span className="h-6 w-6 rounded-full bg-primary flex items-center justify-center text-white text-xs mr-3 flex-shrink-0">
+                    A
+                  </span>
+                  <div className="text-neutral-dark space-y-2">
+                    <p>The third trimester (weeks 27-40) brings several changes as you prepare for birth:</p>
+                    <ul className="list-disc ml-5 space-y-1">
+                      <li>Increased back pain and fatigue</li>
+                      <li>Braxton Hicks contractions</li>
+                      <li>Difficulty sleeping</li>
+                      <li>Shortness of breath</li>
+                      <li>More frequent bathroom visits</li>
+                    </ul>
+                    <p>Focus on birth preparation and recognize signs of labor during this period.</p>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="nutrition" className="border-b">
+              <AccordionTrigger className="px-4 py-4 hover:bg-gray-50 text-left font-medium">
+                <div className="flex items-start">
+                  <span className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs mr-3 flex-shrink-0">
+                    Q
+                  </span>
+                  <span>What are the essential nutritional needs during pregnancy?</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-4 py-3 bg-gray-50">
+                <div className="flex items-start ml-9">
+                  <span className="h-6 w-6 rounded-full bg-primary flex items-center justify-center text-white text-xs mr-3 flex-shrink-0">
+                    A
+                  </span>
+                  <div className="text-neutral-dark space-y-2">
+                    <p>Proper nutrition is crucial during pregnancy. Key requirements include:</p>
+                    <ul className="list-disc ml-5 space-y-1">
+                      <li>Folic acid (400-800 mcg daily)</li>
+                      <li>Iron (27 mg daily)</li>
+                      <li>Calcium (1,000 mg daily)</li>
+                      <li>Protein (75-100 grams daily)</li>
+                      <li>DHA omega-3 fatty acids</li>
+                    </ul>
+                    <p>Always take prescribed prenatal vitamins and maintain a balanced diet with plenty of fruits, vegetables, and whole grains.</p>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
             <AccordionItem value="comprehensive-5" className="border-b">
               <AccordionTrigger className="px-4 py-4 hover:bg-gray-50 text-left font-medium">
                 <div className="flex items-start">
