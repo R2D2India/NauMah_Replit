@@ -151,8 +151,8 @@ export async function generateChatResponse(
   context: string = "You are a helpful pregnancy assistant providing guidance and support to expecting mothers."
 ): Promise<string> {
   try {
-    if (!process.env.OPENAI_API_KEY) {
-      throw new Error("OpenAI API key is not configured");
+    if (!openai) {
+      return "I apologize, but I'm not available right now. Please try again later or contact support.";
     }
     const completion = await openai.chat.completions.create({
       model: OLD_MODEL,

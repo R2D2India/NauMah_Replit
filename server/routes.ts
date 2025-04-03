@@ -166,11 +166,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Chat with AI Assistant
   app.post("/api/chat", validateRequest(chatSchema), async (req: Request, res: Response) => {
     try {
-      if (!process.env.OPENAI_API_KEY) {
-        throw new Error("OpenAI API key not configured");
-      }
-      
       const { message } = req.validatedData;
+      
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(503).json({
+          message: "AI service is temporarily unavailable. Please try again later.",
+          error: "OpenAI API key not configured"
+        });
+      }
       
       // Create base context for the AI
       const context = "You are NauMah, a knowledgeable and supportive AI pregnancy assistant. Format your responses in clear, well-structured paragraphs. Keep responses concise (under 100 words). Be compassionate and evidence-based. Start with a brief greeting. After answering the question, always suggest 1-2 relevant follow-up topics based on pregnancy stage and current conversation context (e.g. 'Would you like to know about recommended tests for this trimester?' or 'Would you like to learn about baby development at this stage?'). Use proper paragraph breaks for readability. End with a gentle healthcare provider consultation reminder.";

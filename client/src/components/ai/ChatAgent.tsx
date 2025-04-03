@@ -79,12 +79,20 @@ export function ChatAgent() {
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
       console.error('Error sending message:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to get a response';
+      let errorMessage = 'An error occurred. Please try again.';
+      let status = 500;
+      
+      if (error instanceof Response) {
+        status = error.status;
+        const data = await error.json();
+        errorMessage = data.message || errorMessage;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
       toast({
-        title: 'Error',
-        description: process.env.NODE_ENV === 'production' 
-          ? 'An error occurred. Please try again.' 
-          : errorMessage,
+        title: status === 503 ? 'Service Unavailable' : 'Error',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
