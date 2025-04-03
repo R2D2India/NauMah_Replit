@@ -56,11 +56,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // In a real app, we would get the userId from the authenticated session
       const userId = demoUserId;
       const pregnancyData = await storage.getPregnancyData(userId);
-      
+
       if (!pregnancyData) {
         return res.status(404).json({ message: "No pregnancy data found. Please set up your pregnancy stage." });
       }
-      
+
       res.json(pregnancyData);
     } catch (error) {
       console.error("Error getting pregnancy data:", error);
@@ -74,9 +74,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // In a real app, we would get the userId from the authenticated session
       const userId = demoUserId;
       const { stageType, stageValue } = req.validatedData;
-      
+
       const updatedData = await storage.updatePregnancyStage(userId, { stageType, stageValue });
-      
+
       res.json(updatedData);
     } catch (error) {
       console.error("Error updating pregnancy stage:", error);
@@ -90,7 +90,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // In a real app, we would get the userId from the authenticated session
       const userId = demoUserId;
       const entries = await storage.getMoodEntries(userId);
-      
+
       res.json(entries);
     } catch (error) {
       console.error("Error getting mood entries:", error);
@@ -104,20 +104,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // In a real app, we would get the userId from the authenticated session
       const userId = demoUserId;
       const { mood, note } = req.validatedData;
-      
+
       // Get current pregnancy data to determine week
       const pregnancyData = await storage.getPregnancyData(userId);
       if (!pregnancyData) {
         return res.status(400).json({ message: "Please set up your pregnancy stage first" });
       }
-      
+
       const entry = await storage.createMoodEntry({
         userId,
         week: pregnancyData.currentWeek,
         mood,
         note: note || "",
       });
-      
+
       res.json(entry);
     } catch (error) {
       console.error("Error creating mood entry:", error);
@@ -131,7 +131,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // In a real app, we would get the userId from the authenticated session
       const userId = demoUserId;
       const checks = await storage.getMedicationChecks(userId);
-      
+
       res.json(checks);
     } catch (error) {
       console.error("Error getting medication checks:", error);
@@ -144,16 +144,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = demoUserId;
       const { medicationName } = req.validatedData;
-      
+
       const safetyInfo = await checkMedicationSafety(medicationName);
-      
+
       const check = await storage.createMedicationCheck({
         userId,
         medicationName,
         isSafe: safetyInfo.isSafe,
         notes: safetyInfo.notes,
       });
-      
+
       res.json({
         ...check,
         risks: safetyInfo.risks,
@@ -164,12 +164,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to check medication" });
     }
   });
-  
+
   // Chat with AI Assistant
   const chatSchema = z.object({
     message: z.string().min(1)
   });
-  
+
   app.post("/api/chat", validateRequest(chatSchema), async (req: Request, res: Response) => {
     try {
       if (!process.env.OPENAI_API_KEY) {
@@ -236,16 +236,16 @@ app.post("/api/meal-plan", validateRequest(mealPlanSchema), async (req: Request,
 });
 
       const { message } = req.validatedData;
-      
+
       // Create base context for the AI
       const context = "You are NauMah, a knowledgeable and supportive AI pregnancy assistant. Format your responses in clear, well-structured paragraphs. Keep responses concise (under 100 words). Be compassionate and evidence-based. Start with a brief greeting. After answering the question, always suggest 1-2 relevant follow-up topics based on pregnancy stage and current conversation context (e.g. 'Would you like to know about recommended tests for this trimester?' or 'Would you like to learn about baby development at this stage?'). Use proper paragraph breaks for readability. End with a gentle healthcare provider consultation reminder.";
-      
+
       const response = await generateChatResponse(message, context);
-      
+
       if (!response) {
         throw new Error("No response generated");
       }
-      
+
       res.json({ response });
     } catch (error) {
       console.error("Error generating chat response:", error);
@@ -257,7 +257,7 @@ app.post("/api/meal-plan", validateRequest(mealPlanSchema), async (req: Request,
       });
     }
   });
-  
+
   // Generate text-to-speech from AI response
   const speechSchema = z.object({
     message: z.string().min(1),
@@ -266,17 +266,17 @@ app.post("/api/meal-plan", validateRequest(mealPlanSchema), async (req: Request,
   app.post("/api/voice/speech", validateRequest(speechSchema), async (req: Request, res: Response) => {
     try {
       const { message } = req.validatedData;
-      
+
       // Create base context for voice responses
       const context = "You are NauMah, a knowledgeable and supportive AI pregnancy assistant providing guidance to expecting mothers. Your responses should be compassionate, evidence-based, and medically sound, but always recommend consulting healthcare providers for personal medical advice. Keep responses concise (under 100 words) for voice output.";
-      
+
       // First generate text response
       const textResponse = await generateChatResponse(message, context);
-      
+
       try {
         // Convert to speech
         const audioBuffer = await generateSpeech(textResponse);
-        
+
         // Send audio file
         res.setHeader('Content-Type', 'audio/mpeg');
         res.setHeader('Content-Length', audioBuffer.length);
