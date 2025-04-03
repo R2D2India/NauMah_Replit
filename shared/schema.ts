@@ -113,3 +113,31 @@ export const waitlistSchema = z.object({
 
 export type WaitlistEntry = typeof waitlistTable.$inferSelect;
 export type InsertWaitlistEntry = typeof waitlistTable.$inferInsert;
+// Existing imports...
+
+export interface WeightEntry {
+  id: number;
+  userId: number;
+  weight: number;
+  date: Date;
+  notes?: string;
+}
+
+export interface SymptomEntry {
+  id: number;
+  userId: number;
+  symptom: string;
+  severity: number; // 1-5 scale
+  date: Date;
+  notes?: string;
+}
+
+export interface Appointment {
+  id: number;
+  userId: number;
+  title: string;
+  date: Date;
+  type: string;
+  notes?: string;
+  location?: string;
+}

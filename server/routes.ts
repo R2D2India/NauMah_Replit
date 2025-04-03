@@ -423,3 +423,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
   return httpServer;
 }
+// Add these endpoints to your existing routes
+
+app.get("/api/weight-tracking", async (req, res) => {
+  try {
+    const userId = getUserIdFromRequest(req);
+    const weightEntries = await db.select().from(weightTrackingTable).where(eq(weightTrackingTable.userId, userId));
+    res.json(weightEntries);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch weight entries" });
+  }
+});
+
+app.post("/api/weight-tracking", async (req, res) => {
+  try {
+    const userId = getUserIdFromRequest(req);
+    const { weight, date } = req.body;
+    const entry = await db.insert(weightTrackingTable).values({
+      userId,
+      weight,
+      date: new Date(date),
+    }).returning();
+    res.json(entry[0]);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to add weight entry" });
+  }
+});
+
+app.get("/api/symptoms", async (req, res) => {
+  try {
+    const userId = getUserIdFromRequest(req);
+    const symptoms = await db.select().from(symptomsTable).where(eq(symptomsTable.userId, userId));
+    res.json(symptoms);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch symptoms" });
+  }
+});
+
+app.post("/api/symptoms", async (req, res) => {
+  try {
+    const userId = getUserIdFromRequest(req);
+    const { type, severity, notes, date } = req.body;
+    const symptom = await db.insert(symptomsTable).values({
+      userId,
+      symptom: type,
+      severity,
+      notes,
+      date: new Date(date),
+    }).returning();
+    res.json(symptom[0]);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to log symptom" });
+  }
+});
+
+app.get("/api/appointments", async (req, res) => {
+  try {
+    const userId = getUserIdFromRequest(req);
+    const appointments = await db.select().from(appointmentsTable).where(eq(appointmentsTable.userId, userId));
+    res.json(appointments);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch appointments" });
+  }
+});
+
+app.post("/api/appointments", async (req, res) => {
+  try {
+    const userId = getUserIdFromRequest(req);
+    const { title, type, location, notes, date } = req.body;
+    const appointment = await db.insert(appointmentsTable).values({
+      userId,
+      title,
+      type,
+      location,
+      notes,
+      date: new Date(date),
+    }).returning();
+    res.json(appointment[0]);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to add appointment" });
+  }
+});
