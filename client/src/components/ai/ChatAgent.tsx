@@ -116,9 +116,9 @@ export function ChatAgent() {
   }, [messages]);
 
   return (
-    <Card className="w-full h-[600px] flex flex-col rounded-xl shadow-[0_20px_50px_rgba(8,_112,_184,_0.7)] transform-gpu hover:scale-[1.02] transition-all duration-300">
+    <Card className="w-full h-[600px] flex flex-col bg-background rounded-xl shadow-[0_20px_50px_rgba(8,_112,_184,_0.7)] transform-gpu hover:scale-[1.02] transition-all duration-300">
       <CardHeader className="shrink-0">
-        <CardTitle>Chat with NauMah</CardTitle>
+        <CardTitle className="text-primary">Chat with NauMah</CardTitle>
         <CardDescription>Hi, I'm NauMah. You AI companion for this beautiful 9 month journey. How can I assist you today? Ask questions about your pregnancy, health concerns, or baby development</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 overflow-hidden">
@@ -132,8 +132,8 @@ export function ChatAgent() {
                 <div
                   className={`max-w-[80%] rounded-lg px-4 py-3 transition-all duration-200 hover:scale-[1.02] ${
                     message.role === 'user'
-                      ? 'bg-gradient-to-r from-primary to-primary-dark text-primary-foreground shadow-lg'
-                      : 'bg-gradient-to-r from-muted/50 to-muted-foreground/5 shadow-md backdrop-blur-sm'
+                      ? 'bg-primary text-primary-foreground shadow-lg'
+                      : 'bg-muted/90 shadow-md'
                   }`}
                 >
                   <div className="text-sm whitespace-pre-line">
@@ -160,7 +160,7 @@ export function ChatAgent() {
                                 key={i}
                                 variant="ghost"
                                 size="sm"
-                                className="text-xs text-primary hover:text-primary-dark"
+                                className="text-xs text-primary hover:text-primary/80"
                                 onClick={() => {
                                   setInputValue(suggestion.trim() + '?');
                                   handleSendMessage();
@@ -173,7 +173,7 @@ export function ChatAgent() {
                       }
                     </div>
                   )}
-                  <p className="text-xs opacity-70 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>

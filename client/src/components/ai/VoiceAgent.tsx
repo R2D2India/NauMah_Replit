@@ -355,9 +355,9 @@ export function VoiceAgent() {
   };
 
   return (
-    <Card className="w-full h-[500px] flex flex-col bg-gradient-to-br from-primary/5 via-background to-primary/5 rounded-xl shadow-[0_20px_50px_rgba(8,_112,_184,_0.7)] transform-gpu hover:scale-[1.02] transition-all duration-300">
+    <Card className="w-full h-[500px] flex flex-col bg-background rounded-xl shadow-[0_20px_50px_rgba(8,_112,_184,_0.7)] transform-gpu hover:scale-[1.02] transition-all duration-300">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-dark">Voice Assistant</CardTitle>
+        <CardTitle className="text-2xl font-bold text-primary">Voice Assistant</CardTitle>
         <CardDescription className="max-w-md mx-auto">Speak with NauMah, your pregnancy AI companion. Just tap the microphone and start talking.</CardDescription>
       </CardHeader>
       <CardContent className="flex-grow flex flex-col items-center justify-center relative">
@@ -370,7 +370,7 @@ export function VoiceAgent() {
             className={`h-48 w-48 rounded-full transition-all duration-300 shadow-[0_10px_20px_rgba(0,_0,_0,_0.2)] ${
               isListening 
                 ? 'bg-red-100 text-red-500 border-red-300 animate-pulse shadow-lg'
-                : 'bg-gradient-to-r from-primary/20 to-primary hover:scale-105 shadow-md'
+                : 'bg-primary text-primary-foreground hover:scale-105 shadow-md'
             }`}
             onClick={toggleListening}
             disabled={isProcessing}

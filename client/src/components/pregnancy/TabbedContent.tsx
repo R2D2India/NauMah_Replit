@@ -48,10 +48,10 @@ const TabbedContent = ({ currentWeek }: TabbedContentProps) => {
   const trimester = getTrimeasterFromWeek(currentWeek);
 
   // Get recommendations based on trimester
-  const dietRecs = DIET_RECOMMENDATIONS[trimester];
-  const exerciseRecs = EXERCISE_RECOMMENDATIONS[trimester];
-  const testRecs = TEST_RECOMMENDATIONS[trimester];
-  const symptoms = COMMON_SYMPTOMS[trimester];
+  const dietRecs = DIET_RECOMMENDATIONS[trimester as keyof typeof DIET_RECOMMENDATIONS];
+  const exerciseRecs = EXERCISE_RECOMMENDATIONS[trimester as keyof typeof EXERCISE_RECOMMENDATIONS];
+  const testRecs = TEST_RECOMMENDATIONS[trimester as keyof typeof TEST_RECOMMENDATIONS];
+  const symptoms = COMMON_SYMPTOMS[trimester as keyof typeof COMMON_SYMPTOMS];
 
   return (
     <div className="mb-8">
@@ -111,7 +111,7 @@ const TabbedContent = ({ currentWeek }: TabbedContentProps) => {
                 <div className="bg-neutral-light rounded-lg p-4">
                   <h4 className="font-montserrat font-medium text-lg mb-3">Focus Nutrients</h4>
                   <ul className="space-y-3">
-                    {dietRecs.focusNutrients.map((nutrient, index) => (
+                    {dietRecs.focusNutrients.map((nutrient: { name: string; description: string }, index: number) => (
                       <li key={index} className="flex">
                         <div className="h-6 w-6 rounded-full bg-primary-light flex-shrink-0 flex items-center justify-center text-white text-xs font-bold mr-3">{index + 1}</div>
                         <div>
@@ -254,7 +254,7 @@ const TabbedContent = ({ currentWeek }: TabbedContentProps) => {
               <h3 className="text-xl font-montserrat font-bold text-primary mb-4">Safe Exercises for Week {currentWeek}</h3>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                {exerciseRecs.map((exercise, index) => (
+                {exerciseRecs.map((exercise: { name: string; duration: string; icon: string }, index: number) => (
                   <div key={index} className="bg-neutral-light rounded-lg p-4 text-center">
                     <div className="h-12 w-12 rounded-full bg-primary-light mx-auto mb-3 flex items-center justify-center">
                       <i className={`fas fa-${exercise.icon} text-white text-xl`}></i>
@@ -313,7 +313,7 @@ const TabbedContent = ({ currentWeek }: TabbedContentProps) => {
               <div className="mb-6 bg-neutral-light rounded-lg p-4">
                 <h4 className="font-montserrat font-medium text-lg mb-3">Key Tests This Period</h4>
                 <div className="space-y-4">
-                  {testRecs.map((test, index) => (
+                  {testRecs.map((test: { name: string; description: string; icon: string }, index: number) => (
                     <div key={index} className="flex items-start">
                       <div className="h-8 w-8 rounded-full bg-primary flex-shrink-0 flex items-center justify-center text-white text-sm font-bold mr-4">
                         <i className={`fas fa-${test.icon}`}></i>
@@ -362,7 +362,7 @@ const TabbedContent = ({ currentWeek }: TabbedContentProps) => {
                 <div className="bg-neutral-light rounded-lg p-4">
                   <h4 className="font-montserrat font-medium text-lg mb-3">Physical Symptoms</h4>
                   <div className="space-y-3">
-                    {symptoms.slice(0, Math.ceil(symptoms.length / 2)).map((symptom, index) => (
+                    {symptoms.slice(0, Math.ceil(symptoms.length / 2)).map((symptom: { name: string; severity: number; remedy: string }, index: number) => (
                       <div key={index}>
                         <div className="flex justify-between items-center mb-1">
                           <span className="font-medium">{symptom.name}</span>

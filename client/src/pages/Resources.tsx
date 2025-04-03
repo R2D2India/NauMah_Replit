@@ -48,7 +48,7 @@ export default function Resources() {
       <h1 className="text-3xl font-bold mb-6">Pregnancy Resources</h1>
       
       <div className="grid md:grid-cols-2 gap-6 mb-8">
-        {resources.articles.map((article, index) => (
+        {resources.articles.map((article: { image: string; title: string; description: string; content: string }, index: number) => (
           <Card key={index}>
             <img src={article.image} alt={article.title} className="w-full h-48 object-cover rounded-t-lg" />
             <CardHeader>
@@ -68,7 +68,7 @@ export default function Resources() {
             <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center mr-3 shadow-md">
               <i className="fas fa-question-circle text-white"></i>
             </div>
-            <CardTitle className="text-2xl bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">
+            <CardTitle className="text-2xl text-primary">
               Frequently Asked Questions
             </CardTitle>
           </div>
@@ -124,7 +124,7 @@ export default function Resources() {
           
           <Accordion type="single" collapsible className="border rounded-xl overflow-hidden">
             {/* Add the existing FAQs */}
-            {resources.faqs.map((faq, index) => (
+            {resources.faqs.map((faq: { question: string; answer: string }, index: number) => (
               <AccordionItem key={index} value={`item-${index}`} className="border-b last:border-0">
                 <AccordionTrigger className="px-4 py-4 hover:bg-gray-50 text-left font-medium">
                   <div className="flex items-start">

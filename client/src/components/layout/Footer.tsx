@@ -36,7 +36,7 @@ const Footer = () => {
                 <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center mr-3 shadow-md">
                   <i className="fas fa-heartbeat text-white"></i>
                 </div>
-                <h3 className="text-xl font-semibold bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">Our Mission</h3>
+                <h3 className="text-xl font-semibold text-primary">Our Mission</h3>
               </div>
               
               <div className="space-y-3">
@@ -71,7 +71,7 @@ const Footer = () => {
                 <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center mr-3 shadow-md">
                   <i className="fas fa-envelope text-white"></i>
                 </div>
-                <h3 className="text-xl font-semibold bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">Contact Us</h3>
+                <h3 className="text-xl font-semibold text-primary">Contact Us</h3>
               </div>
               
               <div className="space-y-5">
