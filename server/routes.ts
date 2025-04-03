@@ -502,3 +502,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to add appointment" });
     }
   });
+  
+  // Create HTTP server
+  const server = createServer(app);
+  return server;
+}
