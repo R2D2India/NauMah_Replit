@@ -79,14 +79,15 @@ export async function generateBabyNames(origin: string, gender: string): Promise
       throw new Error("OpenAI client not initialized");
     }
     const prompt = `Generate 10 unique baby names with their meanings. Origin: ${origin}, Gender: ${gender}. 
-                   Make names culturally authentic and meaningful.`;
+                   Make names culturally authentic and meaningful. 
+                   Return response as JSON with format: { "names": ["name1", "name2", ...], "meanings": { "name1": "meaning1", "name2": "meaning2", ... } }`;
 
     const completion = await openai.chat.completions.create({
       model: MODEL,
       messages: [
         {
           role: "system",
-          content: "You are a cultural expert specializing in traditional and meaningful baby names."
+          content: "You are a cultural expert specializing in traditional and meaningful baby names. You always respond with JSON format."
         },
         {
           role: "user",
@@ -113,14 +114,16 @@ export async function generateMealPlan(week: number): Promise<{
     if (!openai) {
       throw new Error("OpenAI client not initialized");
     }
-    const prompt = `Generate a detailed pregnancy meal plan for week ${week} with specific nutritional requirements.`;
+    const prompt = `Generate a detailed pregnancy meal plan for week ${week} with specific nutritional requirements.
+                   Return response as JSON with format: { "breakfast": "description", "lunch": "description", 
+                   "dinner": "description", "snacks": ["snack1", "snack2", ...] }`;
 
     const completion = await openai.chat.completions.create({
       model: MODEL,
       messages: [
         {
           role: "system",
-          content: "You are a certified nutritionist specializing in pregnancy nutrition."
+          content: "You are a certified nutritionist specializing in pregnancy nutrition. You always respond with JSON format."
         },
         {
           role: "user",
@@ -201,14 +204,16 @@ export async function generateMealPlanOld(week: number): Promise<{
     if (!openai) {
       throw new Error("OpenAI client not initialized");
     }
-    const prompt = `Generate a detailed pregnancy meal plan for week ${week}. Include specific nutritional requirements for this stage of pregnancy. Focus on nutritious, pregnancy-safe meals.`;
+    const prompt = `Generate a detailed pregnancy meal plan for week ${week}. Include specific nutritional requirements for this stage of pregnancy. Focus on nutritious, pregnancy-safe meals.
+                   Return response as JSON with format: { "breakfast": "description", "lunch": "description", 
+                   "dinner": "description", "snacks": ["snack1", "snack2", ...] }`;
     
     const completion = await openai.chat.completions.create({
       model: MODEL,
       messages: [
         {
           role: "system",
-          content: "You are a certified nutritionist specializing in pregnancy nutrition. Provide specific, safe meal suggestions."
+          content: "You are a certified nutritionist specializing in pregnancy nutrition. Provide specific, safe meal suggestions. You always respond with JSON format."
         },
         {
           role: "user",
@@ -251,16 +256,19 @@ export async function generateStructuredResponse<T>(
     if (!openai) {
       throw new Error("OpenAI client not initialized");
     }
+    // Ensure the prompt explicitly requests JSON format
+    const jsonPrompt = prompt.includes("JSON") ? prompt : `${prompt} Return your response in JSON format.`;
+    
     const completion = await openai.chat.completions.create({
       model: MODEL,
       messages: [
         {
           role: "system",
-          content: context
+          content: context + " Always respond with well-structured JSON format."
         },
         {
           role: "user", 
-          content: prompt
+          content: jsonPrompt
         }
       ],
       response_format: { type: "json_object" },
