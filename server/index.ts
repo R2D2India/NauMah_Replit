@@ -71,8 +71,9 @@ app.use((req, res, next) => {
       port,
       host: "0.0.0.0",
       reusePort: true,
+      backlog: 100
     }, () => {
-      log(`serving on port ${port}`);
+      log(`Server running at http://0.0.0.0:${port}`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);
