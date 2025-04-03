@@ -5,6 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 
+// Add types for browser's Speech Recognition API which TypeScript doesn't know about
+declare global {
+  interface Window {
+    SpeechRecognition: any;
+    webkitSpeechRecognition: any;
+  }
+}
+
 export function VoiceAgent() {
   const [isListening, setIsListening] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -48,8 +56,9 @@ export function VoiceAgent() {
             errorMessage = 'Network error. Please check your connection.';
             break;
           case 'no-speech':
-            errorMessage = 'No speech detected. Please try speaking again.';
-            break;
+            // Don't show a toast for no-speech errors as they're common and expected
+            console.log('No speech detected. Try speaking louder or check your microphone.');
+            return;
           case 'audio-capture':
             errorMessage = 'No microphone detected. Please check your device settings.';
             break;
@@ -87,17 +96,15 @@ export function VoiceAgent() {
     setIsProcessing(true);
 
     try {
-      const response = await fetch('/api/chat', {
+      // Use apiRequest for the chat request for consistency with the rest of the app
+      const data = await apiRequest('/api/chat', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({ message: transcript }),
       });
 
-      const data = await response.json();
       setAnswer(data.response);
 
+      // For binary responses like audio, we still need to use fetch directly
       const audioResponse = await fetch('/api/voice/speech', {
         method: 'POST',
         headers: {
@@ -106,11 +113,19 @@ export function VoiceAgent() {
         body: JSON.stringify({ message: data.response }),
       });
 
+      if (!audioResponse.ok) {
+        throw new Error(`Audio response error: ${audioResponse.status}`);
+      }
+
       const audioBlob = await audioResponse.blob();
       const audioUrl = URL.createObjectURL(audioBlob);
       if (audioRef.current) {
         audioRef.current.src = audioUrl;
-        audioRef.current.play();
+        audioRef.current.play().catch(err => {
+          console.error("Error playing audio:", err);
+          // Still mark as playing in case of autoplay restrictions
+          setIsPlaying(true);
+        });
         setIsPlaying(true);
       }
     } catch (error) {
@@ -118,7 +133,7 @@ export function VoiceAgent() {
       const errorMessage = error instanceof Error ? error.message : 'Failed to process your request';
       toast({
         title: 'Error',
-        description: errorMessage,
+        description: 'Could not process your request. Please try again.',
         variant: 'destructive',
       });
       setAnswer("I apologize, but I encountered an error. Please try again.");

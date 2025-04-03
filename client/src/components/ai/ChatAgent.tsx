@@ -107,25 +107,34 @@ export function ChatAgent() {
                       : 'bg-gradient-to-r from-muted/50 to-muted-foreground/5 shadow-md backdrop-blur-sm'
                   }`}
                 >
-                  <p className="text-sm whitespace-pre-line">{message.content}</p>
+                  <div className="text-sm whitespace-pre-line">
+                    {message.content.split('\n\n').map((paragraph, idx) => (
+                      <p key={idx} className="mb-2">{paragraph}</p>
+                    ))}
+                  </div>
                   {message.role === 'assistant' && (
                     <div className="mt-3 space-y-2">
-                      {message.content.split('?').slice(1).map((suggestion, i) => 
-                        suggestion.trim() && (
-                          <Button
-                            key={i}
-                            variant="ghost"
-                            size="sm"
-                            className="text-xs text-primary hover:text-primary-dark"
-                            onClick={() => {
-                              setInputValue(suggestion.trim() + '?');
-                              handleSendMessage();
-                            }}
-                          >
-                            {suggestion.trim() + '?'}
-                          </Button>
-                        )
-                      )}
+                      {message.content.includes('?') && 
+                        message.content
+                          .split('?')
+                          .slice(1)
+                          .map((suggestion, i) => 
+                            suggestion.trim() && (
+                              <Button
+                                key={i}
+                                variant="ghost"
+                                size="sm"
+                                className="text-xs text-primary hover:text-primary-dark"
+                                onClick={() => {
+                                  setInputValue(suggestion.trim() + '?');
+                                  handleSendMessage();
+                                }}
+                              >
+                                {suggestion.trim() + '?'}
+                              </Button>
+                            )
+                          )
+                      }
                     </div>
                   )}
                   <p className="text-xs opacity-70 mt-1">
