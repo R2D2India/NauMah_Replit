@@ -30,31 +30,86 @@ const Footer = () => {
         
         <div className="mt-8 pt-6 border-t border-gray-200">
           <div className="grid md:grid-cols-2 gap-12 mb-8">
-            <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-primary">Our Mission</h3>
-              <p className="text-neutral-dark">
-                At NauMah AI Technologies, we're dedicated to revolutionizing pregnancy care through innovative AI solutions. 
-                Our mission is to empower expectant mothers with personalized guidance, making pregnancy journey safer and more informed. 
-                We understand the challenges women face during pregnancy and are committed to providing 24/7 AI-powered support.
-              </p>
-            </div>
-            <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-primary">Contact Us</h3>
+            {/* Our Mission Section */}
+            <div className="p-6 bg-primary/5 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border border-primary/10">
+              <div className="flex items-center mb-4">
+                <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center mr-3 shadow-md">
+                  <i className="fas fa-heartbeat text-white"></i>
+                </div>
+                <h3 className="text-xl font-semibold bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">Our Mission</h3>
+              </div>
+              
               <div className="space-y-3">
-                <div>
-                  <p className="font-medium">India Headquarters:</p>
-                  <p className="text-neutral-dark">NauMah AI Technologies Pvt. Ltd.<br />OneBKC, BKC<br />Mumbai - 400053, India</p>
+                <p className="text-neutral-dark leading-relaxed">
+                  At NauMah AI Technologies, we're dedicated to revolutionizing pregnancy care through innovative AI solutions.
+                </p>
+                <div className="flex items-start">
+                  <i className="fas fa-check-circle text-primary mt-1 mr-2"></i>
+                  <p className="text-neutral-dark">Empower expectant mothers with personalized guidance</p>
                 </div>
-                <div>
-                  <p className="font-medium">USA Office:</p>
-                  <p className="text-neutral-dark">Woodbridge Park<br />Virginia, USA 22192</p>
+                <div className="flex items-start">
+                  <i className="fas fa-check-circle text-primary mt-1 mr-2"></i>
+                  <p className="text-neutral-dark">Make pregnancy journeys safer and more informed</p>
                 </div>
-                <div>
-                  <p className="font-medium">Email Us:</p>
-                  <p className="text-neutral-dark">
-                    Support: <a href="mailto:support@naumah.com" className="text-primary hover:underline">support@naumah.com</a><br />
-                    Business: <a href="mailto:hypeme@naumah.com" className="text-primary hover:underline">hypeme@naumah.com</a>
-                  </p>
+                <div className="flex items-start">
+                  <i className="fas fa-check-circle text-primary mt-1 mr-2"></i>
+                  <p className="text-neutral-dark">Provide 24/7 AI-powered pregnancy support</p>
+                </div>
+              </div>
+              
+              <div className="mt-4 text-sm bg-white p-3 rounded-lg border border-primary/20">
+                <div className="flex items-center">
+                  <i className="fas fa-quote-left text-primary/50 mr-2"></i>
+                  <p className="italic">Supporting every mother through the beautiful journey of pregnancy</p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Contact Us Section */}
+            <div className="p-6 bg-primary/5 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border border-primary/10">
+              <div className="flex items-center mb-4">
+                <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center mr-3 shadow-md">
+                  <i className="fas fa-envelope text-white"></i>
+                </div>
+                <h3 className="text-xl font-semibold bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">Contact Us</h3>
+              </div>
+              
+              <div className="space-y-5">
+                <div className="flex items-start p-3 bg-white rounded-lg shadow-sm hover:shadow transition-all duration-300">
+                  <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-3 flex-shrink-0">
+                    <i className="fas fa-map-marker-alt"></i>
+                  </div>
+                  <div>
+                    <p className="font-medium text-primary-dark">India Headquarters:</p>
+                    <p className="text-neutral-dark">NauMah AI Technologies Pvt. Ltd.<br />OneBKC, BKC<br />Mumbai - 400053, India</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start p-3 bg-white rounded-lg shadow-sm hover:shadow transition-all duration-300">
+                  <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-3 flex-shrink-0">
+                    <i className="fas fa-building"></i>
+                  </div>
+                  <div>
+                    <p className="font-medium text-primary-dark">USA Office:</p>
+                    <p className="text-neutral-dark">Woodbridge Park<br />Virginia, USA 22192</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start p-3 bg-white rounded-lg shadow-sm hover:shadow transition-all duration-300">
+                  <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-3 flex-shrink-0">
+                    <i className="fas fa-envelope"></i>
+                  </div>
+                  <div>
+                    <p className="font-medium text-primary-dark">Email Us:</p>
+                    <p className="text-neutral-dark">
+                      <a href="mailto:support@naumah.com" className="text-primary hover:underline flex items-center">
+                        <i className="fas fa-headset mr-1"></i> support@naumah.com
+                      </a>
+                      <a href="mailto:hypeme@naumah.com" className="text-primary hover:underline flex items-center mt-1">
+                        <i className="fas fa-briefcase mr-1"></i> hypeme@naumah.com
+                      </a>
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
