@@ -119,11 +119,11 @@ export function ChatAgent() {
     <Card className="w-full h-[600px] flex flex-col bg-background rounded-xl shadow-[0_20px_50px_rgba(8,_112,_184,_0.7)] transform-gpu hover:scale-[1.02] transition-all duration-300">
       <CardHeader className="shrink-0">
         <CardTitle className="text-primary">Chat with NauMah</CardTitle>
-        <CardDescription>Hi, I'm NauMah. You AI companion for this beautiful 9 month journey. How can I assist you today? Ask questions about your pregnancy, health concerns, or baby development</CardDescription>
+        <CardDescription className="mt-1.5 text-foreground/80">Hi, I'm NauMah. Your AI companion for this beautiful 9 month journey. How can I assist you today?</CardDescription>
       </CardHeader>
-      <CardContent className="flex-1 overflow-hidden">
-        <ScrollArea className="h-[calc(600px-10rem)]">
-          <div className="space-y-4 pr-4">
+      <CardContent className="flex-1 overflow-hidden p-0">
+        <ScrollArea className="h-[calc(600px-10rem)] px-6">
+          <div className="space-y-4 pr-4 py-2">
             {messages.map((message, index) => (
               <div
                 key={index}
@@ -136,15 +136,10 @@ export function ChatAgent() {
                       : 'bg-muted/90 shadow-md'
                   }`}
                 >
-                  <div className="text-sm whitespace-pre-wrap break-words">
-                    {message.content.split('\n\n').map((paragraph, idx) => (
+                  <div className="text-sm text-current whitespace-pre-line">
+                    {message.content.replace(/\n{3,}/g, '\n\n').split('\n\n').map((paragraph, idx) => (
                       <p key={idx} className="mb-2 leading-relaxed">
-                        {paragraph.split('\n').map((line, lineIdx) => (
-                          <span key={lineIdx}>
-                            {lineIdx > 0 && <br />}
-                            {line}
-                          </span>
-                        ))}
+                        {paragraph}
                       </p>
                     ))}
                   </div>
