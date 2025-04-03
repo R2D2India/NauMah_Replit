@@ -4,6 +4,7 @@ import OpenAI from "openai";
 let openai: OpenAI | null = null;
 try {
   const apiKey = process.env.OPENAI_API_KEY;
+  console.log("OpenAI API Key:", apiKey ? "Successfully retrieved" : "API key not found");
   if (apiKey) {
     openai = new OpenAI({
       apiKey,
@@ -23,6 +24,9 @@ const MODEL = "gpt-4";
 
 export async function getAssistantResponse(message: string): Promise<string> {
   try {
+    if (!openai) {
+      throw new Error("OpenAI client not initialized");
+    }
     const thread = await openai.beta.threads.create();
     await openai.beta.threads.messages.create(thread.id, { 
       role: "user", 
@@ -70,6 +74,9 @@ export async function generateBabyNames(origin: string, gender: string): Promise
   meanings: Record<string, string>;
 }> {
   try {
+    if (!openai) {
+      throw new Error("OpenAI client not initialized");
+    }
     const prompt = `Generate 10 unique baby names with their meanings. Origin: ${origin}, Gender: ${gender}. 
                    Make names culturally authentic and meaningful.`;
 
@@ -102,6 +109,9 @@ export async function generateMealPlan(week: number): Promise<{
   snacks: string[];
 }> {
   try {
+    if (!openai) {
+      throw new Error("OpenAI client not initialized");
+    }
     const prompt = `Generate a detailed pregnancy meal plan for week ${week} with specific nutritional requirements.`;
 
     const completion = await openai.chat.completions.create({
@@ -128,6 +138,9 @@ export async function generateMealPlan(week: number): Promise<{
 
 export async function transcribeAudio(audioBuffer: Buffer): Promise<string> {
   try {
+    if (!openai) {
+      throw new Error("OpenAI client not initialized");
+    }
     const file = new File([audioBuffer], "audio.webm", { type: "audio/webm" });
     const transcription = await openai.audio.transcriptions.create({
       file,
