@@ -156,7 +156,6 @@ export function VoiceAgent() {
       
       try {
         // Then try to get the audio version - if this fails, we still have the text response
-        console.log("Getting speech response");
         
         // Setup timeout for audio fetch
         const controller = new AbortController();

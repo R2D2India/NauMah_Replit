@@ -51,7 +51,7 @@ export function ChatAgent() {
     timeoutId = window.setTimeout(() => controller.abort(), 30000);
 
     try {
-      console.log("Sending chat request:", currentInput);
+      // Make API request without console logging
       const response = await apiRequest<{response: string}>('/api/chat', {
         method: 'POST',
         body: JSON.stringify({ 
@@ -62,8 +62,6 @@ export function ChatAgent() {
         },
         signal: controller.signal
       });
-      
-      console.log("Chat response received:", response);
 
       // Clear timeout if we used the fallback method
       if (timeoutId) clearTimeout(timeoutId);
