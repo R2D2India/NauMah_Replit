@@ -1,7 +1,17 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { format } from "date-fns";
+
+interface MoodEntry {
+  id: number;
+  userId: number;
+  mood: string;
+  note?: string;
+  week: number;
+  createdAt: string;
+}
 
 interface MoodTrackerProps {
   currentWeek: number;
@@ -11,10 +21,18 @@ const MoodTracker = ({ currentWeek }: MoodTrackerProps) => {
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
   const [note, setNote] = useState("");
   const { toast } = useToast();
+  
+  // Fetch mood entries
+  const { data: moodEntriesResponse, isLoading: isLoadingMoodEntries } = useQuery({
+    queryKey: ["/api/mood"]
+  });
+  
+  // Convert the response to properly typed mood entries array
+  const moodEntries: MoodEntry[] = Array.isArray(moodEntriesResponse) ? moodEntriesResponse : [];
 
   // Mood entry mutation
   const createMoodEntryMutation = useMutation({
-    mutationFn: async (data: { mood: string; note?: string }) => {
+    mutationFn: async (data: { mood: string; note?: string; week: number }) => {
       return await apiRequest("/api/mood", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -56,7 +74,8 @@ const MoodTracker = ({ currentWeek }: MoodTrackerProps) => {
     
     createMoodEntryMutation.mutate({ 
       mood: selectedMood, 
-      note: note.trim() !== "" ? note : undefined 
+      note: note.trim() !== "" ? note : undefined,
+      week: currentWeek
     });
   };
 
@@ -107,6 +126,55 @@ const MoodTracker = ({ currentWeek }: MoodTrackerProps) => {
         >
           {createMoodEntryMutation.isPending ? "Saving..." : "Save Today's Mood"}
         </button>
+      </div>
+
+      {/* Mood History */}
+      <div className="bg-white rounded-xl p-6 custom-shadow mt-6">
+        <h3 className="text-xl font-montserrat font-bold text-primary mb-4">
+          <i className="fas fa-history mr-2"></i>Your Mood History
+        </h3>
+        
+        {isLoadingMoodEntries ? (
+          <div className="py-8 text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-r-transparent"></div>
+            <p className="mt-3">Loading your mood history...</p>
+          </div>
+        ) : moodEntries.length > 0 ? (
+          <div className="space-y-3">
+            {moodEntries.slice(0, 5).map((entry) => {
+              // Find the mood details to get the icon and color
+              const moodDetails = moods.find(m => m.id === entry.mood);
+              
+              return (
+                <div key={entry.id} className="bg-neutral-light p-3 rounded-lg flex items-start">
+                  <div className={`h-12 w-12 rounded-full bg-white flex items-center justify-center mr-3 ${moodDetails?.color}`}>
+                    <i className={`fas fa-${moodDetails?.icon} text-lg`}></i>
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start">
+                      <div className="font-semibold">{moodDetails?.label}</div>
+                      <div className="text-xs text-gray-500">
+                        {format(new Date(entry.createdAt), 'MMM d, yyyy')}
+                      </div>
+                    </div>
+                    {entry.note && <p className="text-sm mt-1">{entry.note}</p>}
+                    <div className="text-xs text-gray-500 mt-1">Week {entry.week}</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="py-8 text-center">
+            <div className="mx-auto bg-neutral-light w-16 h-16 rounded-full flex items-center justify-center mb-4">
+              <i className="fas fa-book text-xl text-gray-500"></i>
+            </div>
+            <h4 className="font-montserrat font-medium mb-2">No mood entries yet</h4>
+            <p className="text-gray-500 text-sm">
+              Track your first mood using the form above to start building your pregnancy mood journal.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

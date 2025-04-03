@@ -93,6 +93,7 @@ export type MedicationCheckRequest = z.infer<typeof medicationCheckSchema>;
 export const moodEntrySchema = z.object({
   mood: z.enum(["great", "good", "okay", "low", "stressed"]),
   note: z.string().optional(),
+  week: z.number().int().min(1).max(40),
 });
 
 export type MoodEntryRequest = z.infer<typeof moodEntrySchema>;
