@@ -16,7 +16,7 @@ interface Message {
 export function ChatAgent() {
   const [messages, setMessages] = useState<Message[]>([{
     role: 'assistant',
-    content: "Hi, I'm NauMah, your AI companion through this beautiful journey of 9 months. How can I help you today?",
+    content: "Welcome! I'm NauMah, your pregnancy companion. How can I help you today?",
     timestamp: new Date()
   }]);
   const [inputValue, setInputValue] = useState('');
@@ -121,7 +121,7 @@ export function ChatAgent() {
       </CardHeader>
       <CardContent className="flex-1 overflow-hidden p-0">
         <ScrollArea className="h-[calc(600px-10rem)] px-6">
-          <div className="space-y-4 pr-4 py-2">
+          <div className="space-y-4 pr-4 py-4 pt-6">
             {messages.map((message, index) => (
               <div
                 key={index}
