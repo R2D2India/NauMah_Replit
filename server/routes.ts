@@ -420,10 +420,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create HTTP server
-  const httpServer = createServer(app);
-  return httpServer;
-}
-// Weight tracking endpoints
+  // Weight tracking endpoints
   app.get("/api/weight-tracking", async (req: Request, res: Response) => {
     try {
       const userId = demoUserId;
