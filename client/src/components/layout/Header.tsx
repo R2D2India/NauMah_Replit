@@ -80,11 +80,9 @@ const Header = () => {
                 Journal
               </span>
             </Link>
-            <Link href="/profile">
-              <span className="font-medium text-primary py-2 block cursor-pointer">
-                My Profile
-              </span>
-            </Link>
+            <div className="py-2">
+              <ProfileDialog />
+            </div>
           </nav>
         </div>
       )}
