@@ -43,7 +43,7 @@ app.use((req, res, next) => {
     log('Running database migrations...');
     await runMigrations();
     log('Migrations completed successfully');
-    
+
     const server = await registerRoutes(app);
 
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
