@@ -51,8 +51,8 @@ export function ChatAgent() {
     timeoutId = window.setTimeout(() => controller.abort(), 30000);
 
     try {
-      // Make API request without console logging
-      const response = await apiRequest<{response: string}>('/api/chat', {
+      // Make API request with more robust error handling
+      const response = await fetch('/api/chat', {
         method: 'POST',
         body: JSON.stringify({ 
           message: currentInput
@@ -63,36 +63,51 @@ export function ChatAgent() {
         signal: controller.signal
       });
 
-      // Clear timeout if we used the fallback method
+      // Clear timeout
       if (timeoutId) clearTimeout(timeoutId);
       
-      if (!response || !response.response) {
+      // Handle HTTP errors explicitly
+      if (!response.ok) {
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch (e) {
+          // If the response cannot be parsed as JSON
+          throw new Error(`Server error: ${response.status} ${response.statusText}`);
+        }
+        
+        throw new Error(errorData.message || `Server error: ${response.status}`);
+      }
+      
+      // Parse the response
+      const data = await response.json();
+      
+      if (!data || !data.response) {
         throw new Error("Empty or invalid response from server");
       }
 
       // Add assistant message
       const assistantMessage: Message = {
         role: 'assistant',
-        content: response.response,
+        content: data.response,
         timestamp: new Date()
       };
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
       console.error('Error sending message:', error);
-      let errorMessage = 'An error occurred. Please try again.';
-      let status = 500;
       
-      if (error instanceof Response) {
-        status = error.status;
-        const data = await error.json();
-        errorMessage = data.message || errorMessage;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-
+      // Add a fallback message
+      const errorMessage: Message = {
+        role: 'assistant',
+        content: "I'm sorry, I'm having trouble connecting to the server right now. Please try again in a moment.",
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
+      
+      // Show error toast
       toast({
-        title: status === 503 ? 'Service Unavailable' : 'Error',
-        description: errorMessage,
+        title: 'Connection Error',
+        description: error instanceof Error ? error.message : 'Failed to connect to the server',
         variant: 'destructive',
       });
     } finally {
