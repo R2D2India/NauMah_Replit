@@ -21,9 +21,10 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === 'production',
+    secure: false, // Set to false in development for localhost testing
     httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    sameSite: 'lax' // Allow cross-site requests
   }
 }));
 
@@ -32,11 +33,13 @@ app.use((req, res, next) => {
   // Get origin from request headers
   const origin = req.headers.origin;
   
-  // Allow the specific origin if it exists, or all origins in development
+  // Important: When using credentials, we must specify an exact origin
+  // We can't use '*' with credentials
   if (origin) {
     res.setHeader('Access-Control-Allow-Origin', origin);
-  } else {
-    res.setHeader('Access-Control-Allow-Origin', '*');
+  } else if (process.env.NODE_ENV === 'development') {
+    // In development, allow requests from localhost
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5000');
   }
   
   // Allow necessary headers and methods

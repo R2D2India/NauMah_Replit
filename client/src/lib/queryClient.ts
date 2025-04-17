@@ -43,16 +43,25 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
+    console.log("Fetching:", queryKey[0]);
     const res = await fetch(queryKey[0] as string, {
       credentials: "include",
+      headers: {
+        "Accept": "application/json"
+      }
     });
+    
+    console.log("Response status:", res.status, "for", queryKey[0]);
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
+      console.log("Unauthorized but configured to return null");
       return null;
     }
 
     await throwIfResNotOk(res);
-    return await res.json();
+    const data = await res.json();
+    console.log("Response data:", data, "for", queryKey[0]);
+    return data;
   };
 
 export const queryClient = new QueryClient({
@@ -68,4 +77,9 @@ export const queryClient = new QueryClient({
       retry: false,
     },
   },
+  logger: {
+    log: import.meta.env.DEV ? console.log : () => {},
+    warn: import.meta.env.DEV ? console.warn : () => {},
+    error: console.error,
+  }
 });

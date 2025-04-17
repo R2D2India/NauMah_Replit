@@ -17,18 +17,31 @@ export default function AdminLogin() {
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: { username: string; password: string }) => {
-      const response = await fetch("/api/admin/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(credentials),
-        credentials: "include"
-      });
+      console.log("Attempting login with credentials:", credentials.username);
       
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Login failed");
+      try {
+        const response = await fetch("/api/admin/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(credentials),
+          credentials: "include"
+        });
+        
+        console.log("Login response status:", response.status);
+        
+        if (!response.ok) {
+          const error = await response.json();
+          console.error("Login error:", error);
+          throw new Error(error.message || "Login failed");
+        }
+        
+        const data = await response.json();
+        console.log("Login success:", data);
+        return data;
+      } catch (error) {
+        console.error("Login fetch error:", error);
+        throw error;
       }
-      return response.json();
     },
     onSuccess: () => {
       toast({

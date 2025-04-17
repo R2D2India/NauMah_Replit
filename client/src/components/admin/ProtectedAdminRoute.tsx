@@ -17,18 +17,31 @@ export default function ProtectedAdminRoute({ children }: ProtectedAdminRoutePro
   const { data: sessionData, isLoading, isError, refetch } = useQuery({
     queryKey: ["/api/admin/session"],
     queryFn: async () => {
-      const res = await fetch("/api/admin/session", {
-        credentials: "include"
-      });
+      console.log("Checking admin session...");
       
-      if (!res.ok) {
-        throw new Error("Failed to check session");
+      try {
+        const res = await fetch("/api/admin/session", {
+          credentials: "include"
+        });
+        
+        console.log("Session check response status:", res.status);
+        
+        if (!res.ok) {
+          console.error("Session check failed with status:", res.status);
+          throw new Error("Failed to check session");
+        }
+        
+        const data = await res.json();
+        console.log("Session check result:", data);
+        return data;
+      } catch (error) {
+        console.error("Session check fetch error:", error);
+        throw error;
       }
-      
-      return res.json();
     },
     staleTime: 0, // Always refetch when component mounts
     refetchOnWindowFocus: true,
+    retry: 1, // Only retry once to avoid excessive requests
   });
 
   useEffect(() => {
