@@ -76,7 +76,12 @@ export const WaitlistSection = () => {
         colors={['#FFD700', '#DAA520', '#FFC107', '#FFB74D', '#FFA500']}
         gravity={0.15}
         tweenDuration={8000}
-        confettiSource={{x: width/2, y: height/2}}
+        confettiSource={{
+          x: width/2,
+          y: height/2,
+          w: 0,
+          h: 0
+        }}
         initialVelocityY={15}
         wind={0.01}
       />}

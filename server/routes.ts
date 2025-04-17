@@ -375,14 +375,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error creating waitlist entry:", error);
       
       // Check if it's a duplicate error from the database layer
-      if (error.message && (
+      if (error instanceof Error && error.message) {
+        if (
           error.message.includes("email already exists") || 
-          error.message.includes("mobile already exists")
-      )) {
-        return res.status(409).json({ 
-          success: false, 
-          message: error.message
-        });
+          error.message.includes("mobile already exists") ||
+          error.message.includes("already exists in our waitlist")
+        ) {
+          return res.status(409).json({ 
+            success: false, 
+            message: error.message
+          });
+        }
       }
       
       // Generic error response
