@@ -11,6 +11,7 @@ import {
 } from "@shared/schema";
 import { addWeeks } from "date-fns";
 import { db } from "./db";
+import { PgStorage } from './pgStorage';
 
 // Interface for storage operations
 export interface IStorage {
@@ -312,4 +313,5 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Use PostgreSQL storage for persistence
+export const storage = new PgStorage();

@@ -424,9 +424,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/weight-tracking", async (req: Request, res: Response) => {
     try {
       const userId = demoUserId;
-      const weightEntries = await db.select().from(schema.weightTrackingTable);
+      const weightEntries = await storage.getWeightEntries(userId);
       res.json(weightEntries);
     } catch (error) {
+      console.error("Error getting weight entries:", error);
       res.status(500).json({ error: "Failed to fetch weight entries" });
     }
   });
@@ -434,14 +435,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/weight-tracking", async (req: Request, res: Response) => {
     try {
       const userId = demoUserId;
-      const { weight, date } = req.body;
-      const entry = await db.insert(schema.weightTrackingTable).values({
+      const { weight, date, notes } = req.body;
+      
+      if (!weight || !date) {
+        return res.status(400).json({ error: "Weight and date are required" });
+      }
+
+      const entry = await storage.createWeightEntry({
         userId,
-        weight,
+        weight: Number(weight),
         date: new Date(date),
-      }).returning();
-      res.json(entry[0]);
+        notes: notes || undefined
+      });
+      
+      res.status(201).json(entry);
     } catch (error) {
+      console.error("Error creating weight entry:", error);
       res.status(500).json({ error: "Failed to add weight entry" });
     }
   });
@@ -450,9 +459,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/symptoms", async (req: Request, res: Response) => {
     try {
       const userId = demoUserId;
-      const symptoms = await db.select().from(schema.symptomsTable);
+      const symptoms = await storage.getSymptomEntries(userId);
       res.json(symptoms);
     } catch (error) {
+      console.error("Error getting symptoms:", error);
       res.status(500).json({ error: "Failed to fetch symptoms" });
     }
   });
@@ -461,15 +471,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = demoUserId;
       const { type, severity, notes, date } = req.body;
-      const symptom = await db.insert(schema.symptomsTable).values({
+      
+      if (!type || !severity || !date) {
+        return res.status(400).json({ error: "Symptom type, severity, and date are required" });
+      }
+
+      const symptom = await storage.createSymptomEntry({
         userId,
         symptom: type,
-        severity,
-        notes,
+        severity: Number(severity),
         date: new Date(date),
-      }).returning();
-      res.json(symptom[0]);
+        notes: notes || undefined
+      });
+      
+      res.status(201).json(symptom);
     } catch (error) {
+      console.error("Error creating symptom entry:", error);
       res.status(500).json({ error: "Failed to log symptom" });
     }
   });
@@ -478,9 +495,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/appointments", async (req: Request, res: Response) => {
     try {
       const userId = demoUserId;
-      const appointments = await db.select().from(schema.appointmentsTable);
+      const appointments = await storage.getAppointments(userId);
       res.json(appointments);
     } catch (error) {
+      console.error("Error getting appointments:", error);
       res.status(500).json({ error: "Failed to fetch appointments" });
     }
   });
@@ -489,15 +507,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = demoUserId;
       const { title, type, location, notes, date } = req.body;
-      const appointment = await db.insert(schema.appointmentsTable).values({
+      
+      if (!title || !type || !date) {
+        return res.status(400).json({ error: "Title, type, and date are required" });
+      }
+
+      const appointment = await storage.createAppointment({
         userId,
         title,
         type,
-        location,
-        notes,
         date: new Date(date),
-      }).returning();
-      res.json(appointment[0]);
+        location: location || undefined,
+        notes: notes || undefined
+      });
+      res.status(201).json(appointment);
     } catch (error) {
       res.status(500).json({ error: "Failed to add appointment" });
     }

@@ -155,6 +155,7 @@ export interface WeightEntry {
   weight: number;
   date: Date;
   notes?: string;
+  createdAt: Date;
 }
 
 export interface SymptomEntry {
@@ -164,6 +165,7 @@ export interface SymptomEntry {
   severity: number; // 1-5 scale
   date: Date;
   notes?: string;
+  createdAt: Date;
 }
 
 export interface Appointment {
@@ -174,4 +176,5 @@ export interface Appointment {
   type: string;
   notes?: string;
   location?: string;
+  createdAt: Date;
 }
