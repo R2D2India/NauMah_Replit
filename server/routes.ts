@@ -339,21 +339,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Send email notification to admin
       const adminEmail = "asknaumah@gmail.com"; // Admin email for waitlist notifications
-      try {
-        await sendWaitlistNotification(adminEmail, req.validatedData);
-        console.log(`Waitlist notification email sent to ${adminEmail}`);
-      } catch (emailError) {
-        console.error("Failed to send waitlist notification email:", emailError);
-        // Don't fail the request if email sending fails
-      }
+      const emailSent = await sendWaitlistNotification(adminEmail, req.validatedData);
       
-      res.json(entry);
+      if (emailSent) {
+        console.log(`Waitlist notification email successfully sent to ${adminEmail}`);
+        res.json({ 
+          success: true, 
+          message: "Successfully joined waitlist and sent notification.",
+          entry 
+        });
+      } else {
+        console.error(`Failed to send waitlist notification email to ${adminEmail}`);
+        // Provide information directly in the response as a fallback
+        res.json({ 
+          success: true, 
+          message: "Successfully joined waitlist, but email notification failed. Please check the data below:",
+          entry,
+          waitlistData: {
+            name: req.validatedData.name,
+            email: req.validatedData.email,
+            mobile: req.validatedData.mobile,
+            submittedAt: new Date().toLocaleString()
+          }
+        });
+      }
     } catch (error) {
       console.error("Error creating waitlist entry:", error);
       res.status(500).json({ message: "Failed to join waitlist" });
     }
   });
 
+  // View latest waitlist entries without auth (for quick testing)
+  app.get("/api/waitlist/latest", async (req: Request, res: Response) => {
+    try {
+      const entries = await storage.getWaitlistEntries();
+      // Return only the most recent 10 entries
+      const latestEntries = entries.slice(-10).reverse();
+      res.json({
+        message: "Latest waitlist entries (newest first):",
+        entries: latestEntries
+      });
+    } catch (error) {
+      console.error("Error getting waitlist entries:", error);
+      res.status(500).json({ message: "Failed to get waitlist entries" });
+    }
+  });
+  
   // Profile update endpoint
   app.post("/api/profile", async (req: Request, res: Response) => {
     try {

@@ -34,8 +34,12 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
     });
     
     return true;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error sending email:', error);
+    // Log additional details if available
+    if (error && error.response && error.response.body) {
+      console.error('SendGrid error details:', JSON.stringify(error.response.body));
+    }
     return false;
   }
 }
@@ -61,7 +65,7 @@ export async function sendWaitlistNotification(
   
   return sendEmail({
     to: recipientEmail,
-    from: 'asknaumah@gmail.com', // Using the same email as recipient since it's verified in SendGrid
+    from: 'info@sendgrid.net', // Using a default SendGrid sender email that should work
     subject,
     html
   });
