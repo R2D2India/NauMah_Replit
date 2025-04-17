@@ -1,8 +1,7 @@
 import { ReactNode, useEffect } from "react";
-import { useNavigate } from "wouter";
+import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 interface ProtectedAdminRouteProps {
@@ -10,14 +9,16 @@ interface ProtectedAdminRouteProps {
 }
 
 export default function ProtectedAdminRoute({ children }: ProtectedAdminRouteProps) {
-  const [, navigate] = useNavigate();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
 
   // Check if user is admin
   const { data: sessionData, isLoading, isError } = useQuery({
     queryKey: ["/api/admin/session"],
     queryFn: async () => {
-      const res = await apiRequest("GET", "/api/admin/session");
+      const res = await fetch("/api/admin/session", {
+        credentials: "include"
+      });
       return res.json();
     },
   });
@@ -29,9 +30,9 @@ export default function ProtectedAdminRoute({ children }: ProtectedAdminRoutePro
         description: "Please login to access the admin dashboard.",
         variant: "destructive",
       });
-      navigate("/admin/login");
+      setLocation("/admin/login");
     }
-  }, [sessionData, isLoading, navigate, toast]);
+  }, [sessionData, isLoading, setLocation, toast]);
 
   if (isLoading) {
     return (

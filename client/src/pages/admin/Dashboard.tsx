@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, LogOut, RefreshCw, Users } from "lucide-react";
 
@@ -25,7 +24,9 @@ export default function AdminDashboard() {
   const { data: sessionData, isLoading: checkingSession } = useQuery({
     queryKey: ["/api/admin/session"],
     queryFn: async () => {
-      const res = await apiRequest("GET", "/api/admin/session");
+      const res = await fetch("/api/admin/session", {
+        credentials: "include"
+      });
       return res.json();
     },
   });
@@ -38,7 +39,9 @@ export default function AdminDashboard() {
   } = useQuery({
     queryKey: ["/api/admin/waitlist"],
     queryFn: async () => {
-      const res = await apiRequest("GET", "/api/admin/waitlist");
+      const res = await fetch("/api/admin/waitlist", {
+        credentials: "include"
+      });
       return res.json() as Promise<WaitlistEntry[]>;
     },
     enabled: !!sessionData?.isAdmin,
@@ -52,14 +55,17 @@ export default function AdminDashboard() {
         description: "Please log in as an administrator.",
         variant: "destructive",
       });
-      navigate("/admin/login");
+      setLocation("/admin/login");
     }
-  }, [sessionData, checkingSession, navigate, toast]);
+  }, [sessionData, checkingSession, setLocation, toast]);
 
   const handleLogout = async () => {
     setIsLoading(true);
     try {
-      const response = await apiRequest("POST", "/api/admin/logout");
+      const response = await fetch("/api/admin/logout", {
+        method: "POST",
+        credentials: "include"
+      });
       const data = await response.json();
       
       if (data.success) {
@@ -67,7 +73,7 @@ export default function AdminDashboard() {
           title: "Logout Successful",
           description: "You have been logged out.",
         });
-        navigate("/admin/login");
+        setLocation("/admin/login");
       } else {
         toast({
           title: "Logout Failed",
