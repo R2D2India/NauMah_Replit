@@ -338,7 +338,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const entry = await storage.createWaitlistEntry(req.validatedData);
       
       // Send email notification to admin
-      const adminEmail = process.env.ADMIN_EMAIL || "admin@naumah.com"; // Replace with your email address
+      const adminEmail = "asknaumah@gmail.com"; // Admin email for waitlist notifications
       try {
         await sendWaitlistNotification(adminEmail, req.validatedData);
         console.log(`Waitlist notification email sent to ${adminEmail}`);

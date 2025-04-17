@@ -29,8 +29,8 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
       to: options.to,
       from: options.from,
       subject: options.subject,
-      text: options.text || options.html || '',
-      html: options.html
+      text: options.text || (options.html ? options.html.replace(/<[^>]*>/g, '') : ''),
+      html: options.html || ''
     });
     
     return true;
@@ -61,7 +61,7 @@ export async function sendWaitlistNotification(
   
   return sendEmail({
     to: recipientEmail,
-    from: 'noreply@naumah.com', // This should be a verified sender in your SendGrid account
+    from: 'asknaumah@gmail.com', // Using the same email as recipient since it's verified in SendGrid
     subject,
     html
   });
