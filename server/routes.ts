@@ -10,7 +10,17 @@ import {
   transcribeSpeech 
 } from "./openai";
 import { sendWaitlistNotification } from "./email";
-import { pregnancyStageSchema, medicationCheckSchema, moodEntrySchema, waitlistSchema } from "@shared/schema";
+import { 
+  pregnancyStageSchema, 
+  medicationCheckSchema, 
+  moodEntrySchema, 
+  waitlistSchema, 
+  chatSchema, 
+  speechSchema, 
+  babyNamesSchema, 
+  mealPlanSchema,
+  adminLoginSchema
+} from "@shared/schema";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
 import z from "zod";
@@ -401,15 +411,96 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin routes
+  // Admin session check middleware
   const adminAuth = (req: Request, res: Response, next: NextFunction) => {
+    // Check if admin session exists
+    if (req.session && req.session.isAdmin) {
+      return next();
+    }
+    
+    // If no session, check for API key (for backward compatibility)
     const adminKey = process.env.ADMIN_KEY;
     const authHeader = req.headers.authorization;
 
-    if (!adminKey || authHeader !== `Bearer ${adminKey}`) {
-      return res.status(401).json({ message: "Unauthorized" });
+    if (adminKey && authHeader === `Bearer ${adminKey}`) {
+      return next();
     }
-    next();
+    
+    return res.status(401).json({ message: "Unauthorized" });
   };
+  
+  // Admin login route
+  app.post("/api/admin/login", validateRequest(adminLoginSchema), async (req: Request, res: Response) => {
+    try {
+      const { username, password } = req.validatedData;
+      
+      // Simple authentication for admin
+      // In production, use environment variables or database credentials with proper hashing
+      const adminUsername = process.env.ADMIN_USERNAME || "admin";
+      const adminPassword = process.env.ADMIN_PASSWORD || "naumah@admin2025";
+      
+      if (username === adminUsername && password === adminPassword) {
+        // Set admin session
+        if (req.session) {
+          req.session.isAdmin = true;
+        }
+        
+        return res.json({ 
+          success: true, 
+          message: "Admin login successful" 
+        });
+      }
+      
+      return res.status(401).json({ 
+        success: false, 
+        message: "Invalid credentials" 
+      });
+    } catch (error) {
+      console.error("Admin login error:", error);
+      return res.status(500).json({ 
+        success: false, 
+        message: "An error occurred during authentication" 
+      });
+    }
+  });
+  
+  // Admin logout route
+  app.post("/api/admin/logout", adminAuth, (req: Request, res: Response) => {
+    if (req.session) {
+      req.session.isAdmin = false;
+      req.session.destroy((err) => {
+        if (err) {
+          return res.status(500).json({ 
+            success: false, 
+            message: "Logout failed" 
+          });
+        }
+        
+        return res.json({ 
+          success: true, 
+          message: "Logged out successfully" 
+        });
+      });
+    } else {
+      return res.json({ 
+        success: true, 
+        message: "Logged out successfully" 
+      });
+    }
+  });
+  
+  // Admin session check
+  app.get("/api/admin/session", (req: Request, res: Response) => {
+    if (req.session && req.session.isAdmin) {
+      return res.json({ 
+        isAdmin: true 
+      });
+    }
+    
+    return res.json({ 
+      isAdmin: false 
+    });
+  });
 
   // Admin routes for data access
   app.get("/api/admin/waitlist", adminAuth, async (req: Request, res: Response) => {
