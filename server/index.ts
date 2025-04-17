@@ -30,26 +30,22 @@ app.use(session({
 
 // Add CORS headers for deployed environments
 app.use((req, res, next) => {
-  // Get origin from request headers
+  // In development, use the HTTP Origin header from the request
+  // This header is set by the browser and contains the origin of the request
   const origin = req.headers.origin;
   
   // Important: When using credentials, we must specify an exact origin
-  // We can't use '*' with credentials
+  // We cannot use wildcard '*' with credentials
   if (origin) {
     res.setHeader('Access-Control-Allow-Origin', origin);
-  } else if (process.env.NODE_ENV === 'development') {
-    // In development, allow requests from localhost
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5000');
-  }
-  
-  // Allow necessary headers and methods
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    
+    // Handle preflight OPTIONS requests
+    if (req.method === 'OPTIONS') {
+      return res.status(200).end();
+    }
   }
   
   next();

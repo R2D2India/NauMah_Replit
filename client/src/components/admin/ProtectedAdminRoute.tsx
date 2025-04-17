@@ -13,33 +13,41 @@ export default function ProtectedAdminRoute({ children }: ProtectedAdminRoutePro
   const { toast } = useToast();
   const [checkedSession, setCheckedSession] = useState(false);
 
-  // Check if user is admin
+  // Check if user is admin - custom function to avoid stale data
+  const fetchSession = async () => {
+    console.log("Checking admin session with direct fetch...");
+    try {
+      const res = await fetch("/api/admin/session", {
+        credentials: "include",
+        headers: {
+          "Accept": "application/json",
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          "Pragma": "no-cache"
+        }
+      });
+      
+      console.log("Direct session check response status:", res.status);
+      
+      if (!res.ok) {
+        console.error("Direct session check failed with status:", res.status);
+        return { isAdmin: false };
+      }
+      
+      const data = await res.json();
+      console.log("Direct session check result:", data);
+      return data;
+    } catch (error) {
+      console.error("Direct session check fetch error:", error);
+      return { isAdmin: false };
+    }
+  };
+
+  // Use React Query for session data
   const { data: sessionData, isLoading, isError, refetch } = useQuery({
     queryKey: ["/api/admin/session"],
-    queryFn: async () => {
-      console.log("Checking admin session...");
-      
-      try {
-        const res = await fetch("/api/admin/session", {
-          credentials: "include"
-        });
-        
-        console.log("Session check response status:", res.status);
-        
-        if (!res.ok) {
-          console.error("Session check failed with status:", res.status);
-          throw new Error("Failed to check session");
-        }
-        
-        const data = await res.json();
-        console.log("Session check result:", data);
-        return data;
-      } catch (error) {
-        console.error("Session check fetch error:", error);
-        throw error;
-      }
-    },
-    staleTime: 0, // Always refetch when component mounts
+    queryFn: fetchSession,
+    staleTime: 0, // Never consider cached data fresh
+    refetchInterval: 30000, // Refetch every 30 seconds
     refetchOnWindowFocus: true,
     retry: 1, // Only retry once to avoid excessive requests
   });

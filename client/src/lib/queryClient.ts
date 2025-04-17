@@ -76,10 +76,5 @@ export const queryClient = new QueryClient({
     mutations: {
       retry: false,
     },
-  },
-  logger: {
-    log: import.meta.env.DEV ? console.log : () => {},
-    warn: import.meta.env.DEV ? console.warn : () => {},
-    error: console.error,
   }
 });

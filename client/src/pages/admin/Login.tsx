@@ -22,7 +22,10 @@ export default function AdminLogin() {
       try {
         const response = await fetch("/api/admin/login", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+          },
           body: JSON.stringify(credentials),
           credentials: "include"
         });
@@ -43,14 +46,46 @@ export default function AdminLogin() {
         throw error;
       }
     },
-    onSuccess: () => {
-      toast({
-        title: "Login Successful",
-        description: "Welcome to the admin dashboard.",
-      });
-      // Invalidate the session query to force a refresh
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/session"] });
-      setLocation("/admin/dashboard");
+    onSuccess: async () => {
+      // Check the session immediately
+      try {
+        const sessionResponse = await fetch("/api/admin/session", {
+          credentials: "include",
+          headers: {
+            "Accept": "application/json",
+            "Cache-Control": "no-cache",
+          }
+        });
+        
+        const sessionData = await sessionResponse.json();
+        console.log("Session check after login:", sessionData);
+        
+        if (sessionData?.isAdmin) {
+          toast({
+            title: "Login Successful",
+            description: "Welcome to the admin dashboard.",
+          });
+          
+          // Invalidate all queries to ensure fresh data
+          queryClient.invalidateQueries();
+          
+          // Redirect to dashboard
+          setLocation("/admin/dashboard");
+        } else {
+          toast({
+            title: "Session Error",
+            description: "Login succeeded but session was not established properly.",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error("Session check error:", error);
+        toast({
+          title: "Session Error", 
+          description: "Please try again or use a different browser.",
+          variant: "destructive",
+        });
+      }
     },
     onError: (error: Error) => {
       toast({
