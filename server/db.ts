@@ -56,6 +56,36 @@ export async function runMigrations() {
         email TEXT NOT NULL,
         created_at TIMESTAMP DEFAULT NOW() NOT NULL
       );
+      
+      CREATE TABLE IF NOT EXISTS weight_tracking (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL,
+        weight INTEGER NOT NULL,
+        date TIMESTAMP NOT NULL,
+        notes TEXT,
+        created_at TIMESTAMP DEFAULT NOW() NOT NULL
+      );
+      
+      CREATE TABLE IF NOT EXISTS symptoms (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL,
+        symptom TEXT NOT NULL,
+        severity INTEGER NOT NULL,
+        date TIMESTAMP NOT NULL,
+        notes TEXT,
+        created_at TIMESTAMP DEFAULT NOW() NOT NULL
+      );
+      
+      CREATE TABLE IF NOT EXISTS appointments (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL,
+        title TEXT NOT NULL,
+        type TEXT NOT NULL,
+        date TIMESTAMP NOT NULL,
+        location TEXT,
+        notes TEXT,
+        created_at TIMESTAMP DEFAULT NOW() NOT NULL
+      );
     `);
     
     console.log('Database migrations completed successfully');

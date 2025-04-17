@@ -6,7 +6,13 @@ import {
   moodEntries, type MoodEntry, type InsertMoodEntry,
   medicationChecks, type MedicationCheck, type InsertMedicationCheck,
   type PregnancyStageUpdate,
-  waitlistTable // Assumed schema import
+  waitlistTable,
+  weightTrackingTable,
+  symptomsTable,
+  appointmentsTable,
+  type WeightEntry,
+  type SymptomEntry,
+  type Appointment
 } from "@shared/schema";
 import { IStorage } from './storage';
 import { addWeeks } from "date-fns";
