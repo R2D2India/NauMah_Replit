@@ -130,25 +130,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Define schemas 
-  const mealPlanSchema = z.object({
-    currentWeek: z.number(),
-  });
-  
-  const babyNamesSchema = z.object({
-    origin: z.string(),
-    gender: z.string()
-  });
-
-  const chatSchema = z.object({
-    message: z.string().min(1)
-  });
-
-  const speechSchema = z.object({
-    message: z.string().min(1),
-  });
-  
-  // While this endpoint accepts binary data, we'll add basic validation in the route handler
+  // While API endpoints that accept binary data will have validation in the route handler
 
   // Check medication safety for pregnancy
   app.post("/api/medication/check", validateRequest(medicationCheckSchema), async (req: Request, res: Response) => {

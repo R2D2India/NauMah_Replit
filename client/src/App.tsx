@@ -10,6 +10,8 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Privacy from "@/pages/Privacy";
 import Terms from "@/pages/Terms";
+import AdminLogin from "@/pages/admin/Login";
+import ProtectedAdminRoute from "@/components/admin/ProtectedAdminRoute";
 
 function Router() {
   return (
