@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "wouter";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,7 +12,7 @@ export default function AdminLogin() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [, navigate] = useNavigate();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -30,7 +30,12 @@ export default function AdminLogin() {
     setIsLoading(true);
     
     try {
-      const response = await apiRequest("POST", "/api/admin/login", { username, password });
+      const response = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+        credentials: "include"
+      });
       const data = await response.json();
       
       if (data.success) {
@@ -38,7 +43,7 @@ export default function AdminLogin() {
           title: "Login Successful",
           description: "Welcome to the admin dashboard.",
         });
-        navigate("/admin/dashboard");
+        setLocation("/admin/dashboard");
       } else {
         toast({
           title: "Login Failed",
