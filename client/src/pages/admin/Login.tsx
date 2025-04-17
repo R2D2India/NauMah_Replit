@@ -4,16 +4,49 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { apiRequest } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Lock } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
 
 export default function AdminLogin() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+
+  const loginMutation = useMutation({
+    mutationFn: async (credentials: { username: string; password: string }) => {
+      const response = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(credentials),
+        credentials: "include"
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Login failed");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Login Successful",
+        description: "Welcome to the admin dashboard.",
+      });
+      // Invalidate the session query to force a refresh
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/session"] });
+      setLocation("/admin/dashboard");
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Login Failed",
+        description: error.message || "Invalid credentials. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,40 +60,7 @@ export default function AdminLogin() {
       return;
     }
     
-    setIsLoading(true);
-    
-    try {
-      const response = await fetch("/api/admin/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-        credentials: "include"
-      });
-      const data = await response.json();
-      
-      if (data.success) {
-        toast({
-          title: "Login Successful",
-          description: "Welcome to the admin dashboard.",
-        });
-        setLocation("/admin/dashboard");
-      } else {
-        toast({
-          title: "Login Failed",
-          description: data.message || "Invalid credentials. Please try again.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Login Error",
-        description: "An error occurred during login. Please try again.",
-        variant: "destructive",
-      });
-      console.error("Login error:", error);
-    } finally {
-      setIsLoading(false);
-    }
+    loginMutation.mutate({ username, password });
   };
 
   return (
@@ -85,7 +85,7 @@ export default function AdminLogin() {
                 placeholder="Enter your username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                disabled={isLoading}
+                disabled={loginMutation.isPending}
                 required
               />
             </div>
@@ -97,7 +97,7 @@ export default function AdminLogin() {
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                disabled={isLoading}
+                disabled={loginMutation.isPending}
                 required
               />
             </div>
@@ -106,9 +106,9 @@ export default function AdminLogin() {
             <Button 
               type="submit" 
               className="w-full" 
-              disabled={isLoading}
+              disabled={loginMutation.isPending}
             >
-              {isLoading ? (
+              {loginMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Logging in...
