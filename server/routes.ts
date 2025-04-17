@@ -327,6 +327,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Waitlist endpoint
   app.post("/api/waitlist", validateRequest(waitlistSchema), async (req: Request, res: Response) => {
     try {
+      // Check for duplicates explicitly before creating entry
+      const duplicateCheck = await storage.checkWaitlistDuplicate(
+        req.validatedData.email, 
+        req.validatedData.mobile
+      );
+      
+      if (duplicateCheck.exists) {
+        // Return a 409 Conflict status for duplicate entries
+        return res.status(409).json({ 
+          success: false, 
+          message: `A user with this ${duplicateCheck.field} already exists in our waitlist.`,
+          field: duplicateCheck.field
+        });
+      }
+      
+      // Create waitlist entry if no duplicates found
       const entry = await storage.createWaitlistEntry(req.validatedData);
       
       // Send email notification to admin
@@ -357,7 +373,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error) {
       console.error("Error creating waitlist entry:", error);
-      res.status(500).json({ message: "Failed to join waitlist" });
+      
+      // Check if it's a duplicate error from the database layer
+      if (error.message && (
+          error.message.includes("email already exists") || 
+          error.message.includes("mobile already exists")
+      )) {
+        return res.status(409).json({ 
+          success: false, 
+          message: error.message
+        });
+      }
+      
+      // Generic error response
+      res.status(500).json({ 
+        success: false,
+        message: "Failed to join waitlist" 
+      });
     }
   });
 

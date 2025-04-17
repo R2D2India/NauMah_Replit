@@ -110,7 +110,30 @@ export class PgStorage implements IStorage {
   }
 
   // Waitlist methods
+  async checkWaitlistDuplicate(email: string, mobile: string): Promise<{ exists: boolean, field?: string }> {
+    // Check for duplicate email
+    const emailExists = await db.select().from(waitlistTable).where(eq(waitlistTable.email, email)).limit(1);
+    if (emailExists.length > 0) {
+      return { exists: true, field: 'email' };
+    }
+    
+    // Check for duplicate mobile number
+    const mobileExists = await db.select().from(waitlistTable).where(eq(waitlistTable.mobile, mobile)).limit(1);
+    if (mobileExists.length > 0) {
+      return { exists: true, field: 'mobile' };
+    }
+    
+    // No duplicates found
+    return { exists: false };
+  }
+  
   async createWaitlistEntry(entry: { name: string; mobile: string; email: string }): Promise<any> {
+    // Check for duplicates before inserting
+    const duplicateCheck = await this.checkWaitlistDuplicate(entry.email, entry.mobile);
+    if (duplicateCheck.exists) {
+      throw new Error(`A user with this ${duplicateCheck.field} already exists in our waitlist.`);
+    }
+    
     const results = await db.insert(waitlistTable).values(entry).returning();
     return results[0];
   }

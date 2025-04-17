@@ -14,23 +14,51 @@ export const WaitlistSection = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await apiRequest('/api/waitlist', {
+      const response = await fetch('/api/waitlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        // Handle duplicate entry errors (status 409)
+        if (response.status === 409) {
+          toast({
+            title: 'Already Registered',
+            description: data.message || 'This information is already registered in our waitlist.',
+            variant: 'destructive',
+          });
+        } else {
+          // Handle other errors
+          toast({
+            title: 'Error',
+            description: data.message || 'Failed to join waitlist. Please try again.',
+            variant: 'destructive',
+          });
+        }
+        return;
+      }
+      
+      // Success case
       toast({
         title: 'Thank you for joining our waitlist!',
         description: 'Team NauMah will contact you soon!',
       });
+      
+      // Show confetti animation
       setConfettiConfig({ numberOfPieces: 500, recycle: true });
       setShowConfetti(true);
       setTimeout(() => {
         setConfettiConfig({ numberOfPieces: 0, recycle: false });
         setTimeout(() => setShowConfetti(false), 1000);
       }, 3000);
+      
+      // Reset form
       setFormData({ name: '', mobile: '', email: '' });
     } catch (error) {
+      console.error('Waitlist submission error:', error);
       toast({
         title: 'Error',
         description: 'Failed to join waitlist. Please try again.',
