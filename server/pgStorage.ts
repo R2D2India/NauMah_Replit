@@ -118,4 +118,84 @@ export class PgStorage implements IStorage {
   async getWaitlistEntries(): Promise<any[]> {
     return await db.select().from(waitlistTable).orderBy(desc(waitlistTable.createdAt));
   }
+
+  // Weight tracking methods
+  async getWeightEntries(userId: number): Promise<WeightEntry[]> {
+    const results = await db.select().from(weightTrackingTable).where(eq(weightTrackingTable.userId, userId));
+    // Convert null to undefined for type compatibility
+    return results.map(entry => ({
+      ...entry,
+      notes: entry.notes || undefined
+    }));
+  }
+
+  async createWeightEntry(entry: { userId: number; weight: number; date: Date; notes?: string }): Promise<WeightEntry> {
+    const results = await db.insert(weightTrackingTable).values({
+      userId: entry.userId,
+      weight: entry.weight,
+      date: entry.date,
+      notes: entry.notes || null,
+      createdAt: new Date()
+    }).returning();
+    // Convert null to undefined for type compatibility
+    return {
+      ...results[0],
+      notes: results[0].notes || undefined
+    };
+  }
+
+  // Symptoms methods
+  async getSymptomEntries(userId: number): Promise<SymptomEntry[]> {
+    const results = await db.select().from(symptomsTable).where(eq(symptomsTable.userId, userId));
+    // Convert null to undefined for type compatibility
+    return results.map(entry => ({
+      ...entry,
+      notes: entry.notes || undefined
+    }));
+  }
+
+  async createSymptomEntry(entry: { userId: number; symptom: string; severity: number; date: Date; notes?: string }): Promise<SymptomEntry> {
+    const results = await db.insert(symptomsTable).values({
+      userId: entry.userId,
+      symptom: entry.symptom,
+      severity: entry.severity,
+      date: entry.date,
+      notes: entry.notes || null,
+      createdAt: new Date()
+    }).returning();
+    // Convert null to undefined for type compatibility
+    return {
+      ...results[0],
+      notes: results[0].notes || undefined
+    };
+  }
+
+  // Appointments methods
+  async getAppointments(userId: number): Promise<Appointment[]> {
+    const results = await db.select().from(appointmentsTable).where(eq(appointmentsTable.userId, userId));
+    // Convert null to undefined for type compatibility
+    return results.map(appointment => ({
+      ...appointment,
+      notes: appointment.notes || undefined,
+      location: appointment.location || undefined
+    }));
+  }
+
+  async createAppointment(appointment: { userId: number; title: string; type: string; date: Date; location?: string; notes?: string }): Promise<Appointment> {
+    const results = await db.insert(appointmentsTable).values({
+      userId: appointment.userId,
+      title: appointment.title,
+      type: appointment.type,
+      date: appointment.date,
+      location: appointment.location || null,
+      notes: appointment.notes || null,
+      createdAt: new Date()
+    }).returning();
+    // Convert null to undefined for type compatibility
+    return {
+      ...results[0],
+      notes: results[0].notes || undefined,
+      location: results[0].location || undefined
+    };
+  }
 }

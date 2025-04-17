@@ -3,9 +3,14 @@ import {
   pregnancyData, type PregnancyData, type InsertPregnancyData,
   moodEntries, type MoodEntry, type InsertMoodEntry,
   medicationChecks, type MedicationCheck, type InsertMedicationCheck,
-  type PregnancyStageUpdate
+  type PregnancyStageUpdate,
+  type WeightEntry,
+  type SymptomEntry,
+  type Appointment,
+  waitlistTable
 } from "@shared/schema";
 import { addWeeks } from "date-fns";
+import { db } from "./db";
 
 // Interface for storage operations
 export interface IStorage {
@@ -29,7 +34,18 @@ export interface IStorage {
   // Medication check methods
   getMedicationChecks(userId: number): Promise<MedicationCheck[]>;
   createMedicationCheck(check: InsertMedicationCheck): Promise<MedicationCheck>;
-  createWaitlistEntry(entry: { name: string; mobile: string; email: string }): Promise<any>;
+
+  // Weight tracking methods
+  getWeightEntries(userId: number): Promise<WeightEntry[]>;
+  createWeightEntry(entry: { userId: number; weight: number; date: Date; notes?: string }): Promise<WeightEntry>;
+  
+  // Symptoms methods
+  getSymptomEntries(userId: number): Promise<SymptomEntry[]>;
+  createSymptomEntry(entry: { userId: number; symptom: string; severity: number; date: Date; notes?: string }): Promise<SymptomEntry>;
+  
+  // Appointments methods
+  getAppointments(userId: number): Promise<Appointment[]>;
+  createAppointment(appointment: { userId: number; title: string; type: string; date: Date; location?: string; notes?: string }): Promise<Appointment>;
 }
 
 export class MemStorage implements IStorage {
@@ -37,20 +53,32 @@ export class MemStorage implements IStorage {
   private pregnancyData: Map<number, PregnancyData>; // userId -> data
   private moodEntries: Map<number, MoodEntry[]>; // userId -> entries
   private medicationChecks: Map<number, MedicationCheck[]>; // userId -> checks
+  private weightEntries: Map<number, WeightEntry[]>; // userId -> entries
+  private symptomEntries: Map<number, SymptomEntry[]>; // userId -> entries
+  private appointments: Map<number, Appointment[]>; // userId -> entries
   private currentId: number;
   private pregnancyDataId: number;
   private moodEntryId: number;
   private medicationCheckId: number;
+  private weightEntryId: number;
+  private symptomEntryId: number;
+  private appointmentId: number;
 
   constructor() {
     this.users = new Map();
     this.pregnancyData = new Map();
     this.moodEntries = new Map();
     this.medicationChecks = new Map();
+    this.weightEntries = new Map();
+    this.symptomEntries = new Map();
+    this.appointments = new Map();
     this.currentId = 1;
     this.pregnancyDataId = 1;
     this.moodEntryId = 1;
     this.medicationCheckId = 1;
+    this.weightEntryId = 1;
+    this.symptomEntryId = 1;
+    this.appointmentId = 1;
   }
 
   // User methods
@@ -133,8 +161,11 @@ export class MemStorage implements IStorage {
   async createMoodEntry(insertEntry: InsertMoodEntry): Promise<MoodEntry> {
     const id = this.moodEntryId++;
     const entry: MoodEntry = {
-      ...insertEntry,
       id,
+      userId: insertEntry.userId,
+      week: insertEntry.week,
+      mood: insertEntry.mood,
+      note: insertEntry.note || null,
       createdAt: new Date(),
     };
     
@@ -158,8 +189,11 @@ export class MemStorage implements IStorage {
   async createMedicationCheck(insertCheck: InsertMedicationCheck): Promise<MedicationCheck> {
     const id = this.medicationCheckId++;
     const check: MedicationCheck = {
-      ...insertCheck,
       id,
+      userId: insertCheck.userId,
+      medicationName: insertCheck.medicationName,
+      isSafe: insertCheck.isSafe !== undefined ? insertCheck.isSafe : null,
+      notes: insertCheck.notes || null,
       createdAt: new Date(),
     };
     
@@ -184,6 +218,97 @@ export class MemStorage implements IStorage {
       })
       .returning();
     return result[0];
+  }
+
+  async getWaitlistEntries(): Promise<any[]> {
+    return await db.select().from(waitlistTable);
+  }
+
+  // Weight tracking methods
+  async getWeightEntries(userId: number): Promise<WeightEntry[]> {
+    return this.weightEntries.get(userId) || [];
+  }
+
+  async createWeightEntry(entry: { userId: number; weight: number; date: Date; notes?: string }): Promise<WeightEntry> {
+    const id = this.weightEntryId++;
+    const weightEntry: WeightEntry = {
+      id,
+      userId: entry.userId,
+      weight: entry.weight,
+      date: entry.date,
+      notes: entry.notes,
+      createdAt: new Date()
+    };
+
+    // Initialize array if it doesn't exist
+    if (!this.weightEntries.has(entry.userId)) {
+      this.weightEntries.set(entry.userId, []);
+    }
+
+    // Add entry to array
+    const entries = this.weightEntries.get(entry.userId)!;
+    entries.push(weightEntry);
+
+    return weightEntry;
+  }
+
+  // Symptoms methods
+  async getSymptomEntries(userId: number): Promise<SymptomEntry[]> {
+    return this.symptomEntries.get(userId) || [];
+  }
+
+  async createSymptomEntry(entry: { userId: number; symptom: string; severity: number; date: Date; notes?: string }): Promise<SymptomEntry> {
+    const id = this.symptomEntryId++;
+    const symptomEntry: SymptomEntry = {
+      id,
+      userId: entry.userId,
+      symptom: entry.symptom,
+      severity: entry.severity,
+      date: entry.date,
+      notes: entry.notes,
+      createdAt: new Date()
+    };
+
+    // Initialize array if it doesn't exist
+    if (!this.symptomEntries.has(entry.userId)) {
+      this.symptomEntries.set(entry.userId, []);
+    }
+
+    // Add entry to array
+    const entries = this.symptomEntries.get(entry.userId)!;
+    entries.push(symptomEntry);
+
+    return symptomEntry;
+  }
+
+  // Appointments methods
+  async getAppointments(userId: number): Promise<Appointment[]> {
+    return this.appointments.get(userId) || [];
+  }
+
+  async createAppointment(appointment: { userId: number; title: string; type: string; date: Date; location?: string; notes?: string }): Promise<Appointment> {
+    const id = this.appointmentId++;
+    const newAppointment: Appointment = {
+      id,
+      userId: appointment.userId,
+      title: appointment.title,
+      type: appointment.type,
+      date: appointment.date,
+      location: appointment.location,
+      notes: appointment.notes,
+      createdAt: new Date()
+    };
+
+    // Initialize array if it doesn't exist
+    if (!this.appointments.has(appointment.userId)) {
+      this.appointments.set(appointment.userId, []);
+    }
+
+    // Add appointment to array
+    const entries = this.appointments.get(appointment.userId)!;
+    entries.push(newAppointment);
+
+    return newAppointment;
   }
 }
 
