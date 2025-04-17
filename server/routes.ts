@@ -9,6 +9,7 @@ import {
   generateSpeech, 
   transcribeSpeech 
 } from "./openai";
+import { sendWaitlistNotification } from "./email";
 import { pregnancyStageSchema, medicationCheckSchema, moodEntrySchema, waitlistSchema } from "@shared/schema";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
@@ -335,6 +336,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/waitlist", validateRequest(waitlistSchema), async (req: Request, res: Response) => {
     try {
       const entry = await storage.createWaitlistEntry(req.validatedData);
+      
+      // Send email notification to admin
+      const adminEmail = process.env.ADMIN_EMAIL || "admin@naumah.com"; // Replace with your email address
+      try {
+        await sendWaitlistNotification(adminEmail, req.validatedData);
+        console.log(`Waitlist notification email sent to ${adminEmail}`);
+      } catch (emailError) {
+        console.error("Failed to send waitlist notification email:", emailError);
+        // Don't fail the request if email sending fails
+      }
+      
       res.json(entry);
     } catch (error) {
       console.error("Error creating waitlist entry:", error);
