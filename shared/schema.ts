@@ -178,3 +178,40 @@ export interface Appointment {
   location?: string;
   createdAt: Date;
 }
+
+// Admin authentication schemas
+export const adminLoginSchema = z.object({
+  username: z.string().min(1, "Username is required"),
+  password: z.string().min(1, "Password is required"),
+});
+
+export type AdminLoginRequest = z.infer<typeof adminLoginSchema>;
+
+// Chat schema for AI assistant
+export const chatSchema = z.object({
+  message: z.string().min(1, "Message is required"),
+});
+
+export type ChatRequest = z.infer<typeof chatSchema>;
+
+// Speech generation schema
+export const speechSchema = z.object({
+  text: z.string().min(1, "Text is required"),
+});
+
+export type SpeechRequest = z.infer<typeof speechSchema>;
+
+// Baby names schema
+export const babyNamesSchema = z.object({
+  origin: z.string(),
+  gender: z.string(),
+});
+
+export type BabyNamesRequest = z.infer<typeof babyNamesSchema>;
+
+// Meal plan schema
+export const mealPlanSchema = z.object({
+  currentWeek: z.number().int().min(1).max(40),
+});
+
+export type MealPlanRequest = z.infer<typeof mealPlanSchema>;
