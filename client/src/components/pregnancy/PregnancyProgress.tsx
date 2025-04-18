@@ -33,7 +33,7 @@ const PregnancyProgress = ({ currentWeek }: PregnancyProgressProps) => {
           <div>
             <h2 className="text-2xl font-montserrat font-bold text-primary flex items-center">
               Your Pregnancy Journey
-              <span className="ml-2 bg-primary bg-opacity-10 text-primary text-sm py-1 px-3 rounded-full">{trimester}</span>
+              <span className="ml-2 bg-white text-primary text-sm py-1 px-3 rounded-full border border-primary font-semibold shadow-sm">{trimester}</span>
             </h2>
             <p className="text-neutral-dark mt-1">Currently in Week {currentWeek}</p>
           </div>
