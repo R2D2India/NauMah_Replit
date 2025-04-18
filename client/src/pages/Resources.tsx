@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useQuery } from "@tanstack/react-query";
+import ContactForm from "@/components/support/ContactForm";
 
 export default function Resources() {
   // Add state for selected FAQ category
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [contactFormOpen, setContactFormOpen] = useState(false);
   
   const { data: resources = {
     articles: [],
@@ -53,7 +55,7 @@ export default function Resources() {
   const getFAQsToShow = () => {
     const allFAQs = [
       // Existing FAQs from API
-      ...resources.faqs.map((faq, index) => ({
+      ...resources.faqs.map((faq: any, index: number) => ({
         ...faq,
         id: `item-${index}`,
       })),
