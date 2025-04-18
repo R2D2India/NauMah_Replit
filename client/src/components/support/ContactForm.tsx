@@ -66,8 +66,8 @@ export default function ContactForm({ open, onOpenChange }: ContactFormProps) {
       }
       
       toast({
-        title: "Message sent",
-        description: "Your message has been sent successfully. We'll get back to you soon."
+        title: "Message received",
+        description: "Your message has been received successfully. Our support team will respond soon."
       });
       
       // Reset form
@@ -98,7 +98,7 @@ export default function ContactForm({ open, onOpenChange }: ContactFormProps) {
         <DialogHeader>
           <DialogTitle>Contact Support</DialogTitle>
           <DialogDescription>
-            Fill out the form below to send a message to our support team.
+            Fill out the form below to submit a message to our support team.
           </DialogDescription>
         </DialogHeader>
         
