@@ -7,6 +7,8 @@ import {
   type WeightEntry,
   type SymptomEntry,
   type Appointment,
+  type SupportMessage,
+  type ContactFormData,
   waitlistTable
 } from "@shared/schema";
 import { addWeeks } from "date-fns";
@@ -47,6 +49,11 @@ export interface IStorage {
   // Appointments methods
   getAppointments(userId: number): Promise<Appointment[]>;
   createAppointment(appointment: { userId: number; title: string; type: string; date: Date; location?: string; notes?: string }): Promise<Appointment>;
+  
+  // Support messages methods
+  getSupportMessages(): Promise<SupportMessage[]>;
+  createSupportMessage(message: ContactFormData): Promise<SupportMessage>;
+  markSupportMessageAsRead(id: number): Promise<SupportMessage>;
 }
 
 export class MemStorage implements IStorage {

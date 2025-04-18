@@ -222,3 +222,25 @@ export const mealPlanSchema = z.object({
 });
 
 export type MealPlanRequest = z.infer<typeof mealPlanSchema>;
+
+// Support messages table and schema
+export const supportMessagesTable = pgTable("support_messages", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  subject: text("subject"),
+  message: text("message").notNull(),
+  isRead: boolean("is_read").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const contactSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Invalid email format"),
+  subject: z.string().optional(),
+  message: z.string().min(1, "Message is required")
+});
+
+export type ContactFormData = z.infer<typeof contactSchema>;
+export type SupportMessage = typeof supportMessagesTable.$inferSelect;
+export type InsertSupportMessage = typeof supportMessagesTable.$inferInsert;

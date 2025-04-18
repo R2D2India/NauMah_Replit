@@ -10,9 +10,12 @@ import {
   weightTrackingTable,
   symptomsTable,
   appointmentsTable,
+  supportMessagesTable,
   type WeightEntry,
   type SymptomEntry,
-  type Appointment
+  type Appointment,
+  type SupportMessage,
+  type ContactFormData
 } from "@shared/schema";
 import { IStorage } from './storage';
 import { addWeeks } from "date-fns";
