@@ -72,16 +72,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const data = await storage.getPregnancyData(userId);
-      if (!data) {
-        // Default data for new users
-        const defaultData = await storage.updatePregnancyStage(userId, {
-          stageType: "week",
-          stageValue: "13"
-        });
-        res.json(defaultData);
-      } else {
-        res.json(data);
-      }
+      
+      // Return the user's pregnancy data if it exists, otherwise return null
+      // This allows the frontend to prompt the user to set their own pregnancy stage
+      res.json(data || null);
     } catch (error) {
       console.error("Error fetching pregnancy data:", error);
       res.status(500).json({ message: "Failed to fetch pregnancy data" });
