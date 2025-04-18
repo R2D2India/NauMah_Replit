@@ -607,6 +607,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Support messages admin endpoints
+  app.get("/api/admin/support-messages", adminAuth, async (req: Request, res: Response) => {
+    try {
+      const messages = await storage.getSupportMessages();
+      res.json(messages);
+    } catch (error) {
+      console.error("Error getting support messages:", error);
+      res.status(500).json({ message: "Failed to get support messages" });
+    }
+  });
+  
+  app.post("/api/admin/support-messages/:id/mark-read", adminAuth, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid message ID" });
+      }
+      
+      const message = await storage.markSupportMessageAsRead(id);
+      res.json(message);
+    } catch (error) {
+      console.error("Error marking support message as read:", error);
+      res.status(500).json({ message: "Failed to update support message" });
+    }
+  });
+
   // Create HTTP server
   // Weight tracking endpoints
   app.get("/api/weight-tracking", async (req: Request, res: Response) => {

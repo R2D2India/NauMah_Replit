@@ -82,6 +82,7 @@ export class MemStorage implements IStorage {
     this.weightEntries = new Map();
     this.symptomEntries = new Map();
     this.appointments = new Map();
+    this.supportMessages = [];
     this.currentId = 1;
     this.pregnancyDataId = 1;
     this.moodEntryId = 1;
@@ -89,6 +90,7 @@ export class MemStorage implements IStorage {
     this.weightEntryId = 1;
     this.symptomEntryId = 1;
     this.appointmentId = 1;
+    this.supportMessageId = 1;
   }
 
   // User methods
@@ -319,6 +321,41 @@ export class MemStorage implements IStorage {
     entries.push(newAppointment);
 
     return newAppointment;
+  }
+  
+  // Support messages methods
+  async getSupportMessages(): Promise<SupportMessage[]> {
+    return this.supportMessages;
+  }
+  
+  async createSupportMessage(message: ContactFormData): Promise<SupportMessage> {
+    const id = this.supportMessageId++;
+    const supportMessage: SupportMessage = {
+      id,
+      name: message.name,
+      email: message.email,
+      subject: message.subject || null,
+      message: message.message,
+      isRead: false,
+      createdAt: new Date()
+    };
+    
+    this.supportMessages.push(supportMessage);
+    return supportMessage;
+  }
+  
+  async markSupportMessageAsRead(id: number): Promise<SupportMessage> {
+    const index = this.supportMessages.findIndex(message => message.id === id);
+    if (index === -1) {
+      throw new Error(`Support message with ID ${id} not found`);
+    }
+    
+    this.supportMessages[index] = {
+      ...this.supportMessages[index],
+      isRead: true
+    };
+    
+    return this.supportMessages[index];
   }
 }
 
