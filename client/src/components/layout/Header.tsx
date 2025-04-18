@@ -23,7 +23,7 @@ const Header = () => {
         <nav className="hidden md:flex space-x-6">
           <Link href="/dashboard">
             <span className={`font-medium ${isActive("/dashboard") ? "text-primary" : "text-neutral-dark hover:text-primary"} transition cursor-pointer`}>
-              Pregnancy AI Tool Kit
+              Baby & Me
             </span>
           </Link>
           <Link href="/tracker">
@@ -62,7 +62,7 @@ const Header = () => {
           <nav className="flex flex-col space-y-3">
             <Link href="/dashboard">
               <span className={`font-medium ${isActive("/dashboard") ? "text-primary" : "text-neutral-dark"} py-2 block cursor-pointer`}>
-                Pregnancy AI Tool Kit
+                Baby & Me
               </span>
             </Link>
             <Link href="/tracker">
