@@ -124,11 +124,11 @@ export default function Resources() {
     return allFAQs.filter(faq => faq.category === selectedCategory);
   };
 
-  const handleSearchChange = (e) => {
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
-  const handleCategoryClick = (category) => {
+  const handleCategoryClick = (category: string) => {
     setSelectedCategory(category);
   };
 
@@ -144,7 +144,7 @@ export default function Resources() {
       <h1 className="text-3xl font-bold mb-6">Pregnancy Resources</h1>
       
       <div className="grid md:grid-cols-2 gap-6 mb-8">
-        {resources.articles.map((article, index) => (
+        {resources.articles.map((article: any, index: number) => (
           <Card key={index}>
             <img src={article.image} alt={article.title} className="w-full h-48 object-cover rounded-t-lg" />
             <CardHeader>
@@ -291,14 +291,17 @@ export default function Resources() {
               <span>Can't find an answer to your question?</span>
             </div>
             <div className="flex space-x-3">
-              <button className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium shadow-sm hover:shadow-md transition-all duration-300">
-                Ask AI Assistant
-              </button>
-              <button className="px-4 py-2 border border-primary text-primary rounded-lg text-sm font-medium hover:bg-primary/5 transition-all duration-300">
+              <button 
+                className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium shadow-sm hover:shadow-md transition-all duration-300"
+                onClick={() => setContactFormOpen(true)}
+              >
                 Contact Support
               </button>
             </div>
           </div>
+          
+          {/* Contact Form Dialog */}
+          <ContactForm open={contactFormOpen} onOpenChange={setContactFormOpen} />
         </CardContent>
       </Card>
     </div>

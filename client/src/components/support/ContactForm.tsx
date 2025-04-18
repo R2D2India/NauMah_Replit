@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 
@@ -51,28 +51,35 @@ export default function ContactForm({ open, onOpenChange }: ContactFormProps) {
     setIsSubmitting(true);
 
     try {
-      const response = await apiRequest("POST", "/api/contact", formData);
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(formData),
+        credentials: "include"
+      });
       
-      if (response.ok) {
-        toast({
-          title: "Message sent",
-          description: "Your message has been sent successfully. We'll get back to you soon."
-        });
-        
-        // Reset form
-        setFormData({
-          name: "",
-          email: "",
-          subject: "",
-          message: ""
-        });
-        
-        // Close dialog
-        onOpenChange(false);
-      } else {
+      if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Failed to send message");
       }
+      
+      toast({
+        title: "Message sent",
+        description: "Your message has been sent successfully. We'll get back to you soon."
+      });
+      
+      // Reset form
+      setFormData({
+        name: "",
+        email: "",
+        subject: "",
+        message: ""
+      });
+      
+      // Close dialog
+      onOpenChange(false);
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Something went wrong. Please try again later.";
       toast({
