@@ -90,7 +90,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/pregnancy/stage", validateRequest(pregnancyStageSchema), async (req: Request, res: Response) => {
     try {
-      const userId = demoUserId;
+      // Get userId from session
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "User session not found" });
+      }
+      
       const data = await storage.updatePregnancyStage(userId, req.validatedData);
       res.json(data);
     } catch (error) {
@@ -102,7 +107,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Mood tracking endpoints
   app.get("/api/mood", async (req: Request, res: Response) => {
     try {
-      const userId = demoUserId;
+      // Get userId from session
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "User session not found" });
+      }
+      
       const entries = await storage.getMoodEntries(userId);
       res.json(entries);
     } catch (error) {
@@ -113,7 +123,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/mood", validateRequest(moodEntrySchema), async (req: Request, res: Response) => {
     try {
-      const userId = demoUserId;
+      // Get userId from session
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "User session not found" });
+      }
+      
       const entry = await storage.createMoodEntry({
         ...req.validatedData,
         userId,
@@ -128,7 +143,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Medication check endpoints
   app.get("/api/medication", async (req: Request, res: Response) => {
     try {
-      const userId = demoUserId;
+      // Get userId from session
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "User session not found" });
+      }
+      
       const checks = await storage.getMedicationChecks(userId);
       res.json(checks);
     } catch (error) {
@@ -142,7 +162,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Check medication safety for pregnancy
   app.post("/api/medication/check", validateRequest(medicationCheckSchema), async (req: Request, res: Response) => {
     try {
-      const userId = demoUserId;
+      // Get userId from session
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "User session not found" });
+      }
+      
       const { medicationName } = req.validatedData;
 
       const safetyInfo = await checkMedicationSafety(medicationName);
@@ -168,7 +193,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Analyze product image for safety (food or medication)
   app.post("/api/product/image-check", validateRequest(productImageCheckSchema), async (req: Request, res: Response) => {
     try {
-      const userId = demoUserId;
+      // Get userId from session
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "User session not found" });
+      }
+      
       const { imageBase64 } = req.validatedData;
       
       const safetyInfo = await analyzeProductImageForSafety(imageBase64);
@@ -758,7 +788,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Journal entries endpoints
   app.get("/api/journal", async (req: Request, res: Response) => {
     try {
-      const userId = demoUserId;
+      // Get userId from session
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "User session not found" });
+      }
+      
       const entries = await storage.getJournalEntries(userId);
       res.json(entries);
     } catch (error) {
@@ -769,7 +804,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/journal/:id", async (req: Request, res: Response) => {
     try {
-      const userId = demoUserId;
+      // Get userId from session
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "User session not found" });
+      }
+      
       const entryId = parseInt(req.params.id);
       
       if (isNaN(entryId)) {
