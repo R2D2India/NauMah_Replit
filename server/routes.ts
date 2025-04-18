@@ -717,38 +717,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Contact form endpoint
   app.post("/api/contact", validateRequest(contactSchema), async (req: Request, res: Response) => {
     try {
-      const { name, email, subject, message } = req.validatedData;
+      const formData = req.validatedData;
       
-      if (!process.env.SENDGRID_API_KEY) {
-        return res.status(503).json({ 
-          message: "Email service is temporarily unavailable. Please try again later." 
-        });
-      }
+      // Store message in database instead of sending email
+      await storage.createSupportMessage(formData);
       
-      const emailSent = await sendEmail({
-        to: "asknaumah@gmail.com",
-        from: "info@sendgrid.net", // Using a default SendGrid sender email
-        subject: subject ? `Contact Form: ${subject}` : "New Contact Form Submission",
-        html: `
-          <h1>New Contact Form Submission</h1>
-          <p><strong>From:</strong> ${name} (${email})</p>
-          <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
-          <h2>Message:</h2>
-          <p>${message.replace(/\n/g, '<br>')}</p>
-        `
+      return res.status(200).json({ 
+        message: "Your message has been received successfully. We'll get back to you soon." 
       });
-      
-      if (emailSent) {
-        return res.status(200).json({ 
-          message: "Your message has been sent successfully. We'll get back to you soon." 
-        });
-      } else {
-        throw new Error("Failed to send email");
-      }
     } catch (error) {
-      console.error("Error sending contact form:", error);
+      console.error("Error saving contact form:", error);
       res.status(500).json({ 
-        message: "Failed to send your message. Please try again later.",
+        message: "Failed to save your message. Please try again later.",
         error: process.env.NODE_ENV === 'development' ? String(error) : undefined
       });
     }

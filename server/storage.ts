@@ -64,6 +64,7 @@ export class MemStorage implements IStorage {
   private weightEntries: Map<number, WeightEntry[]>; // userId -> entries
   private symptomEntries: Map<number, SymptomEntry[]>; // userId -> entries
   private appointments: Map<number, Appointment[]>; // userId -> entries
+  private supportMessages: SupportMessage[]; // all support messages
   private currentId: number;
   private pregnancyDataId: number;
   private moodEntryId: number;
@@ -71,6 +72,7 @@ export class MemStorage implements IStorage {
   private weightEntryId: number;
   private symptomEntryId: number;
   private appointmentId: number;
+  private supportMessageId: number;
 
   constructor() {
     this.users = new Map();

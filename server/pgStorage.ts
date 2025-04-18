@@ -224,4 +224,29 @@ export class PgStorage implements IStorage {
       location: results[0].location || undefined
     };
   }
+
+  // Support messages methods
+  async getSupportMessages(): Promise<SupportMessage[]> {
+    return await db.select().from(supportMessagesTable).orderBy(desc(supportMessagesTable.createdAt));
+  }
+
+  async createSupportMessage(message: ContactFormData): Promise<SupportMessage> {
+    const results = await db.insert(supportMessagesTable).values({
+      name: message.name,
+      email: message.email,
+      subject: message.subject || null,
+      message: message.message,
+      isRead: false,
+      createdAt: new Date()
+    }).returning();
+    return results[0];
+  }
+
+  async markSupportMessageAsRead(id: number): Promise<SupportMessage> {
+    const results = await db.update(supportMessagesTable)
+      .set({ isRead: true })
+      .where(eq(supportMessagesTable.id, id))
+      .returning();
+    return results[0];
+  }
 }
