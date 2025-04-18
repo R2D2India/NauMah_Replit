@@ -10,7 +10,7 @@ import {
   transcribeSpeech,
   analyzeProductImageForSafety
 } from "./openai";
-import { sendWaitlistNotification } from "./email";
+import { sendWaitlistNotification, sendEmail } from "./email";
 import { 
   pregnancyStageSchema, 
   medicationCheckSchema, 
@@ -40,6 +40,16 @@ declare global {
     }
   }
 }
+
+// Contact form schema
+const contactSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Invalid email address"),
+  subject: z.string().optional(),
+  message: z.string().min(1, "Message is required")
+});
+
+type ContactFormData = z.infer<typeof contactSchema>;
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Middleware to handle validation errors consistently
