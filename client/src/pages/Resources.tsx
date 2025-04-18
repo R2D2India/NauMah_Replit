@@ -1,9 +1,14 @@
 
+import * as React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useQuery } from "@tanstack/react-query";
 
 export default function Resources() {
+  // Add state for selected FAQ category
+  const [selectedCategory, setSelectedCategory] = React.useState("all");
+  const [searchQuery, setSearchQuery] = React.useState("");
+  
   const { data: resources = {
     articles: [],
     faqs: []
@@ -30,11 +35,13 @@ export default function Resources() {
           faqs: [
             {
               question: "What foods should I avoid during pregnancy?",
-              answer: "During pregnancy, it's important to avoid: raw or undercooked meat..."
+              answer: "During pregnancy, it's important to avoid: raw or undercooked meat...",
+              category: "nutrition"
             },
             {
               question: "How much weight should I gain?",
-              answer: "The recommended weight gain during pregnancy varies based on your starting BMI..."
+              answer: "The recommended weight gain during pregnancy varies based on your starting BMI...",
+              category: "nutrition"
             }
           ]
         };
