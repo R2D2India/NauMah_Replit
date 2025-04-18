@@ -22,7 +22,8 @@ import {
   mealPlanSchema,
   adminLoginSchema,
   productImageCheckSchema,
-  contactSchema
+  contactSchema,
+  ContactFormData
 } from "@shared/schema";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
@@ -41,9 +42,6 @@ declare global {
     }
   }
 }
-
-// Use ContactFormData type from schema
-import { ContactFormData } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Middleware to handle validation errors consistently
