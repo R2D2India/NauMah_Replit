@@ -121,48 +121,81 @@ const AdditionalFeatures = ({ currentWeek }: AdditionalFeaturesProps) => {
     reader.readAsDataURL(file);
   };
 
+  // State to manage camera UI
+  const [showCamera, setShowCamera] = useState(false);
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  
   const handleCameraCapture = async () => {
     try {
+      // Show camera interface
+      setShowCamera(true);
+      
+      // Camera constraints - prefer rear camera if available
+      const constraints = {
+        video: {
+          facingMode: { ideal: "environment" }, // Prefer rear camera
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        }
+      };
+      
       // Access the user's camera
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      setCameraStream(stream);
       
-      // Create video and canvas elements for capturing
-      const video = document.createElement('video');
-      const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d');
-      
-      // Set up the video stream
-      video.srcObject = stream;
-      video.play();
-      
-      // Take the picture after a slight delay to allow the camera to initialize
-      setTimeout(() => {
-        // Set canvas dimensions to match video
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        
-        // Draw the current video frame to the canvas
-        context?.drawImage(video, 0, 0, canvas.width, canvas.height);
-        
-        // Convert canvas to base64
-        const imageDataUrl = canvas.toDataURL('image/jpeg');
-        const base64Data = imageDataUrl.split(',')[1];
-        
-        // Stop all video streams
-        stream.getTracks().forEach(track => track.stop());
-        
-        // Update state with the captured image
-        setImagePreview(imageDataUrl);
-        analyzeProductImageMutation.mutate({ imageBase64: base64Data });
-      }, 500);
+      // Set the stream to the video element
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play();
+      }
     } catch (error) {
       console.error('Error accessing camera:', error);
+      setShowCamera(false);
+      
       toast({
         title: "Camera access denied",
         description: "Please allow camera access to use this feature or upload an image instead.",
         variant: "destructive",
       });
     }
+  };
+  
+  const takePicture = () => {
+    if (!videoRef.current || !cameraStream) return;
+    
+    // Create a canvas to capture the image
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    
+    // Set canvas dimensions to match video
+    canvas.width = videoRef.current.videoWidth;
+    canvas.height = videoRef.current.videoHeight;
+    
+    // Draw the current video frame to the canvas
+    context?.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+    
+    // Convert canvas to base64
+    const imageDataUrl = canvas.toDataURL('image/jpeg');
+    const base64Data = imageDataUrl.split(',')[1];
+    
+    // Stop all video streams and hide camera
+    cameraStream.getTracks().forEach(track => track.stop());
+    setCameraStream(null);
+    setShowCamera(false);
+    
+    // Update state with the captured image
+    setImagePreview(imageDataUrl);
+    analyzeProductImageMutation.mutate({ imageBase64: base64Data });
+  };
+  
+  const cancelCamera = () => {
+    // Stop all video streams and hide camera
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop());
+      setCameraStream(null);
+    }
+    setShowCamera(false);
   };
 
   const clearImagePreview = () => {
@@ -246,6 +279,48 @@ const AdditionalFeatures = ({ currentWeek }: AdditionalFeaturesProps) => {
           </button>
         </div>
         
+        {/* Camera UI when active */}
+        {showCamera && (
+          <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-lg overflow-hidden">
+              <div className="p-4 border-b flex justify-between items-center">
+                <h3 className="font-bold text-lg text-primary">Take a Photo</h3>
+                <button 
+                  onClick={cancelCamera}
+                  className="text-gray-500 hover:text-red-500"
+                >
+                  ✕
+                </button>
+              </div>
+              
+              <div className="relative bg-black">
+                <video 
+                  ref={videoRef}
+                  autoPlay 
+                  playsInline
+                  className="w-full h-auto"
+                  style={{ maxHeight: '70vh' }}
+                ></video>
+              </div>
+              
+              <div className="p-4 flex justify-between">
+                <button 
+                  onClick={cancelCamera}
+                  className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg font-medium transition"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={takePicture}
+                  className="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium transition"
+                >
+                  Take Photo
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        
         {/* Camera and upload buttons */}
         <div className="mt-4">
           <p className="mb-2 font-medium">Or analyze a product label:</p>
@@ -253,7 +328,7 @@ const AdditionalFeatures = ({ currentWeek }: AdditionalFeaturesProps) => {
             <button
               className="flex items-center justify-center bg-gray-50 hover:bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg p-3 flex-1 transition"
               onClick={handleCameraCapture}
-              disabled={analyzeProductImageMutation.isPending}
+              disabled={analyzeProductImageMutation.isPending || showCamera}
             >
               <Camera className="mr-2 h-5 w-5 text-primary" />
               <span>Take Photo</span>
@@ -262,7 +337,7 @@ const AdditionalFeatures = ({ currentWeek }: AdditionalFeaturesProps) => {
             <button
               className="flex items-center justify-center bg-gray-50 hover:bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg p-3 flex-1 transition"
               onClick={() => fileInputRef.current?.click()}
-              disabled={analyzeProductImageMutation.isPending}
+              disabled={analyzeProductImageMutation.isPending || showCamera}
             >
               <FilePlus className="mr-2 h-5 w-5 text-primary" />
               <span>Upload Image</span>
