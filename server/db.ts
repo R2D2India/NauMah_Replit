@@ -86,6 +86,16 @@ export async function runMigrations() {
         notes TEXT,
         created_at TIMESTAMP DEFAULT NOW() NOT NULL
       );
+      
+      CREATE TABLE IF NOT EXISTS support_messages (
+        id SERIAL PRIMARY KEY,
+        name TEXT NOT NULL,
+        email TEXT NOT NULL,
+        subject TEXT,
+        message TEXT NOT NULL,
+        is_read BOOLEAN DEFAULT FALSE NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW() NOT NULL
+      );
     `);
     
     console.log('Database migrations completed successfully');
