@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, LogOut, RefreshCw, Users } from "lucide-react";
+import SupportMessages from "@/components/admin/SupportMessages";
 
 interface WaitlistEntry {
   id: number;
@@ -198,6 +199,11 @@ export default function AdminDashboard() {
           </p>
         </CardFooter>
       </Card>
+
+      {/* Support Messages Section */}
+      <div className="mb-8">
+        <SupportMessages />
+      </div>
     </div>
   );
 }
