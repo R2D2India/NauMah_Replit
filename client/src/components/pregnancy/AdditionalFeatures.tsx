@@ -266,7 +266,7 @@ const AdditionalFeatures = ({ currentWeek }: AdditionalFeaturesProps) => {
           <input 
             type="text" 
             className="flex-grow p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none" 
-            placeholder="Enter medication name..."
+            placeholder="Enter food or medication name..."
             value={medicationName}
             onChange={(e) => setMedicationName(e.target.value)}
           />
