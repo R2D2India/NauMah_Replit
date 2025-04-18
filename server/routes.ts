@@ -62,13 +62,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     };
   };
 
-  // Demo user ID for testing
-  const demoUserId = 1;
-
   // Pregnancy data endpoints
   app.get("/api/pregnancy", async (req: Request, res: Response) => {
     try {
-      const userId = demoUserId;
+      // Get userId from session
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "User session not found" });
+      }
+      
       const data = await storage.getPregnancyData(userId);
       if (!data) {
         // Default data for new users

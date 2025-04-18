@@ -8,6 +8,7 @@ import { runMigrations } from "./db";
 declare module "express-session" {
   interface SessionData {
     isAdmin?: boolean;
+    userId?: number; // Add userId to store unique user identifier
   }
 }
 
@@ -19,7 +20,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(session({
   secret: process.env.SESSION_SECRET || 'naumah-admin-secret-key',
   resave: false,
-  saveUninitialized: false,
+  saveUninitialized: true, // Changed to true to save session for new users
   cookie: {
     secure: false, // Set to false in development for localhost testing
     httpOnly: true,
@@ -27,6 +28,19 @@ app.use(session({
     sameSite: 'lax' // Allow cross-site requests
   }
 }));
+
+// User session middleware - assigns a unique user ID to each session
+app.use((req, res, next) => {
+  if (!req.session.userId) {
+    // Generate a unique user ID for this session
+    // We're using a timestamp + random number to make it unique
+    const timestamp = Date.now();
+    const random = Math.floor(Math.random() * 10000);
+    req.session.userId = timestamp + random;
+    console.log(`Created new user session with ID: ${req.session.userId}`);
+  }
+  next();
+});
 
 // Add CORS headers for deployed environments
 app.use((req, res, next) => {
