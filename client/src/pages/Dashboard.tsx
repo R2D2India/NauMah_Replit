@@ -70,10 +70,10 @@ const Dashboard = () => {
   const currentWeek = pregnancyData?.currentWeek || 1;
 
   return (
-    <div id="baby-and-me-section">
+    <div id="pregnancy-ai-toolkit-section">
       {/* Page Title */}
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-primary font-montserrat">Baby & Me</h1>
+        <h1 className="text-3xl font-bold text-primary font-montserrat">Pregnancy AI Tool Kit</h1>
         <p className="text-neutral-dark mt-2">Track your pregnancy journey and baby's development</p>
       </div>
       
