@@ -662,7 +662,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Weight tracking endpoints
   app.get("/api/weight-tracking", async (req: Request, res: Response) => {
     try {
-      const userId = demoUserId;
+      // Get userId from session
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "User session not found" });
+      }
+      
       const weightEntries = await storage.getWeightEntries(userId);
       res.json(weightEntries);
     } catch (error) {
@@ -673,7 +678,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/weight-tracking", async (req: Request, res: Response) => {
     try {
-      const userId = demoUserId;
+      // Get userId from session
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "User session not found" });
+      }
+      
       const { weight, date, notes } = req.body;
       
       if (!weight || !date) {
@@ -697,7 +707,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Symptoms endpoints
   app.get("/api/symptoms", async (req: Request, res: Response) => {
     try {
-      const userId = demoUserId;
+      // Get userId from session
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "User session not found" });
+      }
+      
       const symptoms = await storage.getSymptomEntries(userId);
       res.json(symptoms);
     } catch (error) {
@@ -708,7 +723,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/symptoms", async (req: Request, res: Response) => {
     try {
-      const userId = demoUserId;
+      // Get userId from session
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "User session not found" });
+      }
+      
       const { type, severity, notes, date } = req.body;
       
       if (!type || !severity || !date) {
@@ -733,7 +753,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Appointments endpoints
   app.get("/api/appointments", async (req: Request, res: Response) => {
     try {
-      const userId = demoUserId;
+      // Get userId from session
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "User session not found" });
+      }
+      
       const appointments = await storage.getAppointments(userId);
       res.json(appointments);
     } catch (error) {
@@ -744,7 +769,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/appointments", async (req: Request, res: Response) => {
     try {
-      const userId = demoUserId;
+      // Get userId from session
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "User session not found" });
+      }
+      
       const { title, type, location, notes, date } = req.body;
       
       if (!title || !type || !date) {
@@ -836,7 +866,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/journal", validateRequest(journalEntrySchema), async (req: Request, res: Response) => {
     try {
-      const userId = demoUserId;
+      // Get userId from session
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "User session not found" });
+      }
+      
       const journalData = req.validatedData;
       
       const entry = await storage.createJournalEntry({
