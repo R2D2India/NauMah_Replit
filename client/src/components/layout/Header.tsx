@@ -28,7 +28,7 @@ const Header = () => {
           </Link>
           <Link href="/dashboard">
             <span className={`font-medium ${isActive("/dashboard") ? "text-primary" : "text-neutral-dark hover:text-primary"} transition cursor-pointer`}>
-              Dashboard
+              Baby & Me
             </span>
           </Link>
           <Link href="/tracker">
@@ -72,7 +72,7 @@ const Header = () => {
             </Link>
             <Link href="/dashboard">
               <span className={`font-medium ${isActive("/dashboard") ? "text-primary" : "text-neutral-dark"} py-2 block cursor-pointer`}>
-                Dashboard
+                Baby & Me
               </span>
             </Link>
             <Link href="/tracker">

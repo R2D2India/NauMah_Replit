@@ -16,8 +16,16 @@ const Dashboard = () => {
   const [stageType, setStageType] = useState("week");
   const [stageValue, setStageValue] = useState("");
 
+  // Define pregnancy data type
+  interface PregnancyData {
+    currentWeek: number;
+    dueDate?: string;
+    startDate?: string;
+    [key: string]: any;
+  }
+  
   // Fetch pregnancy data
-  const { data: pregnancyData, isLoading, isError, refetch } = useQuery({
+  const { data: pregnancyData, isLoading, isError, refetch } = useQuery<PregnancyData>({
     queryKey: ["/api/pregnancy"],
   });
 
@@ -62,7 +70,13 @@ const Dashboard = () => {
   const currentWeek = pregnancyData?.currentWeek || 1;
 
   return (
-    <div id="dashboard-section">
+    <div id="baby-and-me-section">
+      {/* Page Title */}
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold text-primary font-montserrat">Baby & Me</h1>
+        <p className="text-neutral-dark mt-2">Track your pregnancy journey and baby's development</p>
+      </div>
+      
       {/* Pregnancy Stage Selector */}
       <div className="bg-white rounded-xl p-6 mb-8 custom-shadow">
         <h2 className="text-xl font-montserrat font-bold text-primary mb-4">Update Pregnancy Stage</h2>
