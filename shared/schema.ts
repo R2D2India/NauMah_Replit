@@ -257,7 +257,9 @@ export const journalEntrySchema = z.object({
   title: z.string().min(1, "Title is required"),
   content: z.string().min(1, "Content is required"),
   mood: z.string().optional(),
-  date: z.date().default(new Date())
+  date: z.union([z.string(), z.date()]).transform(val => 
+    typeof val === 'string' ? new Date(val) : val
+  )
 });
 
 export type JournalEntryRequest = z.infer<typeof journalEntrySchema>;
