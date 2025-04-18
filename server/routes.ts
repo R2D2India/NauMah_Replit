@@ -21,7 +21,8 @@ import {
   babyNamesSchema, 
   mealPlanSchema,
   adminLoginSchema,
-  productImageCheckSchema
+  productImageCheckSchema,
+  contactSchema
 } from "@shared/schema";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
@@ -41,15 +42,8 @@ declare global {
   }
 }
 
-// Contact form schema
-const contactSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email address"),
-  subject: z.string().optional(),
-  message: z.string().min(1, "Message is required")
-});
-
-type ContactFormData = z.infer<typeof contactSchema>;
+// Use ContactFormData type from schema
+import { ContactFormData } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Middleware to handle validation errors consistently
