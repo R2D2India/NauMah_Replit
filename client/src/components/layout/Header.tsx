@@ -18,7 +18,7 @@ const Header = () => {
             </div>
             <span className="text-xl md:text-2xl font-montserrat font-semibold text-primary relative">
               NauMah
-              <span className="absolute -top-2 -right-4 text-xs">™</span>
+              <span className="absolute -top-2 -right-2 text-xs">™</span>
             </span>
           </Link>
         </div>
