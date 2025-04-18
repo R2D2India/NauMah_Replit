@@ -12,15 +12,20 @@ const Header = () => {
     <header className="bg-white shadow-sm">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <div className="flex items-center space-x-2">
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center">
+          <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity duration-200" title="Return to Home">
+            <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center shadow-sm">
               <i className="fas fa-baby text-white"></i>
             </div>
-            <span className="text-xl md:text-2xl font-montserrat font-semibold text-primary cursor-pointer">NauMah</span>
+            <span className="text-xl md:text-2xl font-montserrat font-semibold text-primary">NauMah</span>
           </Link>
         </div>
         
         <nav className="hidden md:flex space-x-6">
+          <Link href="/">
+            <span className={`font-medium ${isActive("/") ? "text-primary" : "text-neutral-dark hover:text-primary"} transition cursor-pointer`}>
+              Home
+            </span>
+          </Link>
           <Link href="/dashboard">
             <span className={`font-medium ${isActive("/dashboard") ? "text-primary" : "text-neutral-dark hover:text-primary"} transition cursor-pointer`}>
               Dashboard
@@ -60,6 +65,11 @@ const Header = () => {
       {mobileMenuOpen && (
         <div className="md:hidden bg-white border-t border-gray-100 px-4 py-3">
           <nav className="flex flex-col space-y-3">
+            <Link href="/">
+              <span className={`font-medium ${isActive("/") ? "text-primary" : "text-neutral-dark"} py-2 block cursor-pointer`}>
+                Home
+              </span>
+            </Link>
             <Link href="/dashboard">
               <span className={`font-medium ${isActive("/dashboard") ? "text-primary" : "text-neutral-dark"} py-2 block cursor-pointer`}>
                 Dashboard
