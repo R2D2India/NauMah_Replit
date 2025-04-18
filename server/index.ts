@@ -32,11 +32,11 @@ app.use(session({
 // User session middleware - assigns a unique user ID to each session
 app.use((req, res, next) => {
   if (!req.session.userId) {
-    // Generate a unique user ID for this session
-    // We're using a timestamp + random number to make it unique
-    const timestamp = Date.now();
-    const random = Math.floor(Math.random() * 10000);
-    req.session.userId = timestamp + random;
+    // Generate a unique user ID for this session that's compatible with PostgreSQL integer type
+    // PostgreSQL integers have a range of -2147483648 to +2147483647
+    // We'll use a smaller random number to ensure compatibility
+    const userId = Math.floor(Math.random() * 1000000) + 1; // Random number between 1 and 1,000,000
+    req.session.userId = userId;
     console.log(`Created new user session with ID: ${req.session.userId}`);
   }
   next();
