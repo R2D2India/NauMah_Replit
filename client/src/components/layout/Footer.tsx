@@ -10,7 +10,10 @@ const Footer = () => {
               <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center mr-2">
                 <i className="fas fa-baby text-white text-sm"></i>
               </div>
-              <span className="text-primary font-montserrat font-semibold">NauMah</span>
+              <span className="text-primary font-montserrat font-semibold relative">
+                NauMah
+                <span className="absolute -top-1.5 -right-3 text-xs">™</span>
+              </span>
             </div>
             <p className="text-sm text-neutral-dark mt-2 text-center md:text-left">Your AI Pregnancy Companion</p>
           </div>

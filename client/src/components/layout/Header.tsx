@@ -16,7 +16,10 @@ const Header = () => {
             <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center shadow-sm">
               <i className="fas fa-baby text-white"></i>
             </div>
-            <span className="text-xl md:text-2xl font-montserrat font-semibold text-primary">NauMah</span>
+            <span className="text-xl md:text-2xl font-montserrat font-semibold text-primary relative">
+              NauMah
+              <span className="absolute -top-2 -right-4 text-xs">™</span>
+            </span>
           </Link>
         </div>
         
