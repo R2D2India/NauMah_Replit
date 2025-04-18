@@ -21,11 +21,6 @@ const Header = () => {
         </div>
         
         <nav className="hidden md:flex space-x-6">
-          <Link href="/">
-            <span className={`font-medium ${isActive("/") ? "text-primary" : "text-neutral-dark hover:text-primary"} transition cursor-pointer`}>
-              Home
-            </span>
-          </Link>
           <Link href="/dashboard">
             <span className={`font-medium ${isActive("/dashboard") ? "text-primary" : "text-neutral-dark hover:text-primary"} transition cursor-pointer`}>
               Baby & Me
@@ -65,11 +60,6 @@ const Header = () => {
       {mobileMenuOpen && (
         <div className="md:hidden bg-white border-t border-gray-100 px-4 py-3">
           <nav className="flex flex-col space-y-3">
-            <Link href="/">
-              <span className={`font-medium ${isActive("/") ? "text-primary" : "text-neutral-dark"} py-2 block cursor-pointer`}>
-                Home
-              </span>
-            </Link>
             <Link href="/dashboard">
               <span className={`font-medium ${isActive("/dashboard") ? "text-primary" : "text-neutral-dark"} py-2 block cursor-pointer`}>
                 Baby & Me
