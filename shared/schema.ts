@@ -89,6 +89,13 @@ export const medicationCheckSchema = z.object({
 
 export type MedicationCheckRequest = z.infer<typeof medicationCheckSchema>;
 
+export const productImageCheckSchema = z.object({
+  imageBase64: z.string().min(1, "Image data is required"),
+  productType: z.enum(["food", "medication", "unknown"]).optional(),
+});
+
+export type ProductImageCheckRequest = z.infer<typeof productImageCheckSchema>;
+
 // Mood entry schema
 export const moodEntrySchema = z.object({
   mood: z.enum(["great", "good", "okay", "low", "stressed"]),

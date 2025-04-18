@@ -7,7 +7,8 @@ import {
   generateBabyNames, 
   generateChatResponse, 
   generateSpeech, 
-  transcribeSpeech 
+  transcribeSpeech,
+  analyzeProductImageForSafety
 } from "./openai";
 import { sendWaitlistNotification } from "./email";
 import { 
@@ -19,7 +20,8 @@ import {
   speechSchema, 
   babyNamesSchema, 
   mealPlanSchema,
-  adminLoginSchema
+  adminLoginSchema,
+  productImageCheckSchema
 } from "@shared/schema";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
@@ -155,6 +157,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error checking medication:", error);
       res.status(500).json({ message: "Failed to check medication" });
+    }
+  });
+  
+  // Analyze product image for safety (food or medication)
+  app.post("/api/product/image-check", validateRequest(productImageCheckSchema), async (req: Request, res: Response) => {
+    try {
+      const userId = demoUserId;
+      const { imageBase64 } = req.validatedData;
+      
+      const safetyInfo = await analyzeProductImageForSafety(imageBase64);
+      
+      // Store the check in the database
+      if (safetyInfo.productType === "Medication") {
+        await storage.createMedicationCheck({
+          userId,
+          medicationName: safetyInfo.productName,
+          isSafe: safetyInfo.isSafe,
+          notes: safetyInfo.notes,
+        });
+      }
+      
+      res.json(safetyInfo);
+    } catch (error) {
+      console.error("Error analyzing product image:", error);
+      res.status(500).json({ message: "Failed to analyze product image" });
     }
   });
 

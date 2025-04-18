@@ -248,6 +248,57 @@ export async function checkMedicationSafety(medicationName: string): Promise<{
   return generateStructuredResponse(prompt, "You are a pharmacist with expertise in pregnancy medication safety.");
 }
 
+/**
+ * Analyze food or medication image for pregnancy safety
+ */
+export async function analyzeProductImageForSafety(imageBase64: string): Promise<{
+  productName: string;
+  productType: string; // "Food", "Medication", "Unknown"
+  isSafe: boolean | null;
+  notes: string;
+  ingredients?: string[];
+  risks?: string;
+  alternatives?: string[];
+}> {
+  try {
+    if (!openai) {
+      throw new Error("OpenAI client not initialized");
+    }
+
+    const completion = await openai.chat.completions.create({
+      model: MODEL,
+      messages: [
+        {
+          role: "system",
+          content: "You are a medical expert with expertise in pregnancy safety. Analyze images of food products or medications and assess their safety during pregnancy. Be detailed and evidence-based. Always respond with a well-structured JSON format."
+        },
+        {
+          role: "user", 
+          content: [
+            {
+              type: "text", 
+              text: "Analyze this image of a food product or medication label. Identify the product, determine if it's safe for pregnant women, and provide detailed safety information. Return your response as JSON with the structure: { productName: string, productType: string (Food/Medication/Unknown), isSafe: boolean | null, notes: string, ingredients?: string[], risks?: string, alternatives?: string[] }"
+            },
+            {
+              type: "image_url",
+              image_url: {
+                url: `data:image/jpeg;base64,${imageBase64}`
+              }
+            }
+          ]
+        }
+      ],
+      response_format: { type: "json_object" },
+      max_tokens: 800,
+    });
+
+    return JSON.parse(completion.choices[0].message.content || "{}");
+  } catch (error) {
+    console.error("Error analyzing product image for safety:", error);
+    throw new Error("Failed to analyze the product image");
+  }
+}
+
 export async function generateStructuredResponse<T>(
   prompt: string,
   context: string = "You are a helpful pregnancy assistant providing guidance and support to expecting mothers."
