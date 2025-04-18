@@ -14,7 +14,7 @@ interface JournalEntryProps {
     date: string;
     createdAt: string;
   };
-  onBack: () => void;
+  onBack: (e?: React.MouseEvent) => void;
 }
 
 export function JournalEntry({ entry, onBack }: JournalEntryProps) {
@@ -46,7 +46,7 @@ export function JournalEntry({ entry, onBack }: JournalEntryProps) {
     <>
       <CardHeader>
         <div className="flex justify-between items-center">
-          <Button variant="ghost" size="sm" onClick={onBack}>
+          <Button variant="ghost" size="sm" onClick={(e) => onBack(e)}>
             <ArrowLeft className="h-4 w-4 mr-1" />
             Back
           </Button>

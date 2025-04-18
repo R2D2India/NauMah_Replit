@@ -74,10 +74,17 @@ export default function Journal() {
   });
 
   // Function to show entry details
-  const handleViewEntry = (entry: JournalEntryType) => {
+  const handleViewEntry = (entry: JournalEntryType, e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    // Keep the scroll position
+    const scrollPosition = window.scrollY;
+    
     setSelectedEntry(entry);
     setIsCreateMode(false);
     setViewingAllEntries(false);
+    
+    // Restore scroll position after state update
+    setTimeout(() => window.scrollTo(0, scrollPosition), 0);
   };
 
   // Function to start creating a new entry
@@ -151,11 +158,11 @@ export default function Journal() {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
             <h2 className="text-2xl font-bold tracking-tight">My Journal Entries</h2>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="gap-1" onClick={handleBack}>
+              <Button variant="outline" size="sm" className="gap-1" onClick={(e) => handleBack(e)}>
                 <ArrowLeft className="h-4 w-4" />
                 Back
               </Button>
-              <Button className="gap-1" onClick={handleCreateEntry}>
+              <Button className="gap-1" onClick={(e) => handleCreateEntry(e)}>
                 <Plus className="h-4 w-4" />
                 New Entry
               </Button>
@@ -180,7 +187,7 @@ export default function Journal() {
             <div className="py-16 text-center text-muted-foreground flex flex-col items-center">
               <BookOpen className="h-12 w-12 mb-4" />
               <p className="mb-4">No journal entries yet.</p>
-              <Button onClick={handleCreateEntry}>Create Your First Entry</Button>
+              <Button onClick={(e) => handleCreateEntry(e)}>Create Your First Entry</Button>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -188,7 +195,7 @@ export default function Journal() {
                 <Card 
                   key={entry.id} 
                   className="cursor-pointer hover:bg-muted/50 transition-colors duration-200 flex flex-col h-full overflow-hidden"
-                  onClick={() => handleViewEntry(entry)}
+                  onClick={(e) => handleViewEntry(entry, e)}
                 >
                   <CardHeader className="pb-3 space-y-1">
                     <div className="flex items-center justify-between">
@@ -223,7 +230,7 @@ export default function Journal() {
           <div className="md:col-span-4">
             <Card 
               className="cursor-pointer shadow-sm hover:shadow-md hover:bg-muted/30 transition-all duration-200"
-              onClick={handleViewAllEntries}
+              onClick={(e) => handleViewAllEntries(e)}
             >
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center gap-2">
@@ -299,7 +306,7 @@ export default function Journal() {
                   <CardHeader className="pb-2 space-y-1">
                     <div className="flex justify-between items-center">
                       <CardTitle className="text-xl font-semibold">New Journal Entry</CardTitle>
-                      <Button variant="ghost" size="sm" className="gap-1" onClick={handleBack}>
+                      <Button variant="ghost" size="sm" className="gap-1" onClick={(e) => handleBack(e)}>
                         <ArrowLeft className="h-4 w-4" />
                         Back
                       </Button>
@@ -323,7 +330,7 @@ export default function Journal() {
                       Document your pregnancy journey with thoughts, feelings, and milestones. 
                       Create new entries or browse your existing ones.
                     </p>
-                    <Button size="lg" onClick={handleCreateEntry} className="gap-2">
+                    <Button size="lg" onClick={(e) => handleCreateEntry(e)} className="gap-2">
                       <Plus className="h-4 w-4" />
                       New Journal Entry
                     </Button>
