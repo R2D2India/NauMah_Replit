@@ -51,9 +51,22 @@ export function JournalEntryForm({ onSubmit, isSubmitting, defaultValues }: Jour
     'Mixed feelings',
   ];
 
+  // Prevent scrolling when the form is submitted
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    form.handleSubmit((data) => {
+      // Prevent scrolling by focusing on the current active element
+      const activeElement = document.activeElement as HTMLElement;
+      if (activeElement && activeElement.blur) {
+        activeElement.blur();
+      }
+      onSubmit(data);
+    })(e);
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6">
         <FormField
           control={form.control}
           name="title"

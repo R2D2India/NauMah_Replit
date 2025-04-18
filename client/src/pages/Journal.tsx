@@ -81,32 +81,59 @@ export default function Journal() {
   };
 
   // Function to start creating a new entry
-  const handleCreateEntry = () => {
+  const handleCreateEntry = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    // Keep the scroll position
+    const scrollPosition = window.scrollY;
+    
     setSelectedEntry(null);
     setIsCreateMode(true);
     setViewingAllEntries(false);
+    
+    // Restore scroll position after state update
+    setTimeout(() => window.scrollTo(0, scrollPosition), 0);
   };
 
   // Function to handle form submission
   const handleSubmit = (data: { title: string; content: string; mood?: string }) => {
+    // Keep the scroll position
+    const scrollPosition = window.scrollY;
+    
     createEntryMutation.mutate({
       ...data,
       date: new Date(), // Always use current date
     });
+    
+    // Restore scroll position after mutation
+    setTimeout(() => window.scrollTo(0, scrollPosition), 0);
   };
 
   // Function to go back to the entry list
-  const handleBack = () => {
+  const handleBack = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    // Keep the scroll position
+    const scrollPosition = window.scrollY;
+    
     setIsCreateMode(false);
     setSelectedEntry(null);
     setViewingAllEntries(false);
+    
+    // Restore scroll position after state update
+    setTimeout(() => window.scrollTo(0, scrollPosition), 0);
   };
   
   // Function to view all entries
-  const handleViewAllEntries = () => {
+  const handleViewAllEntries = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    // Keep the scroll position
+    const scrollPosition = window.scrollY;
+    
     setSelectedEntry(null);
     setIsCreateMode(false);
     setViewingAllEntries(true);
+    
+    // Reset scroll to top for the all entries view
+    setTimeout(() => window.scrollTo(0, 0), 0);
   };
 
   return (
