@@ -1,8 +1,9 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { SmilePlus, Smile, Meh, Frown, AlertTriangle, History, BookOpen, Loader2 } from "lucide-react";
 
 interface MoodEntry {
   id: number;
@@ -79,33 +80,47 @@ const MoodTracker = ({ currentWeek }: MoodTrackerProps) => {
     });
   };
 
+  // Updated with Lucide icons
   const moods = [
-    { id: "great", label: "Great", icon: "grin-stars", color: "text-yellow-500" },
-    { id: "good", label: "Good", icon: "smile", color: "text-green-500" },
-    { id: "okay", label: "Okay", icon: "meh", color: "text-blue-500" },
-    { id: "low", label: "Low", icon: "frown", color: "text-orange-500" },
-    { id: "stressed", label: "Stressed", icon: "tired", color: "text-red-500" },
+    { id: "great", label: "Great", icon: SmilePlus, color: "text-yellow-500", bgColor: "bg-yellow-100" },
+    { id: "good", label: "Good", icon: Smile, color: "text-green-500", bgColor: "bg-green-100" },
+    { id: "okay", label: "Okay", icon: Meh, color: "text-blue-500", bgColor: "bg-blue-100" },
+    { id: "low", label: "Low", icon: Frown, color: "text-orange-500", bgColor: "bg-orange-100" },
+    { id: "stressed", label: "Stressed", icon: AlertTriangle, color: "text-red-500", bgColor: "bg-red-100" },
   ];
 
   return (
     <div className="mb-8">
       <div className="bg-white rounded-xl p-6 custom-shadow">
-        <h3 className="text-xl font-montserrat font-bold text-primary mb-4">
-          <i className="fas fa-smile mr-2"></i>Daily Mood Tracker
+        <h3 className="text-xl font-montserrat font-bold text-primary mb-4 flex items-center">
+          <Smile className="mr-2 w-5 h-5" />
+          Daily Mood Tracker
         </h3>
         <p className="mb-5">Track your emotional well-being throughout your pregnancy journey.</p>
         
-        <div className="flex flex-wrap justify-center gap-4 mb-6">
-          {moods.map((mood) => (
-            <button 
-              key={mood.id}
-              className={`mood-btn h-16 w-16 rounded-full ${selectedMood === mood.id ? 'bg-secondary-light' : 'bg-neutral-light hover:bg-secondary-light'} flex flex-col items-center justify-center transition duration-300`}
-              onClick={() => setSelectedMood(mood.id)}
-            >
-              <i className={`fas fa-${mood.icon} text-2xl ${mood.color}`}></i>
-              <span className="text-xs mt-1">{mood.label}</span>
-            </button>
-          ))}
+        <div className="flex flex-wrap justify-center gap-6 mb-6">
+          {moods.map((mood) => {
+            const Icon = mood.icon;
+            const isSelected = selectedMood === mood.id;
+            return (
+              <button 
+                key={mood.id}
+                className={`mood-btn p-4 rounded-xl flex flex-col items-center justify-center transition-all duration-300 ${
+                  isSelected 
+                    ? `${mood.bgColor} border-2 border-${mood.color.split('-')[1]} shadow-md transform scale-110` 
+                    : 'bg-neutral-50 border-2 border-neutral-100 hover:border-neutral-200'
+                }`}
+                onClick={() => setSelectedMood(mood.id)}
+                aria-pressed={isSelected}
+                title={`Select ${mood.label} mood`}
+              >
+                <div className={`w-12 h-12 rounded-full ${isSelected ? mood.bgColor : 'bg-white'} flex items-center justify-center mb-2`}>
+                  <Icon className={`w-6 h-6 ${mood.color}`} />
+                </div>
+                <span className={`font-medium text-sm ${isSelected ? 'text-gray-800' : 'text-gray-600'}`}>{mood.label}</span>
+              </button>
+            );
+          })}
         </div>
         
         <div className="bg-neutral-light rounded-lg p-4 mb-4">
@@ -130,13 +145,14 @@ const MoodTracker = ({ currentWeek }: MoodTrackerProps) => {
 
       {/* Mood History */}
       <div className="bg-white rounded-xl p-6 custom-shadow mt-6">
-        <h3 className="text-xl font-montserrat font-bold text-primary mb-4">
-          <i className="fas fa-history mr-2"></i>Your Mood History
+        <h3 className="text-xl font-montserrat font-bold text-primary mb-4 flex items-center">
+          <History className="mr-2 w-5 h-5" />
+          Your Mood History
         </h3>
         
         {isLoadingMoodEntries ? (
           <div className="py-8 text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-primary border-r-transparent"></div>
+            <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary mb-2" />
             <p className="mt-3">Loading your mood history...</p>
           </div>
         ) : moodEntries.length > 0 ? (
@@ -146,20 +162,24 @@ const MoodTracker = ({ currentWeek }: MoodTrackerProps) => {
               const moodDetails = moods.find(m => m.id === entry.mood);
               
               return (
-                <div key={entry.id} className="bg-neutral-light p-3 rounded-lg flex items-start">
-                  <div className={`h-12 w-12 rounded-full bg-white flex items-center justify-center mr-3 ${moodDetails?.color}`}>
-                    <i className={`fas fa-${moodDetails?.icon} text-lg`}></i>
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start">
-                      <div className="font-semibold">{moodDetails?.label}</div>
-                      <div className="text-xs text-gray-500">
-                        {format(new Date(entry.createdAt), 'MMM d, yyyy')}
+                <div key={entry.id} className="bg-neutral-light p-4 rounded-lg flex items-start">
+                  {moodDetails && (
+                    <>
+                      <div className={`h-12 w-12 rounded-full ${moodDetails.bgColor} flex items-center justify-center mr-3 shadow-sm`}>
+                        <moodDetails.icon className={`w-6 h-6 ${moodDetails.color}`} />
                       </div>
-                    </div>
-                    {entry.note && <p className="text-sm mt-1">{entry.note}</p>}
-                    <div className="text-xs text-gray-500 mt-1">Week {entry.week}</div>
-                  </div>
+                      <div className="flex-1">
+                        <div className="flex justify-between items-start">
+                          <div className="font-semibold">{moodDetails.label}</div>
+                          <div className="text-xs text-gray-500">
+                            {format(new Date(entry.createdAt), 'MMM d, yyyy')}
+                          </div>
+                        </div>
+                        {entry.note && <p className="text-sm mt-1 text-gray-700">{entry.note}</p>}
+                        <div className="text-xs text-gray-500 mt-1">Week {entry.week}</div>
+                      </div>
+                    </>
+                  )}
                 </div>
               );
             })}
@@ -167,7 +187,7 @@ const MoodTracker = ({ currentWeek }: MoodTrackerProps) => {
         ) : (
           <div className="py-8 text-center">
             <div className="mx-auto bg-neutral-light w-16 h-16 rounded-full flex items-center justify-center mb-4">
-              <i className="fas fa-book text-xl text-gray-500"></i>
+              <BookOpen className="w-6 h-6 text-gray-500" />
             </div>
             <h4 className="font-montserrat font-medium mb-2">No mood entries yet</h4>
             <p className="text-gray-500 text-sm">
