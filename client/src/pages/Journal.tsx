@@ -1,20 +1,13 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar } from '@/components/ui/calendar';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
 import { format } from 'date-fns';
-import { CalendarIcon, Plus, PenLine, BookOpen } from 'lucide-react';
+import { Plus, PenLine, BookOpen } from 'lucide-react';
 import { queryClient, apiRequest } from '../lib/queryClient';
-import { JournalEntry } from '@/components/journal/JournalEntry';
-import { JournalEntryForm } from '@/components/journal/JournalEntryForm';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { JournalEntry } from '../components/journal/JournalEntry';
+import { JournalEntryForm } from '../components/journal/JournalEntryForm';
 
 interface JournalEntryType {
   id: number;
@@ -27,7 +20,6 @@ interface JournalEntryType {
 }
 
 export default function Journal() {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [selectedEntry, setSelectedEntry] = useState<JournalEntryType | null>(null);
   const [isCreateMode, setIsCreateMode] = useState(false);
   const { toast } = useToast();
@@ -62,7 +54,7 @@ export default function Journal() {
         description: 'Your journal entry has been saved successfully.',
       });
       setIsCreateMode(false);
-      queryClient.invalidateQueries({ queryKey: ['/api/journal'] });
+      queryClient.invalidateQueries(['/api/journal']);
     },
     onError: (error: Error) => {
       toast({
@@ -73,17 +65,10 @@ export default function Journal() {
     },
   });
 
-  // Get entries for the selected date
-  const entriesForSelectedDate = selectedDate
-    ? entries.filter(entry => {
-        const entryDate = new Date(entry.date);
-        return (
-          entryDate.getDate() === selectedDate.getDate() &&
-          entryDate.getMonth() === selectedDate.getMonth() &&
-          entryDate.getFullYear() === selectedDate.getFullYear()
-        );
-      })
-    : [];
+  // Sort entries by date (newest first)
+  const sortedEntries = [...entries].sort((a, b) => {
+    return new Date(b.date).getTime() - new Date(a.date).getTime();
+  });
 
   // Function to show entry details
   const handleViewEntry = (entry: JournalEntryType) => {
@@ -101,7 +86,7 @@ export default function Journal() {
   const handleSubmit = (data: { title: string; content: string; mood?: string }) => {
     createEntryMutation.mutate({
       ...data,
-      date: selectedDate || new Date(),
+      date: new Date(), // Always use current date
     });
   };
 
@@ -110,14 +95,6 @@ export default function Journal() {
     setIsCreateMode(false);
     setSelectedEntry(null);
   };
-
-  // Create a record of dates that have entries
-  const datesWithEntries = entries.reduce((dates: Record<string, boolean>, entry) => {
-    const date = new Date(entry.date);
-    const dateStr = format(date, 'yyyy-MM-dd');
-    dates[dateStr] = true;
-    return dates;
-  }, {});
 
   return (
     <div className="container mx-auto py-8">
@@ -129,45 +106,12 @@ export default function Journal() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Calendar and entry list section */}
-        <div className="md:col-span-1 space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Journal Calendar</CardTitle>
-              <CardDescription>Select a date to view or add entries</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={setSelectedDate}
-                className="rounded-md border"
-                modifiersStyles={{
-                  selected: {
-                    backgroundColor: 'var(--primary)',
-                    color: 'white',
-                  },
-                }}
-                modifiers={{
-                  hasEntry: (date) => {
-                    const dateStr = format(date, 'yyyy-MM-dd');
-                    return !!datesWithEntries[dateStr];
-                  },
-                }}
-                styles={{
-                  hasEntry: {
-                    fontWeight: 'bold',
-                    border: '2px solid var(--primary)',
-                  },
-                }}
-              />
-            </CardContent>
-          </Card>
-
+        {/* Entry list section */}
+        <div className="md:col-span-1">
           <Card>
             <CardHeader>
               <div className="flex justify-between items-center">
-                <CardTitle>Entries for {selectedDate && format(selectedDate, 'MMMM d, yyyy')}</CardTitle>
+                <CardTitle>Journal Entries</CardTitle>
                 <Button size="sm" variant="outline" onClick={handleCreateEntry}>
                   <Plus className="h-4 w-4 mr-1" />
                   New Entry
@@ -179,9 +123,9 @@ export default function Journal() {
                 <div className="py-4 text-center">Loading entries...</div>
               ) : isError ? (
                 <div className="py-4 text-center text-destructive">Failed to load journal entries</div>
-              ) : entriesForSelectedDate.length === 0 ? (
+              ) : sortedEntries.length === 0 ? (
                 <div className="py-4 text-center text-muted-foreground">
-                  No entries for this date.
+                  No journal entries yet.
                   <div className="mt-2">
                     <Button variant="secondary" size="sm" onClick={handleCreateEntry}>
                       <PenLine className="h-4 w-4 mr-1" />
@@ -191,12 +135,12 @@ export default function Journal() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {entriesForSelectedDate.map((entry) => (
+                  {sortedEntries.map((entry) => (
                     <Card key={entry.id} className="cursor-pointer hover:bg-muted/50" onClick={() => handleViewEntry(entry)}>
                       <CardContent className="p-4">
                         <div className="font-medium">{entry.title}</div>
                         <div className="text-sm text-muted-foreground mt-1">
-                          {format(new Date(entry.createdAt), 'h:mm a')} · {entry.mood || 'No mood'}
+                          {format(new Date(entry.date), 'MMMM d, yyyy')} · {entry.mood || 'No mood'}
                         </div>
                       </CardContent>
                     </Card>
@@ -220,7 +164,7 @@ export default function Journal() {
                     </Button>
                   </div>
                   <CardDescription>
-                    Record your thoughts and feelings for {selectedDate && format(selectedDate, 'MMMM d, yyyy')}
+                    Record your thoughts and feelings
                   </CardDescription>
                 </CardHeader>
                 <CardContent>

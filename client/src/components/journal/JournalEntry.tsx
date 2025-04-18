@@ -30,13 +30,13 @@ export function JournalEntry({ entry, onBack }: JournalEntryProps) {
     
     const moodLower = mood.toLowerCase();
     if (['happy', 'excited', 'joyful', 'grateful'].some(m => moodLower.includes(m))) {
-      return 'success';
+      return 'default';
     } else if (['sad', 'upset', 'depressed', 'disappointed'].some(m => moodLower.includes(m))) {
       return 'destructive';
     } else if (['anxious', 'worried', 'nervous', 'stressed'].some(m => moodLower.includes(m))) {
-      return 'warning';
+      return 'outline';
     } else if (['calm', 'peaceful', 'relaxed', 'content'].some(m => moodLower.includes(m))) {
-      return 'primary';
+      return 'secondary';
     }
     
     return 'secondary';
