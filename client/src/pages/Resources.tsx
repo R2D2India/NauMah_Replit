@@ -1,13 +1,12 @@
-
-import * as React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useQuery } from "@tanstack/react-query";
 
 export default function Resources() {
   // Add state for selected FAQ category
-  const [selectedCategory, setSelectedCategory] = React.useState("all");
-  const [searchQuery, setSearchQuery] = React.useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   
   const { data: resources = {
     articles: [],
@@ -50,12 +49,100 @@ export default function Resources() {
     }
   });
 
+  // Helper function to determine which FAQs to show based on category
+  const getFAQsToShow = () => {
+    const allFAQs = [
+      // Existing FAQs from API
+      ...resources.faqs.map((faq, index) => ({
+        ...faq,
+        id: `item-${index}`,
+      })),
+      
+      // Comprehensive FAQs
+      {
+        id: "comprehensive-1",
+        question: "When should I first see a doctor during pregnancy?",
+        answer: "You should schedule your first prenatal visit as soon as you know you're pregnant, ideally within the first 8 weeks. If you have a history of complications or medical conditions, you may need to see a doctor earlier. During this first visit, your doctor will confirm your pregnancy, estimate your due date, and begin monitoring your health.",
+        category: "general"
+      },
+      {
+        id: "comprehensive-2",
+        question: "How can I manage morning sickness?",
+        answer: "Morning sickness can be managed with several strategies: eat small frequent meals, avoid triggers like strong smells or spicy foods, try ginger tea or supplements, stay hydrated, and eat plain crackers before getting out of bed. If severe, consult your healthcare provider.",
+        category: "first-trimester"
+      },
+      {
+        id: "comprehensive-3",
+        question: "Is it safe to exercise during pregnancy?",
+        answer: "Yes, exercise is generally safe and beneficial during pregnancy. The American College of Obstetricians and Gynecologists recommends 150 minutes of moderate-intensity aerobic activity per week. Safe exercises include walking, swimming, stationary cycling, low-impact aerobics, and prenatal yoga. Avoid high-impact activities and consult your healthcare provider.",
+        category: "general"
+      },
+      {
+        id: "comprehensive-4",
+        question: "How does the NauMah AI assistant work?",
+        answer: "The NauMah AI assistant uses advanced artificial intelligence to provide personalized pregnancy guidance by analyzing your stage and health information, drawing from medical research, providing stage-specific recommendations, and learning from your interactions to become more personalized over time.",
+        category: "app-features"
+      },
+      {
+        id: "first-trimester",
+        question: "What are the key changes during the first trimester?",
+        answer: "The first trimester (weeks 1-12) brings several significant changes: morning sickness and nausea (peaks around week 9), frequent urination, fatigue and mood changes, breast tenderness, and food aversions and cravings. This is also when major organ development occurs in your baby. Regular prenatal care is crucial during this period.",
+        category: "first-trimester"
+      },
+      {
+        id: "second-trimester",
+        question: "What should I expect during the second trimester?",
+        answer: "The second trimester (weeks 13-26) is often considered the most comfortable. Your baby bump becomes visible, morning sickness typically subsides, energy levels increase, and you may feel baby movements. This is when most women have an anatomy scan ultrasound to check the baby's development and possibly learn the sex.",
+        category: "second-trimester"
+      },
+      {
+        id: "third-trimester",
+        question: "What happens in the third trimester?",
+        answer: "The third trimester (weeks 27-40) is the final stretch before delivery. You'll experience more frequent prenatal visits, Braxton Hicks contractions, possible shortness of breath, back pain, trouble sleeping, and more frequent urination as the baby puts pressure on your bladder. Prepare for labor, birth, and bringing baby home during this period.",
+        category: "third-trimester"
+      },
+      {
+        id: "nutrition",
+        question: "What are the most important nutrients during pregnancy?",
+        answer: "Key nutrients include: folic acid (prevents neural tube defects), iron (prevents anemia), calcium (builds baby's bones and teeth), vitamin D (promotes calcium absorption), omega-3 fatty acids (supports baby's brain development), protein (crucial for baby's growth), and fiber (prevents constipation). A prenatal vitamin can help supplement these essential nutrients.",
+        category: "nutrition"
+      },
+      {
+        id: "comprehensive-5",
+        question: "When will I feel my baby move?",
+        answer: "Most first-time mothers feel movement (quickening) between weeks 18-25, while those who have been pregnant before may notice movement as early as week 16. Initially, movements feel like flutters, bubbles, or light taps. By the third trimester, movements become more pronounced and regular. Tracking kick counts is recommended after 28 weeks.",
+        category: "second-trimester"
+      }
+    ];
+
+    if (selectedCategory === "all") {
+      return allFAQs;
+    }
+    
+    return allFAQs.filter(faq => faq.category === selectedCategory);
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const handleCategoryClick = (category) => {
+    setSelectedCategory(category);
+  };
+
+  // Filter FAQs based on search query
+  const filteredFAQs = getFAQsToShow().filter(faq => 
+    searchQuery === "" || 
+    faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    faq.answer.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="container mx-auto px-4 py-6">
       <h1 className="text-3xl font-bold mb-6">Pregnancy Resources</h1>
       
       <div className="grid md:grid-cols-2 gap-6 mb-8">
-        {resources.articles.map((article: { image: string; title: string; description: string; content: string }, index: number) => (
+        {resources.articles.map((article, index) => (
           <Card key={index}>
             <img src={article.image} alt={article.title} className="w-full h-48 object-cover rounded-t-lg" />
             <CardHeader>
@@ -86,22 +173,40 @@ export default function Resources() {
         <CardContent>
           <div className="mb-4">
             <div className="flex space-x-4 mb-3 overflow-x-auto py-2">
-              <button className="px-4 py-2 bg-primary text-white rounded-full text-sm font-medium flex-shrink-0 shadow-sm hover:shadow-md transition-all duration-300">
+              <button 
+                className={`px-4 py-2 ${selectedCategory === "all" ? "bg-primary text-white" : "bg-gray-100 text-gray-700"} rounded-full text-sm font-medium flex-shrink-0 shadow-sm hover:shadow-md transition-all duration-300`}
+                onClick={() => handleCategoryClick("all")}
+              >
                 All Questions
               </button>
-              <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium flex-shrink-0 hover:bg-gray-200 transition-all duration-300">
+              <button 
+                className={`px-4 py-2 ${selectedCategory === "first-trimester" ? "bg-primary text-white" : "bg-gray-100 text-gray-700"} rounded-full text-sm font-medium flex-shrink-0 hover:bg-gray-200 transition-all duration-300`}
+                onClick={() => handleCategoryClick("first-trimester")}
+              >
                 First Trimester
               </button>
-              <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium flex-shrink-0 hover:bg-gray-200 transition-all duration-300">
+              <button 
+                className={`px-4 py-2 ${selectedCategory === "second-trimester" ? "bg-primary text-white" : "bg-gray-100 text-gray-700"} rounded-full text-sm font-medium flex-shrink-0 hover:bg-gray-200 transition-all duration-300`}
+                onClick={() => handleCategoryClick("second-trimester")}
+              >
                 Second Trimester
               </button>
-              <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium flex-shrink-0 hover:bg-gray-200 transition-all duration-300">
+              <button 
+                className={`px-4 py-2 ${selectedCategory === "third-trimester" ? "bg-primary text-white" : "bg-gray-100 text-gray-700"} rounded-full text-sm font-medium flex-shrink-0 hover:bg-gray-200 transition-all duration-300`}
+                onClick={() => handleCategoryClick("third-trimester")}
+              >
                 Third Trimester
               </button>
-              <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium flex-shrink-0 hover:bg-gray-200 transition-all duration-300">
+              <button 
+                className={`px-4 py-2 ${selectedCategory === "nutrition" ? "bg-primary text-white" : "bg-gray-100 text-gray-700"} rounded-full text-sm font-medium flex-shrink-0 hover:bg-gray-200 transition-all duration-300`}
+                onClick={() => handleCategoryClick("nutrition")}
+              >
                 Nutrition
               </button>
-              <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium flex-shrink-0 hover:bg-gray-200 transition-all duration-300">
+              <button 
+                className={`px-4 py-2 ${selectedCategory === "app-features" ? "bg-primary text-white" : "bg-gray-100 text-gray-700"} rounded-full text-sm font-medium flex-shrink-0 hover:bg-gray-200 transition-all duration-300`}
+                onClick={() => handleCategoryClick("app-features")}
+              >
                 App Features
               </button>
             </div>
@@ -113,310 +218,82 @@ export default function Resources() {
               type="text" 
               placeholder="Search for questions..." 
               className="w-full py-3 px-5 pl-12 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              value={searchQuery}
+              onChange={handleSearchChange}
             />
             <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
               <i className="fas fa-search"></i>
             </div>
           </div>
           
-          <div className="bg-primary/5 rounded-xl p-4 mb-6">
-            <h3 className="font-medium text-primary flex items-center mb-2">
-              <i className="fas fa-lightbulb mr-2"></i>
-              Featured Questions
-            </h3>
-            <p className="text-sm text-gray-600">
-              These are the most common questions from expecting mothers at various stages of pregnancy.
-            </p>
-          </div>
-          
-          <Accordion type="single" collapsible className="border rounded-xl overflow-hidden">
-            {/* Add the existing FAQs */}
-            {resources.faqs.map((faq: { question: string; answer: string }, index: number) => (
-              <AccordionItem key={index} value={`item-${index}`} className="border-b last:border-0">
-                <AccordionTrigger className="px-4 py-4 hover:bg-gray-50 text-left font-medium">
-                  <div className="flex items-start">
-                    <span className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs mr-3 flex-shrink-0">
-                      Q
-                    </span>
-                    <span>{faq.question}</span>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="px-4 py-3 bg-gray-50">
-                  <div className="flex items-start ml-9">
-                    <span className="h-6 w-6 rounded-full bg-primary flex items-center justify-center text-white text-xs mr-3 flex-shrink-0">
-                      A
-                    </span>
-                    <p className="text-neutral-dark">{faq.answer}</p>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-            
-            {/* Add comprehensive pregnancy FAQs */}
-            <AccordionItem value="comprehensive-1" className="border-b">
-              <AccordionTrigger className="px-4 py-4 hover:bg-gray-50 text-left font-medium">
-                <div className="flex items-start">
-                  <span className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs mr-3 flex-shrink-0">
-                    Q
-                  </span>
-                  <span>When should I first see a doctor during pregnancy?</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="px-4 py-3 bg-gray-50">
-                <div className="flex items-start ml-9">
-                  <span className="h-6 w-6 rounded-full bg-primary flex items-center justify-center text-white text-xs mr-3 flex-shrink-0">
-                    A
-                  </span>
-                  <p className="text-neutral-dark">
-                    You should schedule your first prenatal visit as soon as you know you're pregnant, ideally within the first 8 weeks. 
-                    If you have a history of complications or medical conditions, you may need to see a doctor earlier. 
-                    During this first visit, your doctor will confirm your pregnancy, estimate your due date, and begin monitoring your health.
+          {filteredFAQs.length === 0 ? (
+            <div className="bg-neutral-light rounded-xl p-6 text-center">
+              <h3 className="text-lg font-medium text-primary mb-2">No questions found</h3>
+              <p className="text-neutral-dark">Try adjusting your search or category selection.</p>
+            </div>
+          ) : (
+            <>
+              {searchQuery && (
+                <div className="bg-primary/5 rounded-xl p-4 mb-6">
+                  <h3 className="font-medium text-primary flex items-center mb-2">
+                    <i className="fas fa-search mr-2"></i>
+                    Search Results
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    Found {filteredFAQs.length} question(s) matching "{searchQuery}"
                   </p>
                 </div>
-              </AccordionContent>
-            </AccordionItem>
-            
-            <AccordionItem value="comprehensive-2" className="border-b">
-              <AccordionTrigger className="px-4 py-4 hover:bg-gray-50 text-left font-medium">
-                <div className="flex items-start">
-                  <span className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs mr-3 flex-shrink-0">
-                    Q
-                  </span>
-                  <span>How can I manage morning sickness?</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="px-4 py-3 bg-gray-50">
-                <div className="flex items-start ml-9">
-                  <span className="h-6 w-6 rounded-full bg-primary flex items-center justify-center text-white text-xs mr-3 flex-shrink-0">
-                    A
-                  </span>
-                  <div className="text-neutral-dark space-y-2">
-                    <p>Morning sickness can be managed with several strategies:</p>
-                    <ul className="list-disc ml-5 space-y-1">
-                      <li>Eat small, frequent meals throughout the day</li>
-                      <li>Avoid triggers like strong smells or spicy foods</li>
-                      <li>Try ginger tea, ginger candies or vitamin B6 supplements</li>
-                      <li>Stay hydrated by sipping water throughout the day</li>
-                      <li>Eat plain crackers before getting out of bed in the morning</li>
-                    </ul>
-                    <p>If your morning sickness is severe (hyperemesis gravidarum), consult your healthcare provider as you may need medication or IV fluids.</p>
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-            
-            <AccordionItem value="comprehensive-3" className="border-b">
-              <AccordionTrigger className="px-4 py-4 hover:bg-gray-50 text-left font-medium">
-                <div className="flex items-start">
-                  <span className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs mr-3 flex-shrink-0">
-                    Q
-                  </span>
-                  <span>Is it safe to exercise during pregnancy?</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="px-4 py-3 bg-gray-50">
-                <div className="flex items-start ml-9">
-                  <span className="h-6 w-6 rounded-full bg-primary flex items-center justify-center text-white text-xs mr-3 flex-shrink-0">
-                    A
-                  </span>
-                  <div className="text-neutral-dark space-y-2">
-                    <p>
-                      Yes, exercise is generally safe and beneficial during pregnancy for most women. The American College of Obstetricians and Gynecologists recommends 150 minutes of moderate-intensity aerobic activity per week.
-                    </p>
-                    <p>Safe exercises include:</p>
-                    <ul className="list-disc ml-5 space-y-1">
-                      <li>Walking</li>
-                      <li>Swimming</li>
-                      <li>Stationary cycling</li>
-                      <li>Low-impact aerobics</li>
-                      <li>Prenatal yoga</li>
-                    </ul>
-                    <p>
-                      Avoid high-impact activities, contact sports, exercises with a high risk of falling, and activities that require lying flat on your back after the first trimester. Always consult with your healthcare provider before starting or continuing an exercise program during pregnancy.
-                    </p>
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-            
-            <AccordionItem value="comprehensive-4" className="border-b">
-              <AccordionTrigger className="px-4 py-4 hover:bg-gray-50 text-left font-medium">
-                <div className="flex items-start">
-                  <span className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs mr-3 flex-shrink-0">
-                    Q
-                  </span>
-                  <span>How does the NauMah AI assistant work?</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="px-4 py-3 bg-gray-50">
-                <div className="flex items-start ml-9">
-                  <span className="h-6 w-6 rounded-full bg-primary flex items-center justify-center text-white text-xs mr-3 flex-shrink-0">
-                    A
-                  </span>
-                  <div className="text-neutral-dark">
-                    <p>
-                      The NauMah AI assistant uses advanced artificial intelligence to provide personalized pregnancy guidance. It works by:
-                    </p>
-                    <ul className="list-disc ml-5 space-y-1 my-2">
-                      <li>Analyzing your pregnancy stage and health information</li>
-                      <li>Drawing from a vast database of medical research on pregnancy</li>
-                      <li>Providing stage-specific recommendations and answers</li>
-                      <li>Learning from your interactions to become more personalized over time</li>
-                    </ul>
-                    <p>
-                      You can interact with the AI through text chat or voice conversations. While our AI provides evidence-based guidance, it's designed to complement, not replace, professional medical care. Always consult healthcare providers for medical decisions.
-                    </p>
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-            
-            <AccordionItem value="first-trimester" className="border-b">
-              <AccordionTrigger className="px-4 py-4 hover:bg-gray-50 text-left font-medium">
-                <div className="flex items-start">
-                  <span className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs mr-3 flex-shrink-0">
-                    Q
-                  </span>
-                  <span>What are the key changes during the first trimester?</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="px-4 py-3 bg-gray-50">
-                <div className="flex items-start ml-9">
-                  <span className="h-6 w-6 rounded-full bg-primary flex items-center justify-center text-white text-xs mr-3 flex-shrink-0">
-                    A
-                  </span>
-                  <div className="text-neutral-dark space-y-2">
-                    <p>The first trimester (weeks 1-12) brings several significant changes:</p>
-                    <ul className="list-disc ml-5 space-y-1">
-                      <li>Morning sickness and nausea (typically peaks around week 9)</li>
-                      <li>Frequent urination</li>
-                      <li>Fatigue and mood changes</li>
-                      <li>Breast tenderness</li>
-                      <li>Food aversions and cravings</li>
-                    </ul>
-                    <p>This is also when major organ development occurs in your baby. Regular prenatal care is crucial during this period.</p>
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="second-trimester" className="border-b">
-              <AccordionTrigger className="px-4 py-4 hover:bg-gray-50 text-left font-medium">
-                <div className="flex items-start">
-                  <span className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs mr-3 flex-shrink-0">
-                    Q
-                  </span>
-                  <span>What should I expect in the second trimester?</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="px-4 py-3 bg-gray-50">
-                <div className="flex items-start ml-9">
-                  <span className="h-6 w-6 rounded-full bg-primary flex items-center justify-center text-white text-xs mr-3 flex-shrink-0">
-                    A
-                  </span>
-                  <div className="text-neutral-dark space-y-2">
-                    <p>The second trimester (weeks 13-26) is often called the "golden period" of pregnancy:</p>
-                    <ul className="list-disc ml-5 space-y-1">
-                      <li>Morning sickness usually subsides</li>
-                      <li>Energy levels increase</li>
-                      <li>Baby's first movements felt (around week 18-20)</li>
-                      <li>Visible bump appears</li>
-                      <li>Gender can be determined via ultrasound</li>
-                    </ul>
-                    <p>This is a good time to start pregnancy exercises and prepare for the baby's arrival.</p>
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="third-trimester" className="border-b">
-              <AccordionTrigger className="px-4 py-4 hover:bg-gray-50 text-left font-medium">
-                <div className="flex items-start">
-                  <span className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs mr-3 flex-shrink-0">
-                    Q
-                  </span>
-                  <span>What are the challenges of the third trimester?</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="px-4 py-3 bg-gray-50">
-                <div className="flex items-start ml-9">
-                  <span className="h-6 w-6 rounded-full bg-primary flex items-center justify-center text-white text-xs mr-3 flex-shrink-0">
-                    A
-                  </span>
-                  <div className="text-neutral-dark space-y-2">
-                    <p>The third trimester (weeks 27-40) brings several changes as you prepare for birth:</p>
-                    <ul className="list-disc ml-5 space-y-1">
-                      <li>Increased back pain and fatigue</li>
-                      <li>Braxton Hicks contractions</li>
-                      <li>Difficulty sleeping</li>
-                      <li>Shortness of breath</li>
-                      <li>More frequent bathroom visits</li>
-                    </ul>
-                    <p>Focus on birth preparation and recognize signs of labor during this period.</p>
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="nutrition" className="border-b">
-              <AccordionTrigger className="px-4 py-4 hover:bg-gray-50 text-left font-medium">
-                <div className="flex items-start">
-                  <span className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs mr-3 flex-shrink-0">
-                    Q
-                  </span>
-                  <span>What are the essential nutritional needs during pregnancy?</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="px-4 py-3 bg-gray-50">
-                <div className="flex items-start ml-9">
-                  <span className="h-6 w-6 rounded-full bg-primary flex items-center justify-center text-white text-xs mr-3 flex-shrink-0">
-                    A
-                  </span>
-                  <div className="text-neutral-dark space-y-2">
-                    <p>Proper nutrition is crucial during pregnancy. Key requirements include:</p>
-                    <ul className="list-disc ml-5 space-y-1">
-                      <li>Folic acid (400-800 mcg daily)</li>
-                      <li>Iron (27 mg daily)</li>
-                      <li>Calcium (1,000 mg daily)</li>
-                      <li>Protein (75-100 grams daily)</li>
-                      <li>DHA omega-3 fatty acids</li>
-                    </ul>
-                    <p>Always take prescribed prenatal vitamins and maintain a balanced diet with plenty of fruits, vegetables, and whole grains.</p>
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem value="comprehensive-5" className="border-b">
-              <AccordionTrigger className="px-4 py-4 hover:bg-gray-50 text-left font-medium">
-                <div className="flex items-start">
-                  <span className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs mr-3 flex-shrink-0">
-                    Q
-                  </span>
-                  <span>How accurate are the due date predictions?</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="px-4 py-3 bg-gray-50">
-                <div className="flex items-start ml-9">
-                  <span className="h-6 w-6 rounded-full bg-primary flex items-center justify-center text-white text-xs mr-3 flex-shrink-0">
-                    A
-                  </span>
-                  <p className="text-neutral-dark">
-                    Due date predictions in NauMah are calculated using standard medical formulas based on your last menstrual period (LMP) or ultrasound measurements. The accuracy depends on the information provided and can vary. Only about 5% of babies are born exactly on their due date, with most deliveries occurring within two weeks before or after. For the most accurate due date, combine the app's prediction with your healthcare provider's assessment based on ultrasound measurements.
+              )}
+              
+              {!searchQuery && selectedCategory === "all" && (
+                <div className="bg-primary/5 rounded-xl p-4 mb-6">
+                  <h3 className="font-medium text-primary flex items-center mb-2">
+                    <i className="fas fa-lightbulb mr-2"></i>
+                    Featured Questions
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    These are the most common questions from expecting mothers at various stages of pregnancy.
                   </p>
                 </div>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
+              )}
+              
+              <Accordion type="single" collapsible className="border rounded-xl overflow-hidden">
+                {filteredFAQs.map((faq) => (
+                  <AccordionItem key={faq.id} value={faq.id} className="border-b last:border-0">
+                    <AccordionTrigger className="px-4 py-4 hover:bg-gray-50 text-left font-medium">
+                      <div className="flex items-start">
+                        <span className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs mr-3 flex-shrink-0">
+                          Q
+                        </span>
+                        <span>{faq.question}</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="px-4 py-3 bg-gray-50">
+                      <div className="flex items-start ml-9">
+                        <span className="h-6 w-6 rounded-full bg-primary flex items-center justify-center text-white text-xs mr-3 flex-shrink-0">
+                          A
+                        </span>
+                        <div className="text-neutral-dark">
+                          {faq.answer}
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </>
+          )}
           
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600 mb-3">Don't see your question? Ask our AI assistant or contact our support team</p>
-            <div className="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-3">
+          <div className="mt-8 flex justify-between items-center">
+            <div className="text-sm text-neutral-dark">
+              <span>Can't find an answer to your question?</span>
+            </div>
+            <div className="flex space-x-3">
               <button className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium shadow-sm hover:shadow-md transition-all duration-300">
-                <i className="fas fa-robot mr-2"></i>Ask the AI Assistant
+                Ask AI Assistant
               </button>
               <button className="px-4 py-2 border border-primary text-primary rounded-lg text-sm font-medium hover:bg-primary/5 transition-all duration-300">
-                <i className="fas fa-envelope mr-2"></i>Contact Support
+                Contact Support
               </button>
             </div>
           </div>
