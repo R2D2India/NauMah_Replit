@@ -11,10 +11,12 @@ import {
   symptomsTable,
   appointmentsTable,
   supportMessagesTable,
+  journalEntriesTable,
   type WeightEntry,
   type SymptomEntry,
   type Appointment,
   type SupportMessage,
+  type JournalEntry,
   type ContactFormData
 } from "@shared/schema";
 import { IStorage } from './storage';
@@ -248,5 +250,55 @@ export class PgStorage implements IStorage {
       .where(eq(supportMessagesTable.id, id))
       .returning();
     return results[0];
+  }
+
+  // Journal entries methods
+  async getJournalEntries(userId: number): Promise<JournalEntry[]> {
+    const results = await db.select()
+      .from(journalEntriesTable)
+      .where(eq(journalEntriesTable.userId, userId))
+      .orderBy(desc(journalEntriesTable.date));
+    
+    // Convert null to undefined for type compatibility
+    return results.map(entry => ({
+      ...entry,
+      mood: entry.mood || null
+    }));
+  }
+
+  async getJournalEntry(id: number): Promise<JournalEntry | undefined> {
+    const results = await db.select()
+      .from(journalEntriesTable)
+      .where(eq(journalEntriesTable.id, id))
+      .limit(1);
+    
+    if (results.length === 0) {
+      return undefined;
+    }
+    
+    // Convert null to undefined for type compatibility
+    return {
+      ...results[0],
+      mood: results[0].mood || null
+    };
+  }
+
+  async createJournalEntry(entry: { userId: number; title: string; content: string; mood?: string; date: Date }): Promise<JournalEntry> {
+    const results = await db.insert(journalEntriesTable)
+      .values({
+        userId: entry.userId,
+        title: entry.title,
+        content: entry.content,
+        mood: entry.mood || null,
+        date: entry.date,
+        createdAt: new Date()
+      })
+      .returning();
+    
+    // Convert null to undefined for type compatibility
+    return {
+      ...results[0],
+      mood: results[0].mood || null
+    };
   }
 }

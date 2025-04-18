@@ -23,7 +23,8 @@ import {
   adminLoginSchema,
   productImageCheckSchema,
   contactSchema,
-  ContactFormData
+  ContactFormData,
+  journalEntrySchema
 } from "@shared/schema";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
@@ -749,6 +750,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "Failed to save your message. Please try again later.",
         error: process.env.NODE_ENV === 'development' ? String(error) : undefined
       });
+    }
+  });
+
+  // Journal entries endpoints
+  app.get("/api/journal", async (req: Request, res: Response) => {
+    try {
+      const userId = demoUserId;
+      const entries = await storage.getJournalEntries(userId);
+      res.json(entries);
+    } catch (error) {
+      console.error("Error getting journal entries:", error);
+      res.status(500).json({ error: "Failed to fetch journal entries" });
+    }
+  });
+
+  app.get("/api/journal/:id", async (req: Request, res: Response) => {
+    try {
+      const userId = demoUserId;
+      const entryId = parseInt(req.params.id);
+      
+      if (isNaN(entryId)) {
+        return res.status(400).json({ error: "Invalid entry ID" });
+      }
+      
+      const entry = await storage.getJournalEntry(entryId);
+      
+      if (!entry) {
+        return res.status(404).json({ error: "Journal entry not found" });
+      }
+      
+      // Ensure users can only access their own entries
+      if (entry.userId !== userId) {
+        return res.status(403).json({ error: "Forbidden" });
+      }
+      
+      res.json(entry);
+    } catch (error) {
+      console.error("Error getting journal entry:", error);
+      res.status(500).json({ error: "Failed to fetch journal entry" });
+    }
+  });
+
+  app.post("/api/journal", validateRequest(journalEntrySchema), async (req: Request, res: Response) => {
+    try {
+      const userId = demoUserId;
+      const journalData = req.validatedData;
+      
+      const entry = await storage.createJournalEntry({
+        userId,
+        title: journalData.title,
+        content: journalData.content,
+        mood: journalData.mood,
+        date: journalData.date
+      });
+      
+      res.status(201).json(entry);
+    } catch (error) {
+      console.error("Error creating journal entry:", error);
+      res.status(500).json({ error: "Failed to create journal entry" });
     }
   });
 

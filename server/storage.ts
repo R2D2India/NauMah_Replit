@@ -375,8 +375,8 @@ export class MemStorage implements IStorage {
   }
 
   async getJournalEntry(id: number): Promise<JournalEntry | undefined> {
-    for (const entries of this.journalEntries.values()) {
-      const entry = entries.find(entry => entry.id === id);
+    for (const entries of Array.from(this.journalEntries.values())) {
+      const entry = entries.find((entry: JournalEntry) => entry.id === id);
       if (entry) return entry;
     }
     return undefined;
