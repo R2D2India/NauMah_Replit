@@ -9,7 +9,9 @@ import {
   type Appointment,
   type SupportMessage,
   type ContactFormData,
-  waitlistTable
+  type JournalEntry,
+  waitlistTable,
+  journalEntriesTable
 } from "@shared/schema";
 import { addWeeks } from "date-fns";
 import { db } from "./db";
@@ -54,6 +56,11 @@ export interface IStorage {
   getSupportMessages(): Promise<SupportMessage[]>;
   createSupportMessage(message: ContactFormData): Promise<SupportMessage>;
   markSupportMessageAsRead(id: number): Promise<SupportMessage>;
+  
+  // Journal entries methods
+  getJournalEntries(userId: number): Promise<JournalEntry[]>;
+  getJournalEntry(id: number): Promise<JournalEntry | undefined>;
+  createJournalEntry(entry: { userId: number; title: string; content: string; mood?: string; date: Date }): Promise<JournalEntry>;
 }
 
 export class MemStorage implements IStorage {
@@ -65,6 +72,7 @@ export class MemStorage implements IStorage {
   private symptomEntries: Map<number, SymptomEntry[]>; // userId -> entries
   private appointments: Map<number, Appointment[]>; // userId -> entries
   private supportMessages: SupportMessage[]; // all support messages
+  private journalEntries: Map<number, JournalEntry[]>; // userId -> entries
   private currentId: number;
   private pregnancyDataId: number;
   private moodEntryId: number;
@@ -73,6 +81,7 @@ export class MemStorage implements IStorage {
   private symptomEntryId: number;
   private appointmentId: number;
   private supportMessageId: number;
+  private journalEntryId: number;
 
   constructor() {
     this.users = new Map();
@@ -83,6 +92,7 @@ export class MemStorage implements IStorage {
     this.symptomEntries = new Map();
     this.appointments = new Map();
     this.supportMessages = [];
+    this.journalEntries = new Map();
     this.currentId = 1;
     this.pregnancyDataId = 1;
     this.moodEntryId = 1;
@@ -91,6 +101,7 @@ export class MemStorage implements IStorage {
     this.symptomEntryId = 1;
     this.appointmentId = 1;
     this.supportMessageId = 1;
+    this.journalEntryId = 1;
   }
 
   // User methods
@@ -356,6 +367,43 @@ export class MemStorage implements IStorage {
     };
     
     return this.supportMessages[index];
+  }
+
+  // Journal entries methods
+  async getJournalEntries(userId: number): Promise<JournalEntry[]> {
+    return this.journalEntries.get(userId) || [];
+  }
+
+  async getJournalEntry(id: number): Promise<JournalEntry | undefined> {
+    for (const entries of this.journalEntries.values()) {
+      const entry = entries.find(entry => entry.id === id);
+      if (entry) return entry;
+    }
+    return undefined;
+  }
+
+  async createJournalEntry(entry: { userId: number; title: string; content: string; mood?: string; date: Date }): Promise<JournalEntry> {
+    const id = this.journalEntryId++;
+    const journalEntry: JournalEntry = {
+      id,
+      userId: entry.userId,
+      title: entry.title,
+      content: entry.content,
+      mood: entry.mood || null,
+      date: entry.date,
+      createdAt: new Date()
+    };
+
+    // Initialize array if it doesn't exist
+    if (!this.journalEntries.has(entry.userId)) {
+      this.journalEntries.set(entry.userId, []);
+    }
+
+    // Add entry to array
+    const entries = this.journalEntries.get(entry.userId)!;
+    entries.push(journalEntry);
+
+    return journalEntry;
   }
 }
 

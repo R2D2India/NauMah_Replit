@@ -234,12 +234,35 @@ export const supportMessagesTable = pgTable("support_messages", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Journal entries table
+export const journalEntriesTable = pgTable("journal_entries", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  mood: text("mood"),
+  date: timestamp("date").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const contactSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email format"),
   subject: z.string().optional(),
   message: z.string().min(1, "Message is required")
 });
+
+// Journal entry schema
+export const journalEntrySchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  content: z.string().min(1, "Content is required"),
+  mood: z.string().optional(),
+  date: z.date().default(new Date())
+});
+
+export type JournalEntryRequest = z.infer<typeof journalEntrySchema>;
+export type JournalEntry = typeof journalEntriesTable.$inferSelect;
+export type InsertJournalEntry = typeof journalEntriesTable.$inferInsert;
 
 export type ContactFormData = z.infer<typeof contactSchema>;
 export type SupportMessage = typeof supportMessagesTable.$inferSelect;

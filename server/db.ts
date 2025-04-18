@@ -96,6 +96,16 @@ export async function runMigrations() {
         is_read BOOLEAN DEFAULT FALSE NOT NULL,
         created_at TIMESTAMP DEFAULT NOW() NOT NULL
       );
+      
+      CREATE TABLE IF NOT EXISTS journal_entries (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL,
+        title TEXT NOT NULL,
+        content TEXT NOT NULL,
+        mood TEXT,
+        date TIMESTAMP NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW() NOT NULL
+      );
     `);
     
     console.log('Database migrations completed successfully');
