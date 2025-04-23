@@ -80,11 +80,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "User session not found" });
       }
       
+      console.log(`Fetching pregnancy data for userId ${userId}`);
+      
       const data = await storage.getPregnancyData(userId);
       
-      // Return the user's pregnancy data if it exists, otherwise return null
-      // This allows the frontend to prompt the user to set their own pregnancy stage
-      res.json(data || null);
+      console.log(`Retrieved pregnancy data: `, data);
+      
+      // If no data exists yet, return a default object with currentWeek=1
+      // This provides better type consistency for the frontend
+      res.json(data || { currentWeek: 1 });
     } catch (error) {
       console.error("Error fetching pregnancy data:", error);
       res.status(500).json({ message: "Failed to fetch pregnancy data" });
@@ -99,7 +103,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "User session not found" });
       }
       
+      console.log(`Updating pregnancy stage for userId ${userId}: `, req.validatedData);
+      
       const data = await storage.updatePregnancyStage(userId, req.validatedData);
+      
+      console.log(`Updated pregnancy data: `, data);
+      
       res.json(data);
     } catch (error) {
       console.error("Error updating pregnancy stage:", error);

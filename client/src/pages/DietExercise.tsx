@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
@@ -10,6 +10,7 @@ import {
   RESOURCE_RECOMMENDATIONS, 
   getTrimeasterFromWeek 
 } from "@/lib/constants";
+import { queryClient } from "@/lib/queryClient";
 import { 
   Apple, 
   Dumbbell, 
@@ -33,8 +34,16 @@ export default function DietExercise() {
     snacks: string[];
   } | null>(null);
 
+  // Define pregnancy data type
+  interface PregnancyData {
+    currentWeek: number;
+    dueDate?: string;
+    startDate?: string;
+    [key: string]: any;
+  }
+  
   // Get pregnancy data for current week
-  const { data: pregnancyData, refetch: refetchPregnancyData } = useQuery({
+  const { data: pregnancyData, refetch: refetchPregnancyData } = useQuery<PregnancyData | null>({
     queryKey: ["/api/pregnancy"],
     staleTime: 0, // Always refetch when accessed
     refetchOnMount: true, // Ensure data is fresh when component mounts
@@ -70,6 +79,26 @@ export default function DietExercise() {
   // Get trimester for recommendations
   const trimester = getTrimeasterFromWeek(currentWeek);
 
+  // Set up an effect to periodically check for pregnancy data updates
+  useEffect(() => {
+    // Subscribe to pregnancy data updates
+    const checkForUpdates = () => {
+      console.log("Diet & Exercise: Checking for pregnancy data updates...");
+      refetchPregnancyData();
+    };
+    
+    // Check for updates when the component mounts
+    checkForUpdates();
+    
+    // Set up a periodic check for updates
+    const intervalId = setInterval(checkForUpdates, 5000); // Check every 5 seconds
+    
+    // Clean up
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [refetchPregnancyData]);
+  
   // Get recommendations based on trimester
   const dietRecs = DIET_RECOMMENDATIONS[trimester as keyof typeof DIET_RECOMMENDATIONS];
   const exerciseRecs = EXERCISE_RECOMMENDATIONS[trimester as keyof typeof EXERCISE_RECOMMENDATIONS];
@@ -79,7 +108,16 @@ export default function DietExercise() {
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <h1 className="text-3xl font-bold mb-2">Diet & Exercise</h1>
+      <div className="flex justify-between items-center mb-2">
+        <h1 className="text-3xl font-bold">Diet & Exercise</h1>
+        <div className="text-sm text-gray-500 flex items-center">
+          <span className="mr-2">Week {currentWeek}</span>
+          <div className="relative flex h-3 w-3">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-20"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+          </div>
+        </div>
+      </div>
       <p className="text-muted-foreground mb-6">
         Nutrition and activity recommendations for week {currentWeek} of your pregnancy
       </p>

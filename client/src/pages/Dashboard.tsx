@@ -31,11 +31,18 @@ const Dashboard = () => {
   // Update pregnancy stage mutation
   const updateStageMutation = useMutation({
     mutationFn: async (data: { stageType: string; stageValue: string }) => {
-      return await apiRequest<any>("/api/pregnancy/stage", {
+      const response = await fetch("/api/pregnancy/stage", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
+        credentials: "include"
       });
+      
+      if (!response.ok) {
+        throw new Error("Failed to update pregnancy stage");
+      }
+      
+      return await response.json();
     },
     onSuccess: () => {
       // Invalidate pregnancy data across the app to ensure all components refresh
