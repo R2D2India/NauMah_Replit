@@ -10,6 +10,11 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   firstName: varchar("first_name", { length: 100 }),
   lastName: varchar("last_name", { length: 100 }),
+  mobileNumber: varchar("mobile_number", { length: 20 }),
+  age: integer("age"),
+  pregnancyWeek: integer("pregnancy_week"),
+  pregnancyMonth: integer("pregnancy_month"),
+  pregnancyTrimester: integer("pregnancy_trimester"),
   profilePicture: text("profile_picture"),
   isEmailVerified: boolean("is_email_verified").default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -58,8 +63,14 @@ export const registerSchema = z.object({
   email: z.string().email("Valid email is required"),
   username: z.string().min(3, "Username must be at least 3 characters"),
   password: z.string().min(8, "Password must be at least 8 characters"),
-  firstName: z.string().optional(),
+  firstName: z.string().min(1, "First name is required"),
   lastName: z.string().optional(),
+  mobileNumber: z.string().min(7, "Valid mobile number is required"),
+  age: z.number().min(18, "Age must be at least 18").max(100, "Age must be valid").or(z.string().transform(val => parseInt(val, 10))),
+  pregnancyStage: z.object({
+    type: z.enum(["week", "month", "trimester"]),
+    value: z.number().or(z.string().transform(val => parseInt(val, 10)))
+  })
 });
 
 export const loginSchema = z.object({
@@ -87,6 +98,11 @@ export const insertUserSchema = createInsertSchema(users).pick({
   password: true,
   firstName: true,
   lastName: true,
+  mobileNumber: true,
+  age: true,
+  pregnancyWeek: true,
+  pregnancyMonth: true,
+  pregnancyTrimester: true,
   profilePicture: true,
   isEmailVerified: true,
 });

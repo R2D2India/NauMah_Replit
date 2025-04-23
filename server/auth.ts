@@ -147,7 +147,16 @@ export function setupAuth(app: Express) {
   // Register a new user
   app.post("/api/register", async (req, res) => {
     try {
-      const { username, email, password, firstName, lastName } = req.body;
+      const { 
+        username, 
+        email, 
+        password, 
+        firstName, 
+        lastName, 
+        mobileNumber, 
+        age, 
+        pregnancyStage 
+      } = req.body;
 
       // Check if username already exists
       const existingUsername = await db.query.users.findFirst({
@@ -170,6 +179,22 @@ export function setupAuth(app: Express) {
       // Hash password
       const hashedPassword = await hashPassword(password);
 
+      // Determine which pregnancy field to set based on the selected type
+      let pregnancyWeek = null;
+      let pregnancyMonth = null;
+      let pregnancyTrimester = null;
+
+      if (pregnancyStage && pregnancyStage.type && pregnancyStage.value) {
+        const value = Number(pregnancyStage.value);
+        if (pregnancyStage.type === "week") {
+          pregnancyWeek = value;
+        } else if (pregnancyStage.type === "month") {
+          pregnancyMonth = value;
+        } else if (pregnancyStage.type === "trimester") {
+          pregnancyTrimester = value;
+        }
+      }
+
       // Insert user into database
       const [newUser] = await db
         .insert(users)
@@ -179,6 +204,11 @@ export function setupAuth(app: Express) {
           password: hashedPassword,
           firstName: firstName || null,
           lastName: lastName || null,
+          mobileNumber: mobileNumber || null,
+          age: age ? Number(age) : null,
+          pregnancyWeek,
+          pregnancyMonth,
+          pregnancyTrimester,
           profilePicture: null,
           isEmailVerified: false,
         })
