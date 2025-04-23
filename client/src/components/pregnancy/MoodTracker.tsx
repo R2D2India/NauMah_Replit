@@ -90,13 +90,9 @@ const MoodTracker = ({ currentWeek }: MoodTrackerProps) => {
   ];
 
   return (
-    <div className="mb-8">
-      <div className="bg-white rounded-xl p-6 custom-shadow">
-        <h3 className="text-xl font-montserrat font-bold text-primary mb-4 flex items-center">
-          <Smile className="mr-2 w-5 h-5" />
-          Daily Mood Tracker
-        </h3>
-        <p className="mb-5">Track your emotional well-being throughout your pregnancy journey.</p>
+    <div>
+      <div className="p-6">
+        <p className="text-gray-600 mb-5">Select an emotion that best represents how you're feeling today.</p>
         
         <div className="flex flex-wrap justify-center gap-6 mb-6">
           {moods.map((mood) => {
@@ -144,9 +140,9 @@ const MoodTracker = ({ currentWeek }: MoodTrackerProps) => {
       </div>
 
       {/* Mood History */}
-      <div className="bg-white rounded-xl p-6 custom-shadow mt-6">
-        <h3 className="text-xl font-montserrat font-bold text-primary mb-4 flex items-center">
-          <History className="mr-2 w-5 h-5" />
+      <div className="bg-white/50 rounded-xl p-6 border mt-8">
+        <h3 className="text-xl font-medium mb-4 flex items-center">
+          <History className="mr-2 w-5 h-5 text-primary" />
           Your Mood History
         </h3>
         

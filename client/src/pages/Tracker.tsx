@@ -289,8 +289,10 @@ export default function Tracker() {
         </TabsContent>
       </Tabs>
       
-      {/* Mood Tracker Section */}
-      <MoodTrackerSection />
+      {/* Mood Tracker Section - integrated with the same width as content above */}
+      <div className="bg-gradient-to-b from-white to-gray-50 py-8 -mx-4 px-4 mt-10 border-t">
+        <MoodTrackerSection />
+      </div>
     </div>
   );
 }
