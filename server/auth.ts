@@ -241,7 +241,7 @@ export function setupAuth(app: Express) {
   });
 
   // Get current user
-  app.get("/api/auth/user", async (req, res) => {
+  app.get("/api/user", async (req, res) => {
     try {
       if (!req.session.userId) {
         return res.status(401).json({ message: "Not authenticated" });
@@ -267,7 +267,7 @@ export function setupAuth(app: Express) {
   });
 
   // Forgot password
-  app.post("/api/auth/forgot-password", async (req, res) => {
+  app.post("/api/forgot-password", async (req, res) => {
     try {
       const { email } = req.body;
 
@@ -306,7 +306,7 @@ export function setupAuth(app: Express) {
   });
 
   // Reset password
-  app.post("/api/auth/reset-password", async (req, res) => {
+  app.post("/api/reset-password", async (req, res) => {
     try {
       const { token, password } = req.body;
 
