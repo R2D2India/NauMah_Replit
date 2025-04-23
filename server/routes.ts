@@ -495,8 +495,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin routes
   // Admin session check middleware
   const adminAuth = (req: Request, res: Response, next: NextFunction) => {
+    console.log("Admin auth middleware - Session ID:", req.sessionID);
+    console.log("Admin auth middleware - Session data:", req.session);
+    
     // Check if admin session exists
     if (req.session && req.session.isAdmin) {
+      console.log("Admin auth passed - Valid admin session found");
       return next();
     }
     
@@ -505,9 +509,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const authHeader = req.headers.authorization;
 
     if (adminKey && authHeader === `Bearer ${adminKey}`) {
+      console.log("Admin auth passed - Valid API key provided");
+      // If using API key, let's also set the session for future requests
+      if (req.session) {
+        req.session.isAdmin = true;
+        req.session.adminEmail = "sandeep@fastest.health";
+        
+        req.session.save(err => {
+          if (err) {
+            console.error("Error saving admin session from API key:", err);
+          }
+        });
+      }
       return next();
     }
     
+    console.log("Admin auth failed - No valid session or API key");
     return res.status(401).json({ message: "Unauthorized" });
   };
   
@@ -520,11 +537,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const adminEmail = "sandeep@fastest.health";
       const adminPassword = "Fastest@2004";
       
+      console.log("Admin login attempt:", { username, providedEmail: adminEmail });
+      
       if (username === adminEmail && password === adminPassword) {
         // Set admin session
         if (req.session) {
           req.session.isAdmin = true;
           req.session.adminEmail = adminEmail;
+          console.log("Admin session set:", { 
+            isAdmin: req.session.isAdmin, 
+            adminEmail: req.session.adminEmail,
+            sessionID: req.sessionID 
+          });
+          
+          // Save session explicitly to ensure persistence
+          req.session.save(err => {
+            if (err) {
+              console.error("Error saving admin session:", err);
+            } else {
+              console.log("Admin session saved successfully");
+            }
+          });
+        } else {
+          console.error("Session object not available in request");
         }
         
         return res.json({ 
@@ -573,14 +608,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Admin session check
   app.get("/api/admin/session", (req: Request, res: Response) => {
+    console.log("Admin session check - Session ID:", req.sessionID);
+    console.log("Admin session check - Session data:", req.session);
+    
     if (req.session && req.session.isAdmin) {
-      return res.json({ 
+      console.log("Admin session is valid, returning admin data");
+      return res.status(200).json({ 
         isAdmin: true,
         email: req.session.adminEmail
       });
     }
     
-    return res.json({ 
+    console.log("Admin session check failed - not an admin");
+    return res.status(200).json({ 
       isAdmin: false 
     });
   });
