@@ -60,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     data: user,
     error,
     isLoading,
-  } = useQuery<UserData | null, Error>({
+  } = useQuery<UserData | null>({
     queryKey: ["/api/auth/user"],
     queryFn: async () => {
       try {
@@ -79,6 +79,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return null;
       }
     },
+    staleTime: 300000, // 5 minutes
+    initialData: null, // Set initial data to null to avoid TypeScript errors
   });
 
   const loginMutation = useMutation({

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { ProfileDialog } from "@/components/profile/ProfileDialog";
+import { AuthButton } from "@/components/auth/AuthButton";
 
 const Header = () => {
   const [location] = useLocation();
@@ -47,7 +47,7 @@ const Header = () => {
         
         <div className="flex items-center space-x-3">
           <div className="hidden md:block">
-            <ProfileDialog />
+            <AuthButton />
           </div>
           <button 
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -83,7 +83,7 @@ const Header = () => {
               </span>
             </Link>
             <div className="py-2">
-              <ProfileDialog />
+              <AuthButton />
             </div>
           </nav>
         </div>
