@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Loader2, UserPlus, Mail, Key, ArrowRight, LogIn } from "lucide-react";
+import { Loader2, UserPlus, Mail, Key, ArrowRight, LogIn, Phone, CalendarDays, Baby } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const loginSchema = z.object({
   username: z.string().min(1, "Username is required"),
@@ -411,9 +413,166 @@ export default function AuthPage() {
                             </FormItem>
                           )}
                         />
+
+                        <FormField
+                          control={registerForm.control}
+                          name="mobileNumber"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Mobile Number</FormLabel>
+                              <FormControl>
+                                <div className="relative">
+                                  <span className="absolute left-3 top-3 text-gray-400">
+                                    <Phone size={18} />
+                                  </span>
+                                  <Input
+                                    type="tel"
+                                    placeholder="Your mobile number"
+                                    className="pl-10"
+                                    {...field}
+                                  />
+                                </div>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={registerForm.control}
+                          name="age"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Age</FormLabel>
+                              <FormControl>
+                                <div className="relative">
+                                  <span className="absolute left-3 top-3 text-gray-400">
+                                    <CalendarDays size={18} />
+                                  </span>
+                                  <Input
+                                    type="number"
+                                    placeholder="Your age"
+                                    className="pl-10"
+                                    min="18"
+                                    max="100"
+                                    {...field}
+                                  />
+                                </div>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <div className="space-y-4 pt-2 border-t">
+                          <h3 className="font-medium text-sm flex items-center gap-2 text-primary pt-2">
+                            <Baby size={18} />
+                            <span>Pregnancy Information</span>
+                          </h3>
+                          
+                          <FormField
+                            control={registerForm.control}
+                            name="pregnancyStage.type"
+                            render={({ field }) => (
+                              <FormItem className="space-y-3">
+                                <FormLabel>How would you like to track your pregnancy?</FormLabel>
+                                <FormControl>
+                                  <RadioGroup
+                                    onValueChange={field.onChange}
+                                    defaultValue={field.value}
+                                    className="flex flex-col space-y-1"
+                                  >
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                      <FormControl>
+                                        <RadioGroupItem value="week" />
+                                      </FormControl>
+                                      <FormLabel className="font-normal">
+                                        By Week
+                                      </FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                      <FormControl>
+                                        <RadioGroupItem value="month" />
+                                      </FormControl>
+                                      <FormLabel className="font-normal">
+                                        By Month
+                                      </FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                      <FormControl>
+                                        <RadioGroupItem value="trimester" />
+                                      </FormControl>
+                                      <FormLabel className="font-normal">
+                                        By Trimester
+                                      </FormLabel>
+                                    </FormItem>
+                                  </RadioGroup>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={registerForm.control}
+                            name="pregnancyStage.value"
+                            render={({ field }) => {
+                              const stageType = registerForm.watch("pregnancyStage.type");
+                              let options: number[] = [];
+                              let placeholder: string = "";
+                              
+                              if (stageType === "week") {
+                                options = Array.from({ length: 42 }, (_, i) => i + 1);
+                                placeholder = "Select week";
+                              } else if (stageType === "month") {
+                                options = Array.from({ length: 10 }, (_, i) => i + 1);
+                                placeholder = "Select month";
+                              } else if (stageType === "trimester") {
+                                options = [1, 2, 3];
+                                placeholder = "Select trimester";
+                              }
+                              
+                              return (
+                                <FormItem>
+                                  <FormLabel>
+                                    {stageType === "week" 
+                                      ? "Current Week" 
+                                      : stageType === "month" 
+                                        ? "Current Month" 
+                                        : "Current Trimester"}
+                                  </FormLabel>
+                                  <Select 
+                                    onValueChange={field.onChange} 
+                                    defaultValue={field.value}>
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder={placeholder} />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      <SelectGroup>
+                                        {options.map((option: number) => (
+                                          <SelectItem key={option} value={String(option)}>
+                                            {stageType === "week" 
+                                              ? `Week ${option}` 
+                                              : stageType === "month" 
+                                                ? `Month ${option}` 
+                                                : `Trimester ${option}`}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectGroup>
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              );
+                            }}
+                          />
+                        </div>
+
                         <Button
                           type="submit"
-                          className="w-full"
+                          className="w-full mt-6"
                           disabled={registerMutation.isPending}
                         >
                           {registerMutation.isPending ? (

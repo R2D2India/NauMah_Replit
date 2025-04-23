@@ -138,9 +138,19 @@ export class MemStorage implements IStorage {
     const id = this.currentId++;
     const now = new Date();
     const user: User = { 
-      ...insertUser, 
       id,
-      isEmailVerified: false,
+      username: insertUser.username,
+      email: insertUser.email,
+      password: insertUser.password,
+      firstName: insertUser.firstName || null,
+      lastName: insertUser.lastName || null,
+      mobileNumber: insertUser.mobileNumber || null,
+      age: insertUser.age ? Number(insertUser.age) : null,
+      pregnancyWeek: insertUser.pregnancyWeek || null,
+      pregnancyMonth: insertUser.pregnancyMonth || null,
+      pregnancyTrimester: insertUser.pregnancyTrimester || null,
+      profilePicture: insertUser.profilePicture || null,
+      isEmailVerified: insertUser.isEmailVerified || false,
       createdAt: now,
       updatedAt: now
     };
