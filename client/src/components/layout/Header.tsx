@@ -38,11 +38,6 @@ const Header = () => {
               Resources
             </span>
           </Link>
-          <Link href="/journal">
-            <span className={`font-medium ${isActive("/journal") ? "text-primary" : "text-neutral-dark hover:text-primary"} transition cursor-pointer`}>
-              Journal
-            </span>
-          </Link>
         </nav>
         
         <div className="flex items-center space-x-3">
@@ -75,11 +70,6 @@ const Header = () => {
             <Link href="/resources">
               <span className={`font-medium ${isActive("/resources") ? "text-primary" : "text-neutral-dark"} py-2 block cursor-pointer`}>
                 Resources
-              </span>
-            </Link>
-            <Link href="/journal">
-              <span className={`font-medium ${isActive("/journal") ? "text-primary" : "text-neutral-dark"} py-2 block cursor-pointer`}>
-                Journal
               </span>
             </Link>
             <div className="py-2">

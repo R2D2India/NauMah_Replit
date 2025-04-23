@@ -70,7 +70,12 @@ function Router() {
               <Route path="/dashboard" component={Dashboard} />
               <Route path="/tracker" component={lazy(() => import("./pages/Tracker"))} />
               <Route path="/resources" component={lazy(() => import("./pages/Resources"))} />
-              <Route path="/journal" component={lazy(() => import("./pages/Journal"))} />
+              <Route path="/journal">
+                {() => {
+                  window.location.href = "/resources#journal-section";
+                  return <div>Redirecting...</div>;
+                }}
+              </Route>
               <Route path="/privacy" component={Privacy} />
               <Route path="/terms" component={Terms} />
               <Route path="/disclaimer" component={lazy(() => import("./pages/Disclaimer"))} />
