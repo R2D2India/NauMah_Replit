@@ -411,18 +411,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const entry = await storage.createWaitlistEntry(req.validatedData);
       
       // Send email notification to admin
-      const adminEmail = "asknaumah@gmail.com"; // Admin email for waitlist notifications
-      const emailSent = await sendWaitlistNotification(adminEmail, req.validatedData);
+      const { NAUMAH_SUPPORT_EMAIL } = await import('./email');
+      const emailSent = await sendWaitlistNotification(NAUMAH_SUPPORT_EMAIL, req.validatedData);
       
       if (emailSent) {
-        console.log(`Waitlist notification email successfully sent to ${adminEmail}`);
+        console.log(`Waitlist notification email successfully sent to ${NAUMAH_SUPPORT_EMAIL}`);
         res.json({ 
           success: true, 
           message: "Successfully joined waitlist and sent notification.",
           entry 
         });
       } else {
-        console.error(`Failed to send waitlist notification email to ${adminEmail}`);
+        console.error(`Failed to send waitlist notification email to ${NAUMAH_SUPPORT_EMAIL}`);
         // Provide information directly in the response as a fallback
         res.json({ 
           success: true, 
