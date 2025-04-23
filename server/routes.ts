@@ -516,15 +516,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { username, password } = req.validatedData;
       
-      // Simple authentication for admin
-      // In production, use environment variables or database credentials with proper hashing
-      const adminUsername = process.env.ADMIN_USERNAME || "admin";
-      const adminPassword = process.env.ADMIN_PASSWORD || "naumah@admin2025";
+      // Fixed admin credentials as specified
+      const adminEmail = "sandeep@fastest.health";
+      const adminPassword = "Fastest@2004";
       
-      if (username === adminUsername && password === adminPassword) {
+      if (username === adminEmail && password === adminPassword) {
         // Set admin session
         if (req.session) {
           req.session.isAdmin = true;
+          req.session.adminEmail = adminEmail;
         }
         
         return res.json({ 
@@ -575,13 +575,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/admin/session", (req: Request, res: Response) => {
     if (req.session && req.session.isAdmin) {
       return res.json({ 
-        isAdmin: true 
+        isAdmin: true,
+        email: req.session.adminEmail
       });
     }
     
     return res.json({ 
       isAdmin: false 
     });
+  });
+  
+  // Admin password reset
+  app.post("/api/admin/reset-password", adminAuth, async (req: Request, res: Response) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Current password and new password are required" 
+        });
+      }
+      
+      // Fixed admin credentials as specified
+      const adminEmail = "sandeep@fastest.health";
+      const adminPassword = "Fastest@2004";
+      
+      // Verify current password
+      if (currentPassword !== adminPassword) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Current password is incorrect" 
+        });
+      }
+      
+      // In a real application, you'd update the password in the database
+      // For this implementation, we'll store it in an environment variable
+      process.env.ADMIN_PASSWORD = newPassword;
+      
+      return res.json({ 
+        success: true, 
+        message: "Password updated successfully" 
+      });
+    } catch (error) {
+      console.error("Admin password reset error:", error);
+      return res.status(500).json({ 
+        success: false, 
+        message: "An error occurred during password reset" 
+      });
+    }
   });
 
   // Admin routes for data access

@@ -10,6 +10,7 @@ declare module "express-session" {
   interface SessionData {
     isAdmin?: boolean;
     userId?: number; // Add userId to store unique user identifier
+    adminEmail?: string; // Admin email for session
     passport?: {
       user: number; // User ID for authenticated users
     };

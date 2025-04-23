@@ -13,9 +13,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Privacy from "@/pages/Privacy";
 import Terms from "@/pages/Terms";
-import AdminLogin from "@/pages/admin/Login";
-import AdminDashboard from "@/pages/admin/Dashboard";
-import ProtectedAdminRoute from "@/components/admin/ProtectedAdminRoute";
+import AdminPage from "@/pages/admin/AdminPage";
 
 // A simplified AdminLayout component
 function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -55,12 +53,7 @@ function Router() {
       {isAdminRoute ? (
         <AdminLayout>
           <Switch>
-            <Route path="/admin/login" component={AdminLogin} />
-            <Route path="/admin/dashboard">
-              <ProtectedAdminRoute>
-                <AdminDashboard />
-              </ProtectedAdminRoute>
-            </Route>
+            <Route path="/admin" component={AdminPage} />
             <Route component={NotFound} />
           </Switch>
         </AdminLayout>
