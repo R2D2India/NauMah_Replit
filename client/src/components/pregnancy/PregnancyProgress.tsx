@@ -21,28 +21,39 @@ const PregnancyProgress = ({ currentWeek }: PregnancyProgressProps) => {
 
   return (
     <div className="mb-8">
-      <div className="bg-white rounded-xl p-6 custom-shadow relative overflow-hidden">
-        {/* Decorative element */}
+      <div className="bg-white rounded-xl p-6 shadow-md relative overflow-hidden border border-primary/10">
+        {/* Enhanced decorative elements */}
         <div className="absolute top-0 right-0 w-32 h-32 opacity-5">
           <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="currentColor"/>
           </svg>
         </div>
+        <div className="absolute -left-10 -bottom-10 w-32 h-32 opacity-5 rotate-45">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="currentColor"/>
+          </svg>
+        </div>
         
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+        {/* Section Header */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 relative z-10">
           <div>
-            <h2 className="text-2xl font-montserrat font-bold text-primary flex items-center">
-              Your Pregnancy Journey
-              <span className="ml-2 bg-white text-primary text-sm py-1 px-3 rounded-full border border-primary font-semibold shadow-sm">{trimester}</span>
-            </h2>
-            <p className="text-neutral-dark mt-1">Currently in Week {currentWeek}</p>
+            <div className="flex items-center">
+              <h2 className="text-2xl font-montserrat font-bold text-primary flex items-center">
+                <span className="bg-primary/10 p-2 rounded-full mr-3 hidden md:flex">
+                  <i className="fas fa-heartbeat text-primary"></i>
+                </span>
+                Your Pregnancy Journey
+              </h2>
+              <span className="ml-3 bg-primary/10 text-primary text-sm py-1 px-3 rounded-full font-semibold">{trimester}</span>
+            </div>
+            <p className="text-neutral-dark mt-2 ml-0 md:ml-11">Currently in Week {currentWeek}</p>
           </div>
-          <div className="mt-3 md:mt-0 flex items-center space-x-2 bg-neutral-light px-4 py-2 rounded-lg">
+          <div className="mt-4 md:mt-0 flex items-center bg-white px-4 py-2 rounded-lg border border-primary/20 shadow-sm">
             <svg className="h-5 w-5 text-primary" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 002 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zm-7 5h5v5h-5v-5z" fill="currentColor"/>
             </svg>
-            <span className="font-montserrat font-medium">Due Date:</span>
-            <span className="font-montserrat text-primary-dark font-bold">{dueDate}</span>
+            <span className="font-montserrat font-medium ml-2">Due Date:</span>
+            <span className="font-montserrat text-primary font-bold ml-2">{dueDate}</span>
           </div>
         </div>
         

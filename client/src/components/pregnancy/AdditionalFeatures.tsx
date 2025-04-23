@@ -56,58 +56,108 @@ const AdditionalFeatures = ({ currentWeek }: AdditionalFeaturesProps) => {
     }
   };
 
-  // Only display one return statement, removing duplicate code
   return (
-    <div className="grid grid-cols-1 md:grid-cols-1 gap-6 mb-8">
+    <div className="mb-8">
       {/* Baby Name Explorer */}
-      <div className="bg-white rounded-xl p-6 custom-shadow">
-        <h3 className="text-xl font-montserrat font-bold text-primary mb-4">
-          <i className="fas fa-baby mr-2"></i>Baby Name Explorer
-        </h3>
-        <p className="mb-4">Find the perfect name for your little one with our name database.</p>
-        
-        <div className="grid grid-cols-2 gap-3 mb-4">
-          <select 
-            className="p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
-            value={selectedOrigin}
-            onChange={(e) => setSelectedOrigin(e.target.value)}
-          >
-            {NAME_ORIGINS.map(origin => (
-              <option key={origin} value={origin}>{origin}</option>
-            ))}
-          </select>
-          <select 
-            className="p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
-            value={selectedGender}
-            onChange={(e) => setSelectedGender(e.target.value)}
-          >
-            {NAME_GENDERS.map(gender => (
-              <option key={gender} value={gender}>{gender}</option>
-            ))}
-          </select>
+      <div className="bg-white rounded-xl p-6 shadow-md border border-primary/10">
+        {/* Section Header */}
+        <div className="mb-5">
+          <h2 className="text-2xl font-montserrat font-bold text-primary flex items-center">
+            <span className="bg-primary/10 p-2 rounded-full mr-3">
+              <i className="fas fa-baby-carriage text-primary"></i>
+            </span>
+            Baby Name Explorer
+          </h2>
+          <p className="text-neutral-dark mt-1 ml-11">Find the perfect name for your little one with our AI-powered name generator</p>
         </div>
         
-        <button 
-          className="w-full bg-primary hover:bg-primary-dark text-white py-2 px-4 rounded-lg font-montserrat font-medium transition duration-300"
-          onClick={handleExploreNames}
-          disabled={isLoadingNames}
-        >
-          {isLoadingNames ? "Generating Names..." : "Explore Names"}
-        </button>
-
-        {names.length > 0 && (
-          <div className="mt-4 space-y-2">
-            <h4 className="font-semibold mb-2">Generated Names:</h4>
-            <div className="max-h-60 overflow-y-auto">
-              {names.map((item, index) => (
-                <div key={index} className="border-b border-gray-100 py-2">
-                  <span className="font-medium text-primary">{item.name}</span>
-                  <p className="text-sm text-gray-600">{item.meaning}</p>
-                </div>
-              ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-gradient-to-br from-white to-primary/5 p-5 rounded-lg border border-primary/10">
+            <div className="flex items-center mb-4">
+              <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center mr-3">
+                <i className="fas fa-globe text-primary"></i>
+              </div>
+              <div>
+                <h4 className="font-medium">Select Preferences</h4>
+                <p className="text-xs text-neutral-dark">Choose origin and gender preferences</p>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1 text-neutral-dark">Origin</label>
+                <select 
+                  className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary/50 outline-none shadow-sm"
+                  value={selectedOrigin}
+                  onChange={(e) => setSelectedOrigin(e.target.value)}
+                >
+                  {NAME_ORIGINS.map(origin => (
+                    <option key={origin} value={origin}>{origin}</option>
+                  ))}
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1 text-neutral-dark">Gender</label>
+                <select 
+                  className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary/50 outline-none shadow-sm"
+                  value={selectedGender}
+                  onChange={(e) => setSelectedGender(e.target.value)}
+                >
+                  {NAME_GENDERS.map(gender => (
+                    <option key={gender} value={gender}>{gender}</option>
+                  ))}
+                </select>
+              </div>
+              
+              <button 
+                className="w-full bg-primary hover:bg-primary-dark text-white py-3 px-4 rounded-lg font-montserrat font-medium transition duration-300 shadow hover:shadow-md flex items-center justify-center"
+                onClick={handleExploreNames}
+                disabled={isLoadingNames}
+              >
+                {isLoadingNames ? (
+                  <>
+                    <i className="fas fa-spinner fa-spin mr-2"></i>
+                    <span>Generating Names...</span>
+                  </>
+                ) : (
+                  <>
+                    <i className="fas fa-magic mr-2"></i>
+                    <span>Generate Baby Names</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
-        )}
+          
+          <div className={`bg-white rounded-lg border ${names.length > 0 ? 'border-primary/20' : 'border-gray-200'} p-5`}>
+            <h4 className="font-medium text-lg mb-3 flex items-center">
+              <i className="fas fa-star text-primary mr-2"></i>
+              <span>Generated Names</span>
+            </h4>
+            
+            {names.length > 0 ? (
+              <div className="max-h-72 overflow-y-auto px-1">
+                {names.map((item, index) => (
+                  <div key={index} className="border-b border-gray-100 py-3 hover:bg-gray-50 px-2 rounded transition-colors">
+                    <div className="flex justify-between items-center">
+                      <span className="font-semibold text-primary text-lg">{item.name}</span>
+                      <span className="text-xs bg-primary/10 px-2 py-1 rounded-full text-primary">
+                        {selectedGender === "All Genders" ? "Unisex" : selectedGender.slice(0, -1)}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-600 mt-1">{item.meaning}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-48 text-center p-4 text-gray-500 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+                <i className="fas fa-baby text-primary/30 text-5xl mb-3"></i>
+                <p>Select preferences and click generate to discover beautiful baby names</p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -68,15 +68,24 @@ const Dashboard = () => {
   const currentWeek = pregnancyData?.currentWeek || 1;
 
   return (
-    <div id="baby-and-me-section" className="pt-2">
+    <div id="baby-and-me-section" className="pt-4">
+      {/* Page Title */}
+      <div className="mb-8 text-center">
+        <h1 className="text-3xl md:text-4xl font-montserrat font-bold text-primary mb-2">Baby & Me</h1>
+        <p className="text-neutral-dark max-w-2xl mx-auto">Track your pregnancy journey and follow your baby's development week by week</p>
+      </div>
+      
       {/* Pregnancy Stage Selector */}
-      <div className="bg-white rounded-xl p-6 mb-8 custom-shadow border-l-4 border-primary">
+      <div className="bg-white rounded-xl p-6 mb-8 shadow-md border-l-4 border-primary">
         <div className="flex flex-wrap justify-between items-center">
-          <h2 className="text-xl font-montserrat font-bold text-primary mb-4">
+          <h2 className="text-2xl font-montserrat font-bold text-primary mb-4 flex items-center">
+            <span className="bg-primary/10 p-2 rounded-full mr-3">
+              <i className="fas fa-calendar-alt text-primary"></i>
+            </span>
             Update Pregnancy Stage
           </h2>
           {updateStageMutation.isSuccess && (
-            <span className="text-sm text-green-600 flex items-center mb-4">
+            <span className="text-sm text-green-600 flex items-center mb-4 bg-green-50 py-1 px-3 rounded-full">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
