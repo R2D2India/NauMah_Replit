@@ -68,7 +68,10 @@ export default function AdminPage() {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const response = await apiRequest("GET", "/api/admin/session");
+        const response = await fetch("/api/admin/session", {
+          method: "GET", 
+          credentials: "include"
+        });
         const data = await response.json();
         
         if (data.isAdmin) {
@@ -90,7 +93,15 @@ export default function AdminPage() {
   const handleLogin = async (data: z.infer<typeof loginSchema>) => {
     try {
       setLoginError(null);
-      const response = await apiRequest("POST", "/api/admin/login", data);
+      const response = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        credentials: "include",
+        body: JSON.stringify(data)
+      });
+      
       const result = await response.json();
       
       if (result.success) {
@@ -107,7 +118,10 @@ export default function AdminPage() {
 
   const handleLogout = async () => {
     try {
-      await apiRequest("POST", "/api/admin/logout");
+      await fetch("/api/admin/logout", {
+        method: "POST",
+        credentials: "include"
+      });
       setIsAdmin(false);
       setAdminEmail(null);
     } catch (error) {
@@ -120,9 +134,16 @@ export default function AdminPage() {
       setResetError(null);
       setResetSuccess(null);
       
-      const response = await apiRequest("POST", "/api/admin/reset-password", {
-        currentPassword: data.currentPassword,
-        newPassword: data.newPassword,
+      const response = await fetch("/api/admin/reset-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          currentPassword: data.currentPassword,
+          newPassword: data.newPassword,
+        })
       });
       
       const result = await response.json();
@@ -141,7 +162,10 @@ export default function AdminPage() {
 
   const fetchData = async (endpoint: string, setterFunction: React.Dispatch<React.SetStateAction<any[]>>) => {
     try {
-      const response = await apiRequest("GET", endpoint);
+      const response = await fetch(endpoint, {
+        method: "GET",
+        credentials: "include"
+      });
       const data = await response.json();
       setterFunction(data);
     } catch (error) {
