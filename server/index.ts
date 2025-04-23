@@ -3,12 +3,28 @@ import session from "express-session";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { runMigrations } from "./db";
+import { setupAuth } from "./auth";
 
 // Add session types
 declare module "express-session" {
   interface SessionData {
     isAdmin?: boolean;
     userId?: number; // Add userId to store unique user identifier
+    passport?: {
+      user: number; // User ID for authenticated users
+    };
+  }
+}
+
+// Extend Express Request type to include user property from Passport
+declare global {
+  namespace Express {
+    interface User {
+      id: number;
+      username: string;
+      email: string;
+      // Other user properties
+    }
   }
 }
 
@@ -16,28 +32,18 @@ const app = express();
 app.use(express.json({ limit: '16mb' })); // Increase payload limit for audio content
 app.use(express.urlencoded({ extended: false }));
 
-// Configure session middleware
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'naumah-admin-secret-key',
-  resave: false,
-  saveUninitialized: true, // Changed to true to save session for new users
-  cookie: {
-    secure: false, // Set to false in development for localhost testing
-    httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    sameSite: 'lax' // Allow cross-site requests
-  }
-}));
+// Setup authentication (must be done before routes)
+setupAuth(app);
 
-// User session middleware - assigns a unique user ID to each session
+// Non-authenticated sessions get anonymous user ID
 app.use((req, res, next) => {
-  if (!req.session.userId) {
+  if (!req.isAuthenticated() && !req.session.userId) {
     // Generate a unique user ID for this session that's compatible with PostgreSQL integer type
     // PostgreSQL integers have a range of -2147483648 to +2147483647
     // We'll use a smaller random number to ensure compatibility
     const userId = Math.floor(Math.random() * 1000000) + 1; // Random number between 1 and 1,000,000
     req.session.userId = userId;
-    console.log(`Created new user session with ID: ${req.session.userId}`);
+    console.log(`Created new anonymous session with ID: ${req.session.userId}`);
   }
   next();
 });

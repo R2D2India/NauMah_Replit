@@ -24,7 +24,12 @@ import {
   productImageCheckSchema,
   contactSchema,
   ContactFormData,
-  journalEntrySchema
+  journalEntrySchema,
+  // Auth schemas
+  registerSchema,
+  loginSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema
 } from "@shared/schema";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";

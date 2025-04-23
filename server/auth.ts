@@ -5,14 +5,14 @@ import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
-import { User } from "@shared/schema";
+import { User as UserType } from "@shared/schema";
 import { createHash } from "crypto";
 import connectPg from "connect-pg-simple";
 import { pool } from "./db";
 
 declare global {
   namespace Express {
-    interface User extends User {}
+    interface User extends UserType {}
   }
 }
 
@@ -150,13 +150,13 @@ export function setupAuth(app: Express) {
 
   // Login
   app.post("/api/auth/login", (req, res, next) => {
-    passport.authenticate("local", (err, user, info) => {
+    passport.authenticate("local", (err: any, user: UserType | false, info: { message: string } | undefined) => {
       if (err) return next(err);
       if (!user) {
         return res.status(401).json({ error: info?.message || "Login failed" });
       }
       
-      req.login(user, (err) => {
+      req.login(user, (err: any) => {
         if (err) return next(err);
         // Return the user without sensitive data
         const { password, ...userWithoutPassword } = user;
@@ -167,7 +167,7 @@ export function setupAuth(app: Express) {
 
   // Logout
   app.post("/api/auth/logout", (req, res, next) => {
-    req.logout((err) => {
+    req.logout((err: any) => {
       if (err) return next(err);
       res.status(200).json({ message: "Logged out successfully" });
     });
@@ -179,7 +179,7 @@ export function setupAuth(app: Express) {
       return res.status(401).json({ error: "Not authenticated" });
     }
     
-    const { password, ...userWithoutPassword } = req.user as User;
+    const { password, ...userWithoutPassword } = req.user as UserType;
     res.json(userWithoutPassword);
   });
 
@@ -255,7 +255,7 @@ export function setupAuth(app: Express) {
   // Update user profile (authenticated users only)
   app.put("/api/auth/profile", isAuthenticated, async (req, res, next) => {
     try {
-      const userId = (req.user as User).id;
+      const userId = (req.user as UserType).id;
       
       // Get fields to update (exclude sensitive fields)
       const { firstName, lastName, profilePicture } = req.body;
@@ -278,7 +278,7 @@ export function setupAuth(app: Express) {
   // Change password (authenticated users only)
   app.post("/api/auth/change-password", isAuthenticated, async (req, res, next) => {
     try {
-      const user = req.user as User;
+      const user = req.user as UserType;
       const { currentPassword, newPassword } = req.body;
       
       // Verify current password
