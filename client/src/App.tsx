@@ -4,9 +4,11 @@ import { lazy, Suspense, useEffect } from "react";
 import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import { setupScrollBehavior } from "./lib/scrollUtils";
+import { AuthProvider } from "@/hooks/use-auth";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
 import Dashboard from "@/pages/Dashboard";
+import AuthPage from "@/pages/auth-page";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Privacy from "@/pages/Privacy";
@@ -80,6 +82,7 @@ function Router() {
               <Route path="/privacy" component={Privacy} />
               <Route path="/terms" component={Terms} />
               <Route path="/disclaimer" component={lazy(() => import("./pages/Disclaimer"))} />
+              <Route path="/auth" component={AuthPage} />
               <Route component={NotFound} />
             </Switch>
           </Suspense>
@@ -92,8 +95,10 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router />
-      <Toaster />
+      <AuthProvider>
+        <Router />
+        <Toaster />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
