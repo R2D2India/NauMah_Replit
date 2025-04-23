@@ -22,7 +22,15 @@ export interface IStorage {
   // User methods
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUserProfile(id: number, profileData: { firstName?: string; lastName?: string; profilePicture?: string }): Promise<User>;
+  updateUserPassword(id: number, hashedPassword: string): Promise<User>;
+  
+  // Password reset methods
+  createPasswordResetToken(token: { userId: number; token: string; expiresAt: Date; isUsed: boolean }): Promise<any>;
+  getValidPasswordResetToken(token: string): Promise<any>;
+  markPasswordResetTokenAsUsed(id: number): Promise<any>;
   
   // Waitlist methods
   createWaitlistEntry(entry: { name: string; mobile: string; email: string }): Promise<any>;
@@ -83,6 +91,9 @@ export class MemStorage implements IStorage {
   private supportMessageId: number;
   private journalEntryId: number;
 
+  private passwordResetTokens: Map<number, { id: number; userId: number; token: string; expiresAt: Date; isUsed: boolean; createdAt: Date }>;
+  private passwordResetTokenId: number;
+
   constructor() {
     this.users = new Map();
     this.pregnancyData = new Map();
@@ -93,6 +104,7 @@ export class MemStorage implements IStorage {
     this.appointments = new Map();
     this.supportMessages = [];
     this.journalEntries = new Map();
+    this.passwordResetTokens = new Map();
     this.currentId = 1;
     this.pregnancyDataId = 1;
     this.moodEntryId = 1;
@@ -102,6 +114,7 @@ export class MemStorage implements IStorage {
     this.appointmentId = 1;
     this.supportMessageId = 1;
     this.journalEntryId = 1;
+    this.passwordResetTokenId = 1;
   }
 
   // User methods
@@ -115,11 +128,91 @@ export class MemStorage implements IStorage {
     );
   }
 
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(
+      (user) => user.email === email,
+    );
+  }
+
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentId++;
-    const user: User = { ...insertUser, id };
+    const now = new Date();
+    const user: User = { 
+      ...insertUser, 
+      id,
+      isEmailVerified: false,
+      createdAt: now,
+      updatedAt: now
+    };
     this.users.set(id, user);
     return user;
+  }
+
+  async updateUserProfile(id: number, profileData: { firstName?: string; lastName?: string; profilePicture?: string }): Promise<User> {
+    const user = this.users.get(id);
+    if (!user) {
+      throw new Error(`User with ID ${id} not found`);
+    }
+
+    const updatedUser = {
+      ...user,
+      ...profileData,
+      updatedAt: new Date()
+    };
+
+    this.users.set(id, updatedUser);
+    return updatedUser;
+  }
+
+  async updateUserPassword(id: number, hashedPassword: string): Promise<User> {
+    const user = this.users.get(id);
+    if (!user) {
+      throw new Error(`User with ID ${id} not found`);
+    }
+
+    const updatedUser = {
+      ...user,
+      password: hashedPassword,
+      updatedAt: new Date()
+    };
+
+    this.users.set(id, updatedUser);
+    return updatedUser;
+  }
+
+  // Password reset methods
+  async createPasswordResetToken(token: { userId: number; token: string; expiresAt: Date; isUsed: boolean }): Promise<any> {
+    const id = this.passwordResetTokenId++;
+    const resetToken = {
+      ...token,
+      id,
+      createdAt: new Date()
+    };
+    
+    this.passwordResetTokens.set(id, resetToken);
+    return resetToken;
+  }
+  
+  async getValidPasswordResetToken(token: string): Promise<any> {
+    const now = new Date();
+    return Array.from(this.passwordResetTokens.values()).find(
+      (t) => t.token === token && !t.isUsed && t.expiresAt > now
+    );
+  }
+  
+  async markPasswordResetTokenAsUsed(id: number): Promise<any> {
+    const token = this.passwordResetTokens.get(id);
+    if (!token) {
+      throw new Error(`Reset token with ID ${id} not found`);
+    }
+    
+    const updatedToken = {
+      ...token,
+      isUsed: true
+    };
+    
+    this.passwordResetTokens.set(id, updatedToken);
+    return updatedToken;
   }
 
   // Pregnancy data methods

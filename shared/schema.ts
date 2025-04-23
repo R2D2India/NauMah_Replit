@@ -1,11 +1,29 @@
-import { pgTable, text, serial, integer, boolean, timestamp, json } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, json, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import z from "zod";
 
+// Enhanced users table with more profile information
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
+  email: varchar("email", { length: 255 }).notNull().unique(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
+  firstName: varchar("first_name", { length: 100 }),
+  lastName: varchar("last_name", { length: 100 }),
+  profilePicture: text("profile_picture"),
+  isEmailVerified: boolean("is_email_verified").default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Password reset tokens for forgot password functionality
+export const passwordResetTokens = pgTable("password_reset_tokens", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  token: varchar("token", { length: 100 }).notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  isUsed: boolean("is_used").default(false),
 });
 
 export const pregnancyData = pgTable("pregnancy_data", {
@@ -35,10 +53,49 @@ export const medicationChecks = pgTable("medication_checks", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Authentication Schemas
+export const registerSchema = z.object({
+  email: z.string().email("Valid email is required"),
+  username: z.string().min(3, "Username must be at least 3 characters"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+});
+
+export const loginSchema = z.object({
+  username: z.string().min(1, "Username is required"),
+  password: z.string().min(1, "Password is required"),
+});
+
+export const forgotPasswordSchema = z.object({
+  email: z.string().email("Valid email is required"),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1, "Token is required"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  confirmPassword: z.string().min(8, "Confirm password is required"),
+}).refine(data => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});
+
 // Insert Schemas
 export const insertUserSchema = createInsertSchema(users).pick({
+  email: true,
   username: true,
   password: true,
+  firstName: true,
+  lastName: true,
+  profilePicture: true,
+  isEmailVerified: true,
+});
+
+export const insertPasswordResetTokenSchema = createInsertSchema(passwordResetTokens).pick({
+  userId: true,
+  token: true,
+  expiresAt: true,
+  isUsed: true,
 });
 
 export const insertPregnancyDataSchema = createInsertSchema(pregnancyData).pick({
@@ -64,6 +121,12 @@ export const insertMedicationCheckSchema = createInsertSchema(medicationChecks).
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+export type RegisterRequest = z.infer<typeof registerSchema>;
+export type LoginRequest = z.infer<typeof loginSchema>;
+export type ForgotPasswordRequest = z.infer<typeof forgotPasswordSchema>;
+export type ResetPasswordRequest = z.infer<typeof resetPasswordSchema>;
+export type InsertPasswordResetToken = z.infer<typeof insertPasswordResetTokenSchema>;
+export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
 
 export type InsertPregnancyData = z.infer<typeof insertPregnancyDataSchema>;
 export type PregnancyData = typeof pregnancyData.$inferSelect;
