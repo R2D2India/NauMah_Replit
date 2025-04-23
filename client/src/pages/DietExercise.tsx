@@ -34,15 +34,11 @@ export default function DietExercise() {
   } | null>(null);
 
   // Get pregnancy data for current week
-  const { data: pregnancyData } = useQuery({
+  const { data: pregnancyData, refetch: refetchPregnancyData } = useQuery({
     queryKey: ["/api/pregnancy"],
-    queryFn: async () => {
-      const response = await fetch("/api/pregnancy");
-      if (!response.ok) {
-        throw new Error("Failed to fetch pregnancy data");
-      }
-      return response.json();
-    }
+    staleTime: 0, // Always refetch when accessed
+    refetchOnMount: true, // Ensure data is fresh when component mounts
+    refetchOnWindowFocus: true, // Refetch when window gets focus
   });
 
   // Default to week 1 if not available

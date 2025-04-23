@@ -8,6 +8,7 @@ import PregnancyProgress from "@/components/pregnancy/PregnancyProgress";
 import BabyDevelopment from "@/components/pregnancy/BabyDevelopment";
 import AdditionalFeatures from "@/components/pregnancy/AdditionalFeatures";
 import { WEEKS_OPTIONS, MONTHS_OPTIONS, TRIMESTER_OPTIONS } from "@/lib/constants";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 const Dashboard = () => {
   const [, setLocation] = useLocation();
@@ -30,15 +31,24 @@ const Dashboard = () => {
   // Update pregnancy stage mutation
   const updateStageMutation = useMutation({
     mutationFn: async (data: { stageType: string; stageValue: string }) => {
-      return await fetch("/api/pregnancy/stage", {
+      return await apiRequest<any>("/api/pregnancy/stage", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      }).then(res => res.json());
+        body: JSON.stringify(data)
+      });
     },
     onSuccess: () => {
+      // Invalidate pregnancy data across the app to ensure all components refresh
+      queryClient.invalidateQueries({ queryKey: ["/api/pregnancy"] });
+      
+      // Also refetch locally to update the UI immediately
       refetch();
+      
+      console.log("Pregnancy stage updated and cache invalidated");
     },
+    onError: (error) => {
+      console.error("Failed to update pregnancy stage:", error);
+    }
   });
 
   // Redirect to home if no pregnancy data is found
