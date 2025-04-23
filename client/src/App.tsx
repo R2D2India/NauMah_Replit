@@ -69,6 +69,7 @@ function Router() {
               <Route path="/" component={Home} />
               <Route path="/dashboard" component={Dashboard} />
               <Route path="/tracker" component={lazy(() => import("./pages/Tracker"))} />
+              <Route path="/diet-exercise" component={lazy(() => import("./pages/DietExercise"))} />
               <Route path="/resources" component={lazy(() => import("./pages/Resources"))} />
               <Route path="/journal">
                 {() => {
