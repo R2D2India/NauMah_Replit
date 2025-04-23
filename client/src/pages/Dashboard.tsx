@@ -6,7 +6,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import PregnancyProgress from "@/components/pregnancy/PregnancyProgress";
 import BabyDevelopment from "@/components/pregnancy/BabyDevelopment";
-import TabbedContent from "@/components/pregnancy/TabbedContent";
 import AdditionalFeatures from "@/components/pregnancy/AdditionalFeatures";
 import { WEEKS_OPTIONS, MONTHS_OPTIONS, TRIMESTER_OPTIONS } from "@/lib/constants";
 
@@ -147,9 +146,6 @@ const Dashboard = () => {
 
       {/* Baby Development */}
       <BabyDevelopment currentWeek={currentWeek} />
-
-      {/* Tabbed Content Section */}
-      <TabbedContent currentWeek={currentWeek} />
       
       {/* Additional Features */}
       <AdditionalFeatures currentWeek={currentWeek} />
