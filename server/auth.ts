@@ -217,6 +217,21 @@ export function setupAuth(app: Express) {
       // Set session
       req.session.userId = newUser.id;
 
+      // Send welcome email
+      try {
+        const { sendWelcomeEmail } = await import('./email');
+        await sendWelcomeEmail({
+          email: newUser.email,
+          firstName: newUser.firstName,
+          lastName: newUser.lastName,
+          username: newUser.username
+        });
+        console.log(`Welcome email sent successfully to ${newUser.email}`);
+      } catch (emailError) {
+        // Log error but don't fail registration
+        console.error("Error sending welcome email:", emailError);
+      }
+
       // Return user without password
       const { password: _, ...userWithoutPassword } = newUser;
       return res.status(201).json(userWithoutPassword);
@@ -324,9 +339,131 @@ export function setupAuth(app: Express) {
         isUsed: false,
       });
 
-      // In a real application, send an email with the reset link
-      // For now, we'll just log it
-      console.log(`Password reset link: ${process.env.APP_URL}/auth?token=${token}`);
+      // Send password reset email
+      try {
+        const { sendEmail, NAUMAH_SUPPORT_EMAIL } = await import('./email');
+        
+        // Determine the appropriate app URL
+        const appUrl = process.env.APP_URL || 'https://naumah.com';
+        const resetLink = `${appUrl}/auth?token=${token}`;
+        
+        const subject = 'Reset Your NauMah Password';
+        const html = `
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Reset Your NauMah Password</title>
+            <style>
+              body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                margin: 0;
+                padding: 0;
+              }
+              .container {
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+              }
+              .header {
+                background: linear-gradient(135deg, #FF8080 0%, #FF4D4D 100%);
+                color: white;
+                padding: 25px;
+                text-align: center;
+                border-radius: 10px 10px 0 0;
+              }
+              .content {
+                background-color: #ffffff;
+                padding: 30px;
+                border-left: 1px solid #eeeeee;
+                border-right: 1px solid #eeeeee;
+              }
+              .footer {
+                background-color: #f9f9f9;
+                padding: 20px;
+                text-align: center;
+                font-size: 12px;
+                color: #777;
+                border-radius: 0 0 10px 10px;
+                border: 1px solid #eeeeee;
+              }
+              h1 {
+                color: #ffffff;
+                margin: 0;
+                font-size: 24px;
+              }
+              h2 {
+                color: #FF4D4D;
+                font-size: 20px;
+              }
+              .btn {
+                display: inline-block;
+                background-color: #FF4D4D;
+                color: white;
+                text-decoration: none;
+                padding: 12px 25px;
+                border-radius: 25px;
+                margin: 20px 0;
+                font-weight: bold;
+                text-align: center;
+              }
+              .warning {
+                background-color: #fff8e1;
+                border-left: 4px solid #ffc107;
+                padding: 15px;
+                margin: 20px 0;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>Password Reset Request</h1>
+              </div>
+              <div class="content">
+                <h2>Hello ${user.firstName || user.username},</h2>
+                <p>We received a request to reset your password for your NauMah account. To proceed with the reset, please click the button below:</p>
+                
+                <div style="text-align: center;">
+                  <a href="${resetLink}" class="btn">Reset Your Password</a>
+                </div>
+                
+                <p>This link will expire in 1 hour for security reasons.</p>
+                
+                <div class="warning">
+                  <p><strong>Important:</strong> If you didn't request this password reset, please ignore this email or contact our support team if you have any concerns.</p>
+                </div>
+                
+                <p>Thank you for using NauMah!</p>
+                <p>The NauMah Team</p>
+              </div>
+              <div class="footer">
+                <p>This email was sent to ${user.email}</p>
+                <p>&copy; ${new Date().getFullYear()} NauMah. All rights reserved.</p>
+                <p>For assistance, contact us at <a href="mailto:${NAUMAH_SUPPORT_EMAIL}">${NAUMAH_SUPPORT_EMAIL}</a></p>
+              </div>
+            </div>
+          </body>
+          </html>
+        `;
+        
+        await sendEmail({
+          to: user.email,
+          from: 'info@sendgrid.net',
+          replyTo: NAUMAH_SUPPORT_EMAIL,
+          subject,
+          html
+        });
+        
+        console.log(`Password reset email sent to ${user.email}`);
+      } catch (emailError) {
+        // Log error but don't fail the password reset request
+        console.error("Error sending password reset email:", emailError);
+        console.log(`Password reset link: ${process.env.APP_URL || 'https://naumah.com'}/auth?token=${token}`);
+      }
 
       return res.status(200).json({ message: "Password reset email sent if account exists" });
     } catch (error) {
