@@ -200,27 +200,50 @@ export function SafetyChecker() {
   };
 
   return (
-    <div className="bg-white rounded-xl p-6 custom-shadow h-full">
-      <h3 className="text-xl font-montserrat font-bold text-primary mb-4">
-        <i className="fas fa-pills mr-2"></i>Food & Medication Safety Checker
-      </h3>
-      <p className="mb-4">Verify if food or medication is safe to use during your pregnancy.</p>
+    <div className="bg-white rounded-xl p-6 shadow-sm h-full border border-primary/5">
+      {/* Elegant header with gradient underline */}
+      <div className="relative pb-3 mb-5">
+        <h3 className="text-xl font-montserrat font-bold text-primary flex items-center">
+          <i className="fas fa-pills mr-3 p-2 bg-primary/10 rounded-full"></i>
+          <span>Food & Medication Safety Checker</span>
+        </h3>
+        <div className="absolute bottom-0 left-0 w-24 h-1 bg-gradient-to-r from-primary to-primary/30 rounded-full"></div>
+      </div>
       
-      {/* Text input for medication names */}
-      <div className="flex gap-3 mb-4">
-        <input 
-          type="text" 
-          className="flex-grow p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none" 
-          placeholder="Enter food or medication name..."
-          value={medicationName}
-          onChange={(e) => setMedicationName(e.target.value)}
-        />
+      <p className="mb-5 text-neutral-dark leading-relaxed">
+        Verify if food or medication is safe to use during your pregnancy journey.
+      </p>
+      
+      {/* Enhanced text input for medication names */}
+      <div className="flex flex-col md:flex-row gap-3 mb-5">
+        <div className="relative flex-grow">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <i className="fas fa-search text-gray-400"></i>
+          </div>
+          <input 
+            type="text" 
+            className="w-full pl-10 p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary/50 outline-none shadow-sm transition-all duration-200" 
+            placeholder="Enter food or medication name..."
+            value={medicationName}
+            onChange={(e) => setMedicationName(e.target.value)}
+          />
+        </div>
         <button 
-          className="bg-primary hover:bg-primary-dark text-white py-2 px-4 rounded-lg font-montserrat font-medium transition duration-300"
+          className="bg-primary hover:bg-primary-dark text-white py-3 px-6 rounded-lg font-montserrat font-medium transition duration-300 shadow-sm hover:shadow flex items-center justify-center"
           onClick={handleMedicationCheck}
           disabled={checkMedicationMutation.isPending}
         >
-          {checkMedicationMutation.isPending ? "Checking..." : "Check"}
+          {checkMedicationMutation.isPending ? (
+            <>
+              <i className="fas fa-spinner fa-spin mr-2"></i>
+              <span>Checking...</span>
+            </>
+          ) : (
+            <>
+              <i className="fas fa-check-circle mr-2"></i>
+              <span>Check Safety</span>
+            </>
+          )}
         </button>
       </div>
       
@@ -266,26 +289,49 @@ export function SafetyChecker() {
         </div>
       )}
       
-      {/* Camera and upload buttons */}
-      <div className="mt-4">
-        <p className="mb-2 font-medium">Or analyze a product label:</p>
-        <div className="flex gap-3">
+      {/* Divider with label */}
+      <div className="relative my-6">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-gray-200"></div>
+        </div>
+        <div className="relative flex justify-center">
+          <span className="bg-white px-4 text-sm text-neutral-dark">OR</span>
+        </div>
+      </div>
+
+      {/* Enhanced camera and upload buttons */}
+      <div className="mb-5">
+        <p className="mb-3 font-medium flex items-center">
+          <i className="fas fa-camera text-primary mr-2"></i>
+          <span>Analyze a product label:</span>
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <button
-            className="flex items-center justify-center bg-gray-50 hover:bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg p-3 flex-1 transition"
+            className="flex items-center justify-center bg-gradient-to-b from-white to-gray-50 hover:from-gray-50 hover:to-gray-100 border border-gray-200 rounded-lg p-4 transition duration-200 shadow-sm hover:shadow group"
             onClick={handleCameraCapture}
             disabled={analyzeProductImageMutation.isPending || showCamera}
           >
-            <Camera className="mr-2 h-5 w-5 text-primary" />
-            <span>Take Photo</span>
+            <div className="mr-3 h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+              <Camera className="h-5 w-5 text-primary" />
+            </div>
+            <div className="text-left">
+              <p className="font-medium">Take Photo</p>
+              <p className="text-xs text-gray-500">Use your camera to scan a label</p>
+            </div>
           </button>
           
           <button
-            className="flex items-center justify-center bg-gray-50 hover:bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg p-3 flex-1 transition"
+            className="flex items-center justify-center bg-gradient-to-b from-white to-gray-50 hover:from-gray-50 hover:to-gray-100 border border-gray-200 rounded-lg p-4 transition duration-200 shadow-sm hover:shadow group"
             onClick={() => fileInputRef.current?.click()}
             disabled={analyzeProductImageMutation.isPending || showCamera}
           >
-            <FilePlus className="mr-2 h-5 w-5 text-primary" />
-            <span>Upload Image</span>
+            <div className="mr-3 h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+              <FilePlus className="h-5 w-5 text-primary" />
+            </div>
+            <div className="text-left">
+              <p className="font-medium">Upload Image</p>
+              <p className="text-xs text-gray-500">Choose a photo from your device</p>
+            </div>
           </button>
           
           <input
@@ -298,73 +344,95 @@ export function SafetyChecker() {
         </div>
       </div>
       
-      {/* Image preview and analysis results */}
+      {/* Enhanced image preview and analysis results */}
       {imagePreview && (
-        <div className="mt-4 border rounded-lg p-3">
-          <div className="flex justify-between items-center mb-2">
-            <h4 className="font-medium">Product Image</h4>
+        <div className="mt-6 border border-primary/10 rounded-lg overflow-hidden bg-white shadow-md">
+          <div className="bg-primary/5 px-4 py-3 border-b border-primary/10 flex justify-between items-center">
+            <h4 className="font-medium text-primary flex items-center">
+              <i className="fas fa-image mr-2"></i>
+              <span>Product Analysis</span>
+            </h4>
             <button
-              className="text-sm text-red-500 hover:text-red-700"
+              className="text-sm text-gray-500 hover:text-red-500 bg-white hover:bg-red-50 rounded-full p-1 transition-colors"
               onClick={clearImagePreview}
+              title="Clear image"
             >
-              Clear
+              <i className="fas fa-times"></i>
             </button>
           </div>
           
-          <div className="relative">
-            <img 
-              src={imagePreview} 
-              alt="Product" 
-              className="w-full h-auto max-h-48 object-contain rounded-lg" 
-            />
-            
-            {analyzeProductImageMutation.isPending && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-lg">
-                <div className="text-center text-white">
-                  <Loader2 className="animate-spin h-8 w-8 mx-auto mb-2" />
-                  <p>Analyzing image...</p>
+          <div className="p-4">
+            <div className="flex flex-col md:flex-row gap-4">
+              {/* Image preview */}
+              <div className="relative md:w-1/3">
+                <div className="bg-gray-50 rounded-lg p-2 border border-gray-100">
+                  <img 
+                    src={imagePreview} 
+                    alt="Product" 
+                    className="w-full h-auto max-h-48 object-contain rounded" 
+                  />
                 </div>
-              </div>
-            )}
-          </div>
-          
-          {productAnalysisResult && (
-            <div className="mt-3">
-              <div className="flex items-center gap-2">
-                <span className="font-semibold">Product:</span> 
-                <span>{productAnalysisResult.productName}</span>
-              </div>
-              
-              <div className="flex items-center gap-2 mt-1">
-                <span className="font-semibold">Type:</span> 
-                <span>{productAnalysisResult.productType}</span>
+                
+                {analyzeProductImageMutation.isPending && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-60 rounded-lg">
+                    <div className="text-center text-white px-3 py-2 rounded-lg bg-black/40 backdrop-blur-sm">
+                      <Loader2 className="animate-spin h-8 w-8 mx-auto mb-2" />
+                      <p className="text-sm">Analyzing image...</p>
+                    </div>
+                  </div>
+                )}
               </div>
               
-              <div className="flex items-center gap-2 mt-1">
-                <span className="font-semibold">Safety:</span> 
-                <span className={`${
-                  productAnalysisResult.isSafe === true ? 'text-green-600' :
-                  productAnalysisResult.isSafe === false ? 'text-red-600' :
-                  'text-yellow-600'
-                }`}>
-                  {productAnalysisResult.isSafe === true ? 'Safe for pregnancy' :
-                   productAnalysisResult.isSafe === false ? 'Not recommended' :
-                   'Unknown safety profile'}
-                </span>
-              </div>
-              
-              {productAnalysisResult.notes && (
-                <div className="mt-2 text-sm">
-                  <p className="font-semibold">Notes:</p>
-                  <p className="text-gray-700">{productAnalysisResult.notes}</p>
+              {/* Analysis results */}
+              {productAnalysisResult && (
+                <div className="md:w-2/3">
+                  <div className="space-y-3">
+                    <div className="flex flex-col">
+                      <span className="text-xs uppercase text-gray-500">Product Name</span>
+                      <span className="font-medium text-lg">{productAnalysisResult.productName}</span>
+                    </div>
+                    
+                    <div className="flex flex-col">
+                      <span className="text-xs uppercase text-gray-500">Product Type</span>
+                      <span className="font-medium">{productAnalysisResult.productType}</span>
+                    </div>
+                    
+                    <div className="flex flex-col">
+                      <span className="text-xs uppercase text-gray-500">Safety Status</span>
+                      <span className={`font-medium ${
+                        productAnalysisResult.isSafe === true ? 'text-green-600 bg-green-50 px-2 py-0.5 rounded-full inline-block' :
+                        productAnalysisResult.isSafe === false ? 'text-red-600 bg-red-50 px-2 py-0.5 rounded-full inline-block' :
+                        'text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded-full inline-block'
+                      }`}>
+                        {productAnalysisResult.isSafe === true ? '✓ Safe for pregnancy' :
+                        productAnalysisResult.isSafe === false ? '✕ Not recommended' :
+                        '? Unknown safety profile'}
+                      </span>
+                    </div>
+                    
+                    {productAnalysisResult.notes && (
+                      <div className="flex flex-col">
+                        <span className="text-xs uppercase text-gray-500">Notes</span>
+                        <p className="text-neutral-dark bg-gray-50 p-3 rounded-lg border border-gray-100 text-sm">{productAnalysisResult.notes}</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
-          )}
+          </div>
         </div>
       )}
       
-      <p className="text-sm text-neutral-dark mt-3">Recently checked: Acetaminophen, Prenatal vitamins</p>
+      {/* Recently checked section with enhanced design */}
+      <div className="flex items-center mt-6 pt-4 border-t border-gray-100">
+        <span className="text-xs font-medium text-gray-500 uppercase tracking-wider mr-2">Recently checked:</span>
+        <div className="flex flex-wrap gap-2">
+          <span className="text-xs bg-primary/5 px-2 py-1 rounded-full text-primary">Acetaminophen</span>
+          <span className="text-xs bg-primary/5 px-2 py-1 rounded-full text-primary">Prenatal vitamins</span>
+          <span className="text-xs bg-primary/5 px-2 py-1 rounded-full text-primary">Ginger tea</span>
+        </div>
+      </div>
     </div>
   );
 }
