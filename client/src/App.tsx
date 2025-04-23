@@ -14,9 +14,6 @@ import Terms from "@/pages/Terms";
 import AdminLogin from "@/pages/admin/Login";
 import AdminDashboard from "@/pages/admin/Dashboard";
 import ProtectedAdminRoute from "@/components/admin/ProtectedAdminRoute";
-import AuthPage from "@/pages/auth-page";
-import { ProtectedRoute } from "@/lib/protected-route";
-import { AuthProvider } from "@/hooks/use-auth";
 
 // A simplified AdminLayout component
 function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -69,12 +66,11 @@ function Router() {
         <AppLayout>
           <Suspense fallback={<div>Loading...</div>}>
             <Switch>
-              <Route path="/auth" component={AuthPage} />
-              <ProtectedRoute path="/" component={Home} />
-              <ProtectedRoute path="/dashboard" component={Dashboard} />
-              <ProtectedRoute path="/tracker" component={lazy(() => import("./pages/Tracker"))} />
-              <ProtectedRoute path="/diet-exercise" component={lazy(() => import("./pages/DietExercise"))} />
-              <ProtectedRoute path="/resources" component={lazy(() => import("./pages/Resources"))} />
+              <Route path="/" component={Home} />
+              <Route path="/dashboard" component={Dashboard} />
+              <Route path="/tracker" component={lazy(() => import("./pages/Tracker"))} />
+              <Route path="/diet-exercise" component={lazy(() => import("./pages/DietExercise"))} />
+              <Route path="/resources" component={lazy(() => import("./pages/Resources"))} />
               <Route path="/journal">
                 {() => {
                   window.location.href = "/resources#journal-section";
@@ -96,10 +92,8 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Router />
-        <Toaster />
-      </AuthProvider>
+      <Router />
+      <Toaster />
     </QueryClientProvider>
   );
 }
