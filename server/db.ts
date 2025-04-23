@@ -13,6 +13,28 @@ export const db = drizzle(pool, { schema });
 // Prepare function to run migrations during development
 export async function runMigrations() {
   try {
+    // First check if the user_sessions table exists
+    const sessionTableExists = await pool.query(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_name = 'user_sessions'
+      );
+    `);
+    
+    // If the user_sessions table doesn't exist, create it
+    // otherwise, we'll use the existing one for our sessions
+    if (!sessionTableExists.rows[0].exists) {
+      await pool.query(`
+        CREATE TABLE "user_sessions" (
+          "sid" varchar NOT NULL COLLATE "default",
+          "sess" json NOT NULL,
+          "expire" timestamp(6) NOT NULL,
+          CONSTRAINT "session_pkey" PRIMARY KEY ("sid")
+        );
+        CREATE INDEX "IDX_session_expire" ON "user_sessions" ("expire");
+      `);
+    }
+    
     // Note: In a production app, you would use a migration tool like drizzle-kit
     // We're creating tables directly here for simplicity
     await pool.query(`

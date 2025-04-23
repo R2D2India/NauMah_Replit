@@ -11,6 +11,7 @@ import {
   analyzeProductImageForSafety
 } from "./openai";
 import { sendWaitlistNotification, sendEmail } from "./email";
+import { setupAuth } from "./auth";
 import { 
   pregnancyStageSchema, 
   medicationCheckSchema, 
@@ -50,6 +51,9 @@ declare global {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Set up authentication
+  const { isAuthenticated } = setupAuth(app);
+  
   // Middleware to handle validation errors consistently
   const validateRequest = (schema: any) => {
     return (req: Request, res: Response, next: NextFunction) => {

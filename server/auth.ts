@@ -1,31 +1,43 @@
-import passport from "passport";
-import { Strategy as LocalStrategy } from "passport-local";
-import { Express, Request, Response, NextFunction } from "express";
-import session from "express-session";
+import { Request, Response, NextFunction, Express } from "express";
+import { db } from "./db";
+import { users, passwordResetTokens, User } from "@shared/schema";
+import { eq } from "drizzle-orm";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
-import { storage } from "./storage";
-import { User as UserType } from "@shared/schema";
-import { createHash } from "crypto";
-import connectPg from "connect-pg-simple";
+import session from "express-session";
+import connectPgSimple from "connect-pg-simple";
 import { pool } from "./db";
+import passport from "passport";
+import { Strategy as LocalStrategy } from "passport-local";
 
+// TypeScript utility to augment the Express.User type
 declare global {
   namespace Express {
-    interface User extends UserType {}
+    interface User {
+      id: number;
+      email: string;
+      username: string;
+      firstName: string | null;
+      lastName: string | null;
+      profilePicture: string | null;
+      isEmailVerified: boolean;
+      createdAt: Date;
+      updatedAt: Date;
+    }
   }
 }
 
+// Create PostgreSQL session store
+const PgStore = connectPgSimple(session);
+
 const scryptAsync = promisify(scrypt);
 
-// Hash password using scrypt and a random salt
 export async function hashPassword(password: string): Promise<string> {
   const salt = randomBytes(16).toString("hex");
   const buf = (await scryptAsync(password, salt, 64)) as Buffer;
   return `${buf.toString("hex")}.${salt}`;
 }
 
-// Compare a supplied password with a stored hashed password
 export async function comparePasswords(supplied: string, stored: string): Promise<boolean> {
   const [hashed, salt] = stored.split(".");
   const hashedBuf = Buffer.from(hashed, "hex");
@@ -33,269 +45,309 @@ export async function comparePasswords(supplied: string, stored: string): Promis
   return timingSafeEqual(hashedBuf, suppliedBuf);
 }
 
-// Generate a random token for password reset
 export function generateToken(): string {
   return randomBytes(32).toString("hex");
 }
 
-// Create a PostgreSQL session store
-const PostgresSessionStore = connectPg(session);
-
 export function setupAuth(app: Express) {
-  // Configure session settings
-  const sessionSettings: session.SessionOptions = {
-    secret: process.env.SESSION_SECRET || "naumah-session-secret",
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    },
-    store: new PostgresSessionStore({
-      pool,
-      tableName: "user_sessions",
-      createTableIfMissing: true,
-    }),
-  };
-
-  // Use proxied headers from frontend server
-  app.set("trust proxy", 1);
+  // Set up session middleware
+  app.use(
+    session({
+      store: new PgStore({
+        pool,
+        tableName: "user_sessions", // Use existing user_sessions table
+        createTableIfMissing: false, // Don't try to create the table
+      }),
+      secret: process.env.SESSION_SECRET || "naumah-auth-secret-key",
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        secure: process.env.NODE_ENV === "production",
+        httpOnly: true,
+        maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
+      },
+    })
+  );
   
-  // Initialize session middleware
-  app.use(session(sessionSettings));
-  
-  // Initialize passport for authentication
+  // Initialize Passport
   app.use(passport.initialize());
   app.use(passport.session());
-
-  // Configure the local strategy for username/password authentication
-  passport.use(
-    new LocalStrategy(async (username, password, done) => {
+  
+  // Configure Passport to use local strategy
+  passport.use(new LocalStrategy(
+    async (username, password, done) => {
       try {
-        // Find the user by username
-        const user = await storage.getUserByUsername(username);
+        // Find user by username
+        const user = await db.query.users.findFirst({
+          where: eq(users.username, username),
+        });
         
-        // If no user found or password doesn't match, authentication fails
-        if (!user || !(await comparePasswords(password, user.password))) {
-          return done(null, false, { message: "Invalid username or password" });
+        if (!user) {
+          return done(null, false, { message: 'Invalid credentials' });
         }
         
-        // Authentication successful, return the user
-        return done(null, user);
+        // Check password
+        const passwordValid = await comparePasswords(password, user.password);
+        if (!passwordValid) {
+          return done(null, false, { message: 'Invalid credentials' });
+        }
+        
+        // Ensure isEmailVerified is a boolean (not null)
+        const userWithBooleanEmailVerified = {
+          ...user,
+          isEmailVerified: user.isEmailVerified || false
+        };
+        
+        return done(null, userWithBooleanEmailVerified);
       } catch (error) {
         return done(error);
       }
-    }),
-  );
-
-  // Serialize user to store in session
-  passport.serializeUser((user, done) => {
+    }
+  ));
+  
+  // Serialize user to session
+  passport.serializeUser((user: Express.User, done) => {
     done(null, user.id);
   });
-
+  
   // Deserialize user from session
   passport.deserializeUser(async (id: number, done) => {
     try {
-      const user = await storage.getUser(id);
-      done(null, user);
+      const user = await db.query.users.findFirst({
+        where: eq(users.id, id),
+      });
+      
+      if (!user) {
+        return done(null, false);
+      }
+      
+      // Remove password and fix isEmailVerified type
+      const { password, ...userWithoutPassword } = user;
+      
+      // Ensure isEmailVerified is boolean
+      const fixedUser = {
+        ...userWithoutPassword,
+        isEmailVerified: userWithoutPassword.isEmailVerified || false
+      };
+      
+      done(null, fixedUser as Express.User);
     } catch (error) {
       done(error);
     }
   });
 
-  // Middleware to check if user is authenticated
+  // Authentication middleware
   const isAuthenticated = (req: Request, res: Response, next: NextFunction) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ error: "Unauthorized" });
+    if (req.session && req.session.userId) {
+      return next();
     }
-    next();
+    return res.status(401).json({ message: "Unauthorized" });
   };
 
   // Register a new user
-  app.post("/api/auth/register", async (req, res, next) => {
+  app.post("/api/register", async (req, res) => {
     try {
+      const { username, email, password, firstName, lastName } = req.body;
+
       // Check if username already exists
-      const existingUser = await storage.getUserByUsername(req.body.username);
-      if (existingUser) {
-        return res.status(400).json({ error: "Username already exists" });
+      const existingUsername = await db.query.users.findFirst({
+        where: eq(users.username, username),
+      });
+
+      if (existingUsername) {
+        return res.status(400).json({ message: "Username already exists" });
       }
 
       // Check if email already exists
-      const existingEmail = await storage.getUserByEmail(req.body.email);
+      const existingEmail = await db.query.users.findFirst({
+        where: eq(users.email, email),
+      });
+
       if (existingEmail) {
-        return res.status(400).json({ error: "Email already exists" });
+        return res.status(400).json({ message: "Email already exists" });
       }
 
-      // Hash the password
-      const hashedPassword = await hashPassword(req.body.password);
+      // Hash password
+      const hashedPassword = await hashPassword(password);
 
-      // Create the user
-      const user = await storage.createUser({
-        ...req.body,
-        password: hashedPassword,
-      });
+      // Insert user into database
+      const [newUser] = await db
+        .insert(users)
+        .values({
+          username,
+          email,
+          password: hashedPassword,
+          firstName: firstName || null,
+          lastName: lastName || null,
+          profilePicture: null,
+          isEmailVerified: false,
+        })
+        .returning();
 
-      // Log the user in automatically after registration
-      req.login(user, (err) => {
-        if (err) return next(err);
-        // Return the user without sensitive data
-        const { password, ...userWithoutPassword } = user;
-        res.status(201).json(userWithoutPassword);
-      });
+      // Set session
+      req.session.userId = newUser.id;
+
+      // Return user without password
+      const { password: _, ...userWithoutPassword } = newUser;
+      return res.status(201).json(userWithoutPassword);
     } catch (error) {
-      next(error);
+      console.error("Registration error:", error);
+      return res.status(500).json({ message: "An error occurred during registration" });
     }
   });
 
   // Login
-  app.post("/api/auth/login", (req, res, next) => {
-    passport.authenticate("local", (err: any, user: UserType | false, info: { message: string } | undefined) => {
-      if (err) return next(err);
-      if (!user) {
-        return res.status(401).json({ error: info?.message || "Login failed" });
-      }
-      
-      req.login(user, (err: any) => {
-        if (err) return next(err);
-        // Return the user without sensitive data
-        const { password, ...userWithoutPassword } = user;
-        res.status(200).json(userWithoutPassword);
+  app.post("/api/login", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+
+      // Find user by username
+      const user = await db.query.users.findFirst({
+        where: eq(users.username, username),
       });
-    })(req, res, next);
+
+      if (!user) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      // Check password
+      const passwordValid = await comparePasswords(password, user.password);
+      if (!passwordValid) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      // Set session
+      req.session.userId = user.id;
+
+      // Return user without password
+      const { password: _, ...userWithoutPassword } = user;
+      return res.status(200).json(userWithoutPassword);
+    } catch (error) {
+      console.error("Login error:", error);
+      return res.status(500).json({ message: "An error occurred during login" });
+    }
   });
 
   // Logout
-  app.post("/api/auth/logout", (req, res, next) => {
-    req.logout((err: any) => {
-      if (err) return next(err);
-      res.status(200).json({ message: "Logged out successfully" });
+  app.post("/api/logout", (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        console.error("Logout error:", err);
+        return res.status(500).json({ message: "Failed to logout" });
+      }
+      res.clearCookie("connect.sid");
+      return res.status(200).json({ message: "Logged out successfully" });
     });
   });
 
   // Get current user
-  app.get("/api/auth/user", (req, res) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ error: "Not authenticated" });
+  app.get("/api/auth/user", async (req, res) => {
+    try {
+      if (!req.session.userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = await db.query.users.findFirst({
+        where: eq(users.id, req.session.userId),
+      });
+
+      if (!user) {
+        req.session.destroy((err) => {
+          if (err) console.error("Session destruction error:", err);
+        });
+        return res.status(401).json({ message: "User not found" });
+      }
+
+      const { password, ...userWithoutPassword } = user;
+      return res.status(200).json(userWithoutPassword);
+    } catch (error) {
+      console.error("Get user error:", error);
+      return res.status(500).json({ message: "Failed to get user information" });
     }
-    
-    const { password, ...userWithoutPassword } = req.user as UserType;
-    res.json(userWithoutPassword);
   });
 
-  // Forgot password - send reset token
-  app.post("/api/auth/forgot-password", async (req, res, next) => {
+  // Forgot password
+  app.post("/api/auth/forgot-password", async (req, res) => {
     try {
       const { email } = req.body;
-      
+
       // Find user by email
-      const user = await storage.getUserByEmail(email);
+      const user = await db.query.users.findFirst({
+        where: eq(users.email, email),
+      });
+
+      // If no user found, still return success to prevent user enumeration
       if (!user) {
-        // Don't reveal that the user doesn't exist
-        return res.status(200).json({ message: "If your email is registered, you will receive a password reset link" });
+        return res.status(200).json({ message: "Password reset email sent if account exists" });
       }
-      
-      // Generate reset token
+
+      // Generate token
       const token = generateToken();
-      
-      // Set token expiration to 1 hour from now
       const expiresAt = new Date();
-      expiresAt.setHours(expiresAt.getHours() + 1);
-      
+      expiresAt.setHours(expiresAt.getHours() + 1); // Token expires in 1 hour
+
       // Save token to database
-      await storage.createPasswordResetToken({
+      await db.insert(passwordResetTokens).values({
         userId: user.id,
         token,
         expiresAt,
         isUsed: false,
       });
-      
+
       // In a real application, send an email with the reset link
-      // For simplicity, we'll just return the token in the response
-      // In production, use sendEmail function to send a proper email with reset link
-      
-      // Return success message
-      res.status(200).json({
-        message: "If your email is registered, you will receive a password reset link",
-        // Remove this line in production and send the token via email
-        token
-      });
+      // For now, we'll just log it
+      console.log(`Password reset link: ${process.env.APP_URL}/auth?token=${token}`);
+
+      return res.status(200).json({ message: "Password reset email sent if account exists" });
     } catch (error) {
-      next(error);
+      console.error("Forgot password error:", error);
+      return res.status(500).json({ message: "An error occurred" });
     }
   });
 
-  // Reset password using token
-  app.post("/api/auth/reset-password", async (req, res, next) => {
+  // Reset password
+  app.post("/api/auth/reset-password", async (req, res) => {
     try {
       const { token, password } = req.body;
-      
-      // Find valid token
-      const resetToken = await storage.getValidPasswordResetToken(token);
+
+      // Find token in database
+      const resetToken = await db.query.passwordResetTokens.findFirst({
+        where: eq(passwordResetTokens.token, token),
+      });
+
       if (!resetToken) {
-        return res.status(400).json({ error: "Invalid or expired token" });
+        return res.status(400).json({ message: "Invalid or expired token" });
       }
-      
+
+      // Check if token is used
+      if (resetToken.isUsed) {
+        return res.status(400).json({ message: "Token has already been used" });
+      }
+
+      // Check if token is expired
+      if (new Date() > resetToken.expiresAt) {
+        return res.status(400).json({ message: "Token has expired" });
+      }
+
       // Hash new password
       const hashedPassword = await hashPassword(password);
-      
-      // Update user password
-      await storage.updateUserPassword(resetToken.userId, hashedPassword);
-      
+
+      // Update user's password
+      await db
+        .update(users)
+        .set({ password: hashedPassword })
+        .where(eq(users.id, resetToken.userId));
+
       // Mark token as used
-      await storage.markPasswordResetTokenAsUsed(resetToken.id);
-      
-      // Return success message
-      res.status(200).json({ message: "Password reset successful" });
-    } catch (error) {
-      next(error);
-    }
-  });
+      await db
+        .update(passwordResetTokens)
+        .set({ isUsed: true })
+        .where(eq(passwordResetTokens.id, resetToken.id));
 
-  // Update user profile (authenticated users only)
-  app.put("/api/auth/profile", isAuthenticated, async (req, res, next) => {
-    try {
-      const userId = (req.user as UserType).id;
-      
-      // Get fields to update (exclude sensitive fields)
-      const { firstName, lastName, profilePicture } = req.body;
-      
-      // Update user profile
-      const updatedUser = await storage.updateUserProfile(userId, {
-        firstName,
-        lastName,
-        profilePicture,
-      });
-      
-      // Return updated user without password
-      const { password, ...userWithoutPassword } = updatedUser;
-      res.status(200).json(userWithoutPassword);
+      return res.status(200).json({ message: "Password reset successfully" });
     } catch (error) {
-      next(error);
-    }
-  });
-
-  // Change password (authenticated users only)
-  app.post("/api/auth/change-password", isAuthenticated, async (req, res, next) => {
-    try {
-      const user = req.user as UserType;
-      const { currentPassword, newPassword } = req.body;
-      
-      // Verify current password
-      if (!(await comparePasswords(currentPassword, user.password))) {
-        return res.status(400).json({ error: "Current password is incorrect" });
-      }
-      
-      // Hash new password
-      const hashedPassword = await hashPassword(newPassword);
-      
-      // Update password
-      await storage.updateUserPassword(user.id, hashedPassword);
-      
-      // Return success message
-      res.status(200).json({ message: "Password changed successfully" });
-    } catch (error) {
-      next(error);
+      console.error("Reset password error:", error);
+      return res.status(500).json({ message: "An error occurred during password reset" });
     }
   });
 

@@ -35,9 +35,18 @@ app.use(express.urlencoded({ extended: false }));
 // Setup authentication (must be done before routes)
 setupAuth(app);
 
+// Add type for isAuthenticated
+declare global {
+  namespace Express {
+    interface Request {
+      isAuthenticated(): boolean;
+    }
+  }
+}
+
 // Non-authenticated sessions get anonymous user ID
 app.use((req, res, next) => {
-  if (!req.isAuthenticated() && !req.session.userId) {
+  if ((!req.isAuthenticated || !req.isAuthenticated()) && !req.session.userId) {
     // Generate a unique user ID for this session that's compatible with PostgreSQL integer type
     // PostgreSQL integers have a range of -2147483648 to +2147483647
     // We'll use a smaller random number to ensure compatibility
