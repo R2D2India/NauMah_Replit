@@ -33,6 +33,11 @@ const Header = () => {
               Tracker
             </span>
           </Link>
+          <Link href="/diet-exercise">
+            <span className={`font-medium ${isActive("/diet-exercise") ? "text-primary" : "text-neutral-dark hover:text-primary"} transition cursor-pointer`}>
+              Diet & Exercise
+            </span>
+          </Link>
           <Link href="/resources">
             <span className={`font-medium ${isActive("/resources") ? "text-primary" : "text-neutral-dark hover:text-primary"} transition cursor-pointer`}>
               Resources
@@ -65,6 +70,11 @@ const Header = () => {
             <Link href="/tracker">
               <span className={`font-medium ${isActive("/tracker") ? "text-primary" : "text-neutral-dark"} py-2 block cursor-pointer`}>
                 Tracker
+              </span>
+            </Link>
+            <Link href="/diet-exercise">
+              <span className={`font-medium ${isActive("/diet-exercise") ? "text-primary" : "text-neutral-dark"} py-2 block cursor-pointer`}>
+                Diet & Exercise
               </span>
             </Link>
             <Link href="/resources">
