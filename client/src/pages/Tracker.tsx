@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { MoodTrackerSection } from "@/components/pregnancy/MoodTrackerSection";
 
 export default function Tracker() {
   const [date, setDate] = useState<Date>(new Date());
@@ -287,6 +288,9 @@ export default function Tracker() {
           </Card>
         </TabsContent>
       </Tabs>
+      
+      {/* Mood Tracker Section */}
+      <MoodTrackerSection />
     </div>
   );
 }

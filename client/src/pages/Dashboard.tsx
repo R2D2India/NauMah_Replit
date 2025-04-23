@@ -8,7 +8,6 @@ import PregnancyProgress from "@/components/pregnancy/PregnancyProgress";
 import BabyDevelopment from "@/components/pregnancy/BabyDevelopment";
 import TabbedContent from "@/components/pregnancy/TabbedContent";
 import AdditionalFeatures from "@/components/pregnancy/AdditionalFeatures";
-import MoodTracker from "@/components/pregnancy/MoodTracker";
 import { WEEKS_OPTIONS, MONTHS_OPTIONS, TRIMESTER_OPTIONS } from "@/lib/constants";
 
 const Dashboard = () => {
@@ -154,9 +153,6 @@ const Dashboard = () => {
       
       {/* Additional Features */}
       <AdditionalFeatures currentWeek={currentWeek} />
-      
-      {/* Daily Mood Tracker */}
-      <MoodTracker currentWeek={currentWeek} />
     </div>
   );
 };
