@@ -51,10 +51,12 @@ export default function DietExercise() {
     refetchOnWindowFocus: true, // Refetch when window gets focus
   });
   
-  // Set up logging for data changes
+  // Set up logging for data changes and sync status
   useEffect(() => {
     if (pregnancyData) {
       console.log("⚠️ Diet & Exercise: Pregnancy data updated", pregnancyData);
+      // Clear synchronizing state
+      setIsSynchronizing(false);
     }
   }, [pregnancyData]);
 
@@ -126,6 +128,8 @@ export default function DietExercise() {
     const handlePregnancyStageUpdate = (updatedData: any) => {
       console.log("Diet & Exercise: Received pregnancy stage update event", updatedData);
       if (isMounted.current) {
+        // Show synchronizing state
+        setIsSynchronizing(true);
         // Force immediate refetch of pregnancy data
         refetchPregnancyData();
         // Update our last timestamp
@@ -162,6 +166,7 @@ export default function DietExercise() {
           console.log("Diet & Exercise: Detected localStorage event", data);
           if (isMounted.current && data.timestamp > lastUpdateTimestamp.current) {
             lastUpdateTimestamp.current = data.timestamp;
+            setIsSynchronizing(true);
             refetchPregnancyData();
           }
         } catch (err) {
@@ -209,9 +214,37 @@ export default function DietExercise() {
           </div>
         </div>
       </div>
-      <p className="text-muted-foreground mb-6">
-        Nutrition and activity recommendations for week {currentWeek} of your pregnancy
-      </p>
+      <div className="flex justify-between items-center mb-6">
+        <p className="text-muted-foreground">
+          Nutrition and activity recommendations for week {currentWeek} of your pregnancy
+        </p>
+        <div className="flex items-center gap-3">
+          {isSynchronizing ? (
+            <div className="flex items-center text-xs text-primary animate-pulse">
+              <div className="mr-1 relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+              </div>
+              Syncing data...
+            </div>
+          ) : (
+            <button 
+              onClick={() => {
+                console.log("⚠️ Diet & Exercise: Manual sync requested");
+                setIsSynchronizing(true);
+                appEvents.forceSyncAll();
+              }}
+              className="text-xs text-primary hover:text-primary-dark flex items-center"
+              title="Sync data with other pages"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38" />
+              </svg>
+              Sync
+            </button>
+          )}
+        </div>
+      </div>
       
       <Tabs 
         defaultValue="diet" 
