@@ -8,7 +8,8 @@ import {
   generateChatResponse, 
   generateSpeech, 
   transcribeSpeech,
-  analyzeProductImageForSafety
+  analyzeProductImageForSafety,
+  generateBabyDevelopment
 } from "./openai";
 import { sendWaitlistNotification, sendEmail } from "./email";
 import { setupAuth } from "./auth";
@@ -390,6 +391,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error generating meal plan:", error);
       const errorMessage = error instanceof Error ? error.message : "Failed to generate meal plan";
+      const status = (error instanceof Error && error.message?.includes('API key')) ? 401 : 500;
+      res.status(status).json({ 
+        message: errorMessage,
+        error: process.env.NODE_ENV === 'development' ? String(error) : undefined 
+      });
+    }
+  });
+  
+  // Baby development information for given pregnancy week
+  app.get("/api/baby-development/:week", async (req: Request, res: Response) => {
+    // Set appropriate content type to ensure Vite doesn't intercept
+    res.setHeader('Content-Type', 'application/json');
+    try {
+      if (!process.env.OPENAI_API_KEY) {
+        throw new Error("OpenAI API key not configured");
+      }
+      
+      const week = parseInt(req.params.week);
+      if (isNaN(week) || week < 1 || week > 42) {
+        return res.status(400).json({ 
+          message: "Invalid pregnancy week. Must be between 1 and 42."
+        });
+      }
+      
+      console.log(`Generating baby development information for week ${week}`);
+      const developmentInfo = await generateBabyDevelopment(week);
+      
+      res.json(developmentInfo);
+    } catch (error) {
+      console.error("Error generating baby development information:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to generate baby development information";
       const status = (error instanceof Error && error.message?.includes('API key')) ? 401 : 500;
       res.status(status).json({ 
         message: errorMessage,

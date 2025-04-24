@@ -54,7 +54,9 @@ const Dashboard = () => {
       
       // Invalidate pregnancy data across the app to ensure all components refresh
       queryClient.invalidateQueries({ queryKey: ["/api/pregnancy"] });
-      console.log("✅ Dashboard: Invalidated pregnancy query cache");
+      // Also invalidate baby development data to refresh it with the new week
+      queryClient.invalidateQueries({ queryKey: ["/api/baby-development"] });
+      console.log("✅ Dashboard: Invalidated pregnancy and baby development query cache");
       
       // Broadcast the pregnancy stage update event with reliable localStorage mechanism
       appEvents.publish(APP_EVENTS.PREGNANCY_STAGE_UPDATED, updatedData);
