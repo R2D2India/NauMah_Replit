@@ -140,6 +140,51 @@ export async function generateMealPlan(week: number): Promise<{
   }
 }
 
+/**
+ * Generate baby development information for a specific pregnancy week
+ */
+export async function generateBabyDevelopment(week: number): Promise<{
+  description: string;
+  keyDevelopments: string[];
+  funFact: string;
+  size: string;
+  imageDescription: string;
+}> {
+  try {
+    if (!openai) {
+      throw new Error("OpenAI client not initialized");
+    }
+    const prompt = `Generate detailed and accurate baby development information for pregnancy week ${week}.
+                   Return response as JSON with format: { 
+                     "description": "Detailed description of development at this stage", 
+                     "keyDevelopments": ["Key development 1", "Key development 2", ...], 
+                     "funFact": "An interesting fact about the baby at this stage",
+                     "size": "Approximate size comparison to a fruit or object",
+                     "imageDescription": "Brief description of what the baby looks like at this stage for visualization"
+                   }`;
+
+    const completion = await openai.chat.completions.create({
+      model: MODEL,
+      messages: [
+        {
+          role: "system",
+          content: "You are an obstetrician specializing in fetal development with deep expertise in embryology. Provide scientifically accurate, informative, and compassionate information about baby development during pregnancy. You always respond with JSON format."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      response_format: { type: "json_object" },
+    });
+
+    return JSON.parse(completion.choices[0].message.content || "{}");
+  } catch (error) {
+    console.error("Error generating baby development info:", error);
+    throw new Error("Failed to generate baby development information");
+  }
+}
+
 export async function transcribeAudio(audioBuffer: Buffer): Promise<string> {
   try {
     if (!openai) {
