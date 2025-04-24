@@ -27,6 +27,7 @@ import {
 export default function DietExercise() {
   const [activeTab, setActiveTab] = useState("diet");
   const [isGeneratingMealPlan, setIsGeneratingMealPlan] = useState(false);
+  const [isSynchronizing, setIsSynchronizing] = useState(false);
   const [mealPlan, setMealPlan] = useState<{
     breakfast: string;
     lunch: string;
@@ -49,6 +50,13 @@ export default function DietExercise() {
     refetchOnMount: true, // Ensure data is fresh when component mounts
     refetchOnWindowFocus: true, // Refetch when window gets focus
   });
+  
+  // Set up logging for data changes
+  useEffect(() => {
+    if (pregnancyData) {
+      console.log("⚠️ Diet & Exercise: Pregnancy data updated", pregnancyData);
+    }
+  }, [pregnancyData]);
 
   // Default to week 1 if not available
   const currentWeek = pregnancyData?.currentWeek || 1;
@@ -82,6 +90,20 @@ export default function DietExercise() {
   // Track if component is mounted
   const isMounted = useRef(true);
   const lastUpdateTimestamp = useRef(0);
+  
+  // Force sync on initial render
+  useEffect(() => {
+    console.log("⚠️ Diet & Exercise: Component mounted, forcing data sync");
+    // Short delay to ensure all components are loaded
+    const timer = setTimeout(() => {
+      if (isMounted.current) {
+        console.log("⚠️ Diet & Exercise: Initial force sync");
+        appEvents.forceSyncAll();
+      }
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, []);
   
   // Check URL parameters for timestamp changes
   useEffect(() => {

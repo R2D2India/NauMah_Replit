@@ -128,6 +128,13 @@ export const appEvents = {
           key: STORAGE_KEYS.LAST_PREGNANCY_UPDATE,
           newValue: JSON.stringify(storageEvent)
         }));
+        
+        // Force the query client to refetch the pregnancy data route
+        queryClient.invalidateQueries({ queryKey: ["/api/pregnancy"] });
+        queryClient.refetchQueries({ queryKey: ["/api/pregnancy"] });
+        
+        // Set a system flag to indicate an update has happened
+        window.__PREGNANCY_DATA_UPDATED = true;
       }
     } catch (err) {
       console.error('Error publishing event to localStorage:', err);
@@ -148,6 +155,25 @@ export const appEvents = {
       console.error('Error reading last update timestamp:', err);
     }
     return 0;
+  },
+  
+  // Force synchronization of all components
+  forceSyncAll() {
+    console.log("[AppEvents] Forcing synchronization of all components");
+    // Invalidate and refetch pregnancy data
+    queryClient.invalidateQueries({ queryKey: ["/api/pregnancy"] });
+    queryClient.refetchQueries({ queryKey: ["/api/pregnancy"] });
+    
+    // Send signal to all listeners
+    const lastStorageEvent = localStorage.getItem(STORAGE_KEYS.LAST_PREGNANCY_UPDATE);
+    if (lastStorageEvent) {
+      try {
+        const event = JSON.parse(lastStorageEvent);
+        this.publish(APP_EVENTS.PREGNANCY_STAGE_UPDATED, event.data);
+      } catch (err) {
+        console.error('Error parsing last storage event:', err);
+      }
+    }
   }
 };
 

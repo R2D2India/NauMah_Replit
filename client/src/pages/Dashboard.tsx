@@ -9,7 +9,7 @@ import PregnancyProgress from "@/components/pregnancy/PregnancyProgress";
 import BabyDevelopment from "@/components/pregnancy/BabyDevelopment";
 import AdditionalFeatures from "@/components/pregnancy/AdditionalFeatures";
 import { WEEKS_OPTIONS, MONTHS_OPTIONS, TRIMESTER_OPTIONS } from "@/lib/constants";
-import { apiRequest, queryClient, appEvents, APP_EVENTS } from "@/lib/queryClient";
+import { apiRequest, queryClient, appEvents, APP_EVENTS, STORAGE_KEYS } from "@/lib/queryClient";
 
 const Dashboard = () => {
   const [, setLocation] = useLocation();
