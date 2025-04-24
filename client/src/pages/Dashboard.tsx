@@ -4,11 +4,12 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/hooks/use-toast";
 import PregnancyProgress from "@/components/pregnancy/PregnancyProgress";
 import BabyDevelopment from "@/components/pregnancy/BabyDevelopment";
 import AdditionalFeatures from "@/components/pregnancy/AdditionalFeatures";
 import { WEEKS_OPTIONS, MONTHS_OPTIONS, TRIMESTER_OPTIONS } from "@/lib/constants";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest, queryClient, appEvents, APP_EVENTS } from "@/lib/queryClient";
 
 const Dashboard = () => {
   const [, setLocation] = useLocation();
@@ -44,14 +45,24 @@ const Dashboard = () => {
       
       return await response.json();
     },
-    onSuccess: () => {
+    onSuccess: (updatedData) => {
       // Invalidate pregnancy data across the app to ensure all components refresh
       queryClient.invalidateQueries({ queryKey: ["/api/pregnancy"] });
       
       // Also refetch locally to update the UI immediately
       refetch();
       
-      console.log("Pregnancy stage updated and cache invalidated");
+      // Broadcast the pregnancy stage update event to other components
+      appEvents.publish(APP_EVENTS.PREGNANCY_STAGE_UPDATED, updatedData);
+      
+      // Show success toast
+      toast({
+        title: "Pregnancy stage updated",
+        description: `Your pregnancy information has been updated successfully.`,
+        variant: "default"
+      });
+      
+      console.log("Pregnancy stage updated and cache invalidated:", updatedData);
     },
     onError: (error) => {
       console.error("Failed to update pregnancy stage:", error);

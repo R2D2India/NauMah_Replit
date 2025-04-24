@@ -64,17 +64,53 @@ export const getQueryFn: <T>(options: {
     return data;
   };
 
+// Event bus for app-wide events
+export const appEvents = {
+  listeners: new Map<string, Set<Function>>(),
+  
+  subscribe(event: string, callback: Function) {
+    if (!this.listeners.has(event)) {
+      this.listeners.set(event, new Set());
+    }
+    this.listeners.get(event)?.add(callback);
+    
+    // Return unsubscribe function
+    return () => {
+      const callbacks = this.listeners.get(event);
+      if (callbacks) {
+        callbacks.delete(callback);
+      }
+    };
+  },
+  
+  publish(event: string, data?: any) {
+    console.log(`[AppEvents] Publishing event: ${event}`, data);
+    const callbacks = this.listeners.get(event);
+    if (callbacks) {
+      callbacks.forEach(callback => callback(data));
+    }
+  }
+};
+
+// Constants for app events
+export const APP_EVENTS = {
+  PREGNANCY_STAGE_UPDATED: 'pregnancy_stage_updated'
+};
+
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
-      refetchOnWindowFocus: false,
-      staleTime: Infinity,
+      refetchOnWindowFocus: true, // Enable auto-refresh when window gets focus
+      staleTime: 60000, // Consider data stale after 60 seconds
       retry: false,
     },
     mutations: {
       retry: false,
+      onSuccess: (data, variables, context) => {
+        console.log('Mutation success - consider invalidating related queries');
+      }
     },
   }
 });

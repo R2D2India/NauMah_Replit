@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
@@ -10,7 +10,7 @@ import {
   RESOURCE_RECOMMENDATIONS, 
   getTrimeasterFromWeek 
 } from "@/lib/constants";
-import { queryClient } from "@/lib/queryClient";
+import { queryClient, appEvents, APP_EVENTS } from "@/lib/queryClient";
 import { 
   Apple, 
   Dumbbell, 
@@ -79,22 +79,41 @@ export default function DietExercise() {
   // Get trimester for recommendations
   const trimester = getTrimeasterFromWeek(currentWeek);
 
-  // Set up an effect to periodically check for pregnancy data updates
+  // Track if component is mounted
+  const isMounted = useRef(true);
+  
+  // Set up event listeners for pregnancy data updates
   useEffect(() => {
-    // Subscribe to pregnancy data updates
-    const checkForUpdates = () => {
-      console.log("Diet & Exercise: Checking for pregnancy data updates...");
-      refetchPregnancyData();
+    // Set up pregnancy stage update event listener
+    const handlePregnancyStageUpdate = (updatedData: any) => {
+      console.log("Diet & Exercise: Received pregnancy stage update event", updatedData);
+      if (isMounted.current) {
+        // Force immediate refetch of pregnancy data
+        refetchPregnancyData();
+      }
     };
     
-    // Check for updates when the component mounts
-    checkForUpdates();
+    // Subscribe to pregnancy stage update events
+    const unsubscribe = appEvents.subscribe(
+      APP_EVENTS.PREGNANCY_STAGE_UPDATED, 
+      handlePregnancyStageUpdate
+    );
     
-    // Set up a periodic check for updates
-    const intervalId = setInterval(checkForUpdates, 5000); // Check every 5 seconds
+    // Initial fetch
+    refetchPregnancyData();
+    
+    // Set up a periodic check for updates as a fallback mechanism
+    const intervalId = setInterval(() => {
+      if (isMounted.current) {
+        console.log("Diet & Exercise: Periodic pregnancy data refresh");
+        refetchPregnancyData();
+      }
+    }, 10000); // Every 10 seconds as a fallback
     
     // Clean up
     return () => {
+      isMounted.current = false;
+      unsubscribe();
       clearInterval(intervalId);
     };
   }, [refetchPregnancyData]);
