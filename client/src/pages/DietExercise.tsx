@@ -10,7 +10,7 @@ import {
   RESOURCE_RECOMMENDATIONS, 
   getTrimeasterFromWeek 
 } from "@/lib/constants";
-import { queryClient, appEvents, APP_EVENTS } from "@/lib/queryClient";
+import { queryClient, appEvents, APP_EVENTS, STORAGE_KEYS } from "@/lib/queryClient";
 import { 
   Apple, 
   Dumbbell, 
@@ -81,6 +81,22 @@ export default function DietExercise() {
 
   // Track if component is mounted
   const isMounted = useRef(true);
+  const lastUpdateTimestamp = useRef(0);
+  
+  // Check URL parameters for timestamp changes
+  useEffect(() => {
+    try {
+      const url = new URL(window.location.href);
+      const urlTimestamp = parseInt(url.searchParams.get('_t') || '0');
+      if (urlTimestamp > 0 && urlTimestamp > lastUpdateTimestamp.current) {
+        console.log("Diet & Exercise: Detected URL timestamp change, refreshing data");
+        lastUpdateTimestamp.current = urlTimestamp;
+        refetchPregnancyData();
+      }
+    } catch (err) {
+      console.error("Error processing URL parameters:", err);
+    }
+  }, [window.location.search, refetchPregnancyData]);
   
   // Set up event listeners for pregnancy data updates
   useEffect(() => {
@@ -90,10 +106,12 @@ export default function DietExercise() {
       if (isMounted.current) {
         // Force immediate refetch of pregnancy data
         refetchPregnancyData();
+        // Update our last timestamp
+        lastUpdateTimestamp.current = Date.now();
       }
     };
     
-    // Subscribe to pregnancy stage update events
+    // Subscribe to pregnancy stage update events (in-memory)
     const unsubscribe = appEvents.subscribe(
       APP_EVENTS.PREGNANCY_STAGE_UPDATED, 
       handlePregnancyStageUpdate
@@ -102,18 +120,50 @@ export default function DietExercise() {
     // Initial fetch
     refetchPregnancyData();
     
-    // Set up a periodic check for updates as a fallback mechanism
+    // Check if there was a recent update in localStorage
+    try {
+      const localTimestamp = appEvents.getLastUpdateTimestamp();
+      if (localTimestamp > 0 && localTimestamp > lastUpdateTimestamp.current) {
+        console.log("Diet & Exercise: Detected localStorage update, refreshing data");
+        lastUpdateTimestamp.current = localTimestamp;
+        refetchPregnancyData();
+      }
+    } catch (err) {
+      console.error("Error checking localStorage:", err);
+    }
+    
+    // Set up storage event listener for cross-tab updates
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEYS.LAST_PREGNANCY_UPDATE && e.newValue) {
+        try {
+          const data = JSON.parse(e.newValue);
+          console.log("Diet & Exercise: Detected localStorage event", data);
+          if (isMounted.current && data.timestamp > lastUpdateTimestamp.current) {
+            lastUpdateTimestamp.current = data.timestamp;
+            refetchPregnancyData();
+          }
+        } catch (err) {
+          console.error("Error processing storage event:", err);
+        }
+      }
+    };
+    
+    // Add storage event listener
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Set up a periodic check for updates as a fallback mechanism - less frequent now
     const intervalId = setInterval(() => {
       if (isMounted.current) {
         console.log("Diet & Exercise: Periodic pregnancy data refresh");
         refetchPregnancyData();
       }
-    }, 10000); // Every 10 seconds as a fallback
+    }, 30000); // Every 30 seconds as a fallback (reduced frequency)
     
     // Clean up
     return () => {
       isMounted.current = false;
       unsubscribe();
+      window.removeEventListener('storage', handleStorageChange);
       clearInterval(intervalId);
     };
   }, [refetchPregnancyData]);

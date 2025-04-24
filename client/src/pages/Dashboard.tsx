@@ -46,13 +46,13 @@ const Dashboard = () => {
       return await response.json();
     },
     onSuccess: (updatedData) => {
+      // Force immediate refetch to get fresh data
+      refetch();
+      
       // Invalidate pregnancy data across the app to ensure all components refresh
       queryClient.invalidateQueries({ queryKey: ["/api/pregnancy"] });
       
-      // Also refetch locally to update the UI immediately
-      refetch();
-      
-      // Broadcast the pregnancy stage update event to other components
+      // Broadcast the pregnancy stage update event with reliable localStorage mechanism
       appEvents.publish(APP_EVENTS.PREGNANCY_STAGE_UPDATED, updatedData);
       
       // Show success toast
@@ -61,6 +61,16 @@ const Dashboard = () => {
         description: `Your pregnancy information has been updated successfully.`,
         variant: "default"
       });
+      
+      // URL state update approach - add timestamp to force cache invalidation
+      try {
+        // Add timestamp to URL without causing navigation
+        const url = new URL(window.location.href);
+        url.searchParams.set('_t', new Date().getTime().toString());
+        window.history.replaceState({}, '', url.toString());
+      } catch (err) {
+        console.error('Error updating URL state:', err);
+      }
       
       console.log("Pregnancy stage updated and cache invalidated:", updatedData);
     },
