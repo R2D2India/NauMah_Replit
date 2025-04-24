@@ -46,14 +46,19 @@ const Dashboard = () => {
       return await response.json();
     },
     onSuccess: (updatedData) => {
+      console.log("✅ Dashboard: Pregnancy update success, data received:", updatedData);
+      
       // Force immediate refetch to get fresh data
       refetch();
+      console.log("✅ Dashboard: Triggered refetch of pregnancy data");
       
       // Invalidate pregnancy data across the app to ensure all components refresh
       queryClient.invalidateQueries({ queryKey: ["/api/pregnancy"] });
+      console.log("✅ Dashboard: Invalidated pregnancy query cache");
       
       // Broadcast the pregnancy stage update event with reliable localStorage mechanism
       appEvents.publish(APP_EVENTS.PREGNANCY_STAGE_UPDATED, updatedData);
+      console.log("✅ Dashboard: Published pregnancy_stage_updated event to appEvents system");
       
       // Show success toast
       toast({
@@ -68,11 +73,28 @@ const Dashboard = () => {
         const url = new URL(window.location.href);
         url.searchParams.set('_t', new Date().getTime().toString());
         window.history.replaceState({}, '', url.toString());
+        console.log(`✅ Dashboard: Updated URL timestamp parameter to ${url.searchParams.get('_t')}`);
       } catch (err) {
         console.error('Error updating URL state:', err);
       }
       
-      console.log("Pregnancy stage updated and cache invalidated:", updatedData);
+      // Force a dispatch of the storage event for cross-tab communication
+      try {
+        const storageEvent = {
+          event: APP_EVENTS.PREGNANCY_STAGE_UPDATED,
+          data: updatedData,
+          timestamp: new Date().getTime()
+        };
+        console.log("✅ Dashboard: Manually triggering storage event for immediate cross-tab sync");
+        window.dispatchEvent(new StorageEvent('storage', {
+          key: STORAGE_KEYS.LAST_PREGNANCY_UPDATE,
+          newValue: JSON.stringify(storageEvent)
+        }));
+      } catch (err) {
+        console.error('Error dispatching storage event:', err);
+      }
+      
+      console.log("Pregnancy stage updated and cache invalidation complete:", updatedData);
     },
     onError: (error) => {
       console.error("Failed to update pregnancy stage:", error);
