@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { AuthButton } from "@/components/auth/AuthButton";
+import { scrollToTop } from "@/lib/scrollUtils";
 
 const Header = () => {
   const [location] = useLocation();
@@ -12,7 +13,21 @@ const Header = () => {
     <header className="bg-white shadow-sm">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <div className="flex items-center space-x-2">
-          <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity duration-200" title="Return to Home">
+          <Link 
+            href="/" 
+            className="flex items-center space-x-2 hover:opacity-80 transition-opacity duration-200" 
+            title="Return to Home"
+            onClick={(e) => {
+              // Ensure we scroll to the top of the page when clicking the logo
+              if (location === "/") {
+                e.preventDefault(); // Prevent navigation if already on home page
+                scrollToTop(); // Scroll to top
+              } else {
+                // If not on home page, we'll use this to ensure we start at the top after navigation
+                window.scrollTo(0, 0);
+              }
+            }}
+          >
             <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center shadow-sm">
               <i className="fas fa-baby text-white"></i>
             </div>
@@ -28,14 +43,14 @@ const Header = () => {
               Baby & Me
             </span>
           </Link>
-          <Link href="/tracker">
-            <span className={`font-medium ${isActive("/tracker") ? "text-primary" : "text-neutral-dark hover:text-primary"} transition cursor-pointer`}>
-              Tracker
-            </span>
-          </Link>
           <Link href="/diet-exercise">
             <span className={`font-medium ${isActive("/diet-exercise") ? "text-primary" : "text-neutral-dark hover:text-primary"} transition cursor-pointer`}>
               Diet & Exercise
+            </span>
+          </Link>
+          <Link href="/tracker">
+            <span className={`font-medium ${isActive("/tracker") ? "text-primary" : "text-neutral-dark hover:text-primary"} transition cursor-pointer`}>
+              Tracker
             </span>
           </Link>
           <Link href="/resources">
@@ -67,14 +82,14 @@ const Header = () => {
                 Baby & Me
               </span>
             </Link>
-            <Link href="/tracker">
-              <span className={`font-medium ${isActive("/tracker") ? "text-primary" : "text-neutral-dark"} py-2 block cursor-pointer`}>
-                Tracker
-              </span>
-            </Link>
             <Link href="/diet-exercise">
               <span className={`font-medium ${isActive("/diet-exercise") ? "text-primary" : "text-neutral-dark"} py-2 block cursor-pointer`}>
                 Diet & Exercise
+              </span>
+            </Link>
+            <Link href="/tracker">
+              <span className={`font-medium ${isActive("/tracker") ? "text-primary" : "text-neutral-dark"} py-2 block cursor-pointer`}>
+                Tracker
               </span>
             </Link>
             <Link href="/resources">
