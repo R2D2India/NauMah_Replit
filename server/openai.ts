@@ -5,6 +5,11 @@ let openai: OpenAI | null = null;
 try {
   const apiKey = process.env.OPENAI_API_KEY;
   console.log("OpenAI API Key:", apiKey ? "Successfully retrieved" : "API key not found");
+  // More detailed logging to help debug deployment issues
+  if (!apiKey) {
+    console.error("CRITICAL: OpenAI API Key is missing. Environment variables may not be configured correctly.");
+    console.log("Environment variables available:", Object.keys(process.env).filter(key => !key.includes("SECRET") && !key.includes("KEY")).join(", "));
+  }
   if (apiKey) {
     openai = new OpenAI({
       apiKey,
@@ -152,8 +157,14 @@ export async function generateBabyDevelopment(week: number): Promise<{
 }> {
   try {
     if (!openai) {
-      throw new Error("OpenAI client not initialized");
+      console.error("DEPLOYMENT ERROR: OpenAI client not initialized when generating baby development for week", week);
+      // Return predefined data for common weeks to ensure functionality in production
+      return getBackupBabyDevelopmentData(week);
     }
+    
+    console.log(`Starting OpenAI API call for baby development week ${week}`);
+    const startTime = Date.now();
+    
     const prompt = `Generate detailed and accurate baby development information for pregnancy week ${week}.
                    Return response as JSON with format: { 
                      "description": "Detailed description of development at this stage", 
@@ -163,26 +174,118 @@ export async function generateBabyDevelopment(week: number): Promise<{
                      "imageDescription": "Brief description of what the baby looks like at this stage for visualization"
                    }`;
 
-    const completion = await openai.chat.completions.create({
-      model: MODEL,
-      messages: [
-        {
-          role: "system",
-          content: "You are an obstetrician specializing in fetal development with deep expertise in embryology. Provide scientifically accurate, informative, and compassionate information about baby development during pregnancy. You always respond with JSON format."
-        },
-        {
-          role: "user",
-          content: prompt
-        }
-      ],
-      response_format: { type: "json_object" },
-    });
-
-    return JSON.parse(completion.choices[0].message.content || "{}");
+    try {
+      // For better reliability in production, use a shorter system request
+      const abortController = new AbortController();
+      const timeoutId = setTimeout(() => abortController.abort('Request timeout after 15 seconds'), 15000);
+      
+      const completion = await openai.chat.completions.create({
+        model: MODEL,
+        messages: [
+          {
+            role: "system",
+            content: "You are an obstetrician specializing in fetal development. Provide accurate, concise information about baby development during pregnancy. Always respond with JSON format."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: 800, // Limit token usage for faster responses
+      }, { 
+        signal: abortController.signal 
+      });
+      
+      clearTimeout(timeoutId);
+      
+      const endTime = Date.now();
+      console.log(`OpenAI API call completed in ${endTime - startTime}ms for baby development week ${week}`);
+      
+      const content = completion.choices[0].message.content || "{}";
+      return JSON.parse(content);
+    } catch (apiError) {
+      console.error(`OpenAI API error for baby development week ${week}:`, apiError);
+      // If OpenAI call fails, return backup data
+      return getBackupBabyDevelopmentData(week);
+    }
   } catch (error) {
     console.error("Error generating baby development info:", error);
-    throw new Error("Failed to generate baby development information");
+    return getBackupBabyDevelopmentData(week);
   }
+}
+
+/**
+ * Backup data for baby development in case OpenAI is unavailable in production
+ */
+export function getBackupBabyDevelopmentData(week: number): {
+  description: string;
+  keyDevelopments: string[];
+  funFact: string;
+  size: string;
+  imageDescription: string;
+} {
+  console.log(`Using backup data for baby development week ${week}`);
+  
+  // Simple mapping function to ensure we have reasonable data for any week
+  const getWeekData = (week: number) => {
+    // Basic patterns for different stages
+    if (week <= 8) {
+      return {
+        description: `During early pregnancy (week ${week}), your baby is rapidly developing fundamental body structures. The embryo is establishing vital organs and systems.`,
+        keyDevelopments: [
+          "Basic brain structure is forming",
+          "Heart begins to beat and circulate blood",
+          "Limb buds appear and begin to develop into arms and legs",
+          "Facial features begin to take shape"
+        ],
+        funFact: "At this stage, your baby is growing at a rate of about 1 millimeter per day.",
+        size: week <= 4 ? "Poppy seed" : week <= 6 ? "Pea" : "Kidney bean",
+        imageDescription: "A tiny embryo with visible limb buds and developing facial features."
+      };
+    } else if (week <= 13) {
+      return {
+        description: `At week ${week}, your baby is now considered a fetus. All essential organs are formed and will continue to mature throughout your pregnancy.`,
+        keyDevelopments: [
+          "Fingers and toes are fully separated",
+          "External genitalia begin to differentiate",
+          "Kidneys begin to produce urine",
+          "Baby can make tiny movements"
+        ],
+        funFact: "Your baby can now squint, frown, and even suck their thumb!",
+        size: week <= 10 ? "Strawberry" : week <= 12 ? "Lime" : "Lemon",
+        imageDescription: "A fully formed fetus with distinct human features and proportional limbs."
+      };
+    } else if (week <= 27) {
+      return {
+        description: `At week ${week}, your baby is gaining weight and developing more complex body systems. Their senses are developing rapidly.`,
+        keyDevelopments: [
+          "Skin is becoming less transparent",
+          "Inner ear bones are hardening, allowing baby to hear sounds",
+          "Taste buds are developing",
+          "Lungs are preparing for breathing air"
+        ],
+        funFact: "Your baby can now hear your voice and may respond to loud noises with movement.",
+        size: week <= 20 ? "Bell pepper" : week <= 24 ? "Corn on the cob" : "Eggplant",
+        imageDescription: "A well-proportioned fetus with more body fat, who can now open and close their eyes."
+      };
+    } else {
+      return {
+        description: `At week ${week}, your baby is preparing for life outside the womb. Their lungs and digestive system are maturing for independent functioning.`,
+        keyDevelopments: [
+          "Brain is developing rapidly",
+          "Lungs are producing surfactant necessary for breathing",
+          "Baby is practicing breathing movements",
+          "Immune system is developing antibodies"
+        ],
+        funFact: "Your baby now has their own unique fingerprints!",
+        size: week <= 34 ? "Pineapple" : week <= 38 ? "Watermelon" : "Small pumpkin",
+        imageDescription: "A fully developed baby with chubby limbs, who has limited space to move as they fill your uterus."
+      };
+    }
+  };
+  
+  return getWeekData(week);
 }
 
 export async function transcribeAudio(audioBuffer: Buffer): Promise<string> {
