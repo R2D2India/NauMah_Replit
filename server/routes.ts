@@ -121,7 +121,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`Updated pregnancy data: `, data);
       
-      res.json(data);
+      // Add timestamp and metadata to help client prioritize data sources
+      const enhancedData = {
+        ...data,
+        _serverTimestamp: new Date().getTime(),
+        _source: 'server',
+        _updateType: 'stage_update'
+      };
+      
+      // Add caching prevention headers
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      
+      res.json(enhancedData);
     } catch (error) {
       console.error("Error updating pregnancy stage:", error);
       res.status(500).json({ message: "Failed to update pregnancy stage" });
