@@ -1,7 +1,9 @@
 import { BABY_SIZE_COMPARISONS } from "@/lib/constants";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertTriangle, InfoIcon } from "lucide-react";
+import { useOpenAIStatus } from "@/hooks/use-openai-status";
+import { Badge } from "@/components/ui/badge";
 
 interface BabyDevelopmentProps {
   currentWeek: number;
@@ -19,6 +21,9 @@ const BabyDevelopment = ({ currentWeek }: BabyDevelopmentProps) => {
   // Use state to track if we should use AI-generated content
   const [useAIContent, setUseAIContent] = useState(false);
   
+  // Check if OpenAI integration is available
+  const { isAvailable: isOpenAIAvailable, isLoading: checkingOpenAI } = useOpenAIStatus();
+  
   // Get baby size for current week from constants (fallback)
   const babySize = BABY_SIZE_COMPARISONS.find(item => item.week === currentWeek) || 
                   BABY_SIZE_COMPARISONS[0]; // Default to first week if not found
@@ -33,20 +38,33 @@ const BabyDevelopment = ({ currentWeek }: BabyDevelopmentProps) => {
     queryKey: ["/api/baby-development", currentWeek],
     queryFn: async () => {
       if (!useAIContent) return null;
-      const response = await fetch(`/api/baby-development/${currentWeek}`);
+      
+      // Add cache-busting parameter for production environments
+      const timestamp = new Date().getTime();
+      const response = await fetch(`/api/baby-development/${currentWeek}?t=${timestamp}`, {
+        headers: {
+          'Cache-Control': 'no-cache, no-store',
+          'Pragma': 'no-cache'
+        }
+      });
+      
       if (!response.ok) {
         throw new Error("Failed to fetch baby development data");
       }
       return response.json();
     },
-    enabled: useAIContent // Only run the query if useAIContent is true
+    enabled: useAIContent && (isOpenAIAvailable || !checkingOpenAI), // Only run if OpenAI is available
+    retry: 2, // Retry failed requests twice
+    retryDelay: 1000 // Wait 1 second between retries
   });
   
-  // Set useAIContent to true after component mounts
+  // Set useAIContent to true after component mounts and OpenAI status is checked
   useEffect(() => {
-    setUseAIContent(true);
-    console.log(`BabyDevelopment: Requesting AI data for week ${currentWeek}`);
-  }, [currentWeek]);
+    if (!checkingOpenAI) {
+      setUseAIContent(true);
+      console.log(`BabyDevelopment: Requesting AI data for week ${currentWeek}`);
+    }
+  }, [currentWeek, checkingOpenAI]);
   
   // Determine the milestone data to display
   const milestones: MilestoneData = aiMilestones || {

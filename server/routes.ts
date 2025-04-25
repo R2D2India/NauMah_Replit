@@ -399,6 +399,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Health check endpoint for OpenAI integration
+  app.get("/api/openai-status", (req: Request, res: Response) => {
+    const status = {
+      available: !!process.env.OPENAI_API_KEY,
+      timestamp: new Date().toISOString()
+    };
+    res.json(status);
+  });
+  
   // Baby development information for given pregnancy week
   app.get("/api/baby-development/:week", async (req: Request, res: Response) => {
     // Set appropriate content type to ensure Vite doesn't intercept

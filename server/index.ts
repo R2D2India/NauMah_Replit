@@ -4,6 +4,21 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { runMigrations } from "./db";
 import { setupAuth } from "./auth";
+import fs from "fs";
+import path from "path";
+
+// Check and log critical environment variables for deployment diagnostics
+const criticalVars = ['OPENAI_API_KEY', 'DATABASE_URL', 'SESSION_SECRET'];
+const missingVars = criticalVars.filter(varName => !process.env[varName]);
+
+if (missingVars.length > 0) {
+  console.warn(`⚠️ DEPLOYMENT WARNING: Missing critical environment variables: ${missingVars.join(', ')}`);
+  console.log('Environment variables available:', Object.keys(process.env)
+    .filter(key => !key.includes('SECRET') && !key.includes('KEY') && !key.includes('PASSWORD'))
+    .join(', '));
+} else {
+  console.log('✅ All critical environment variables are available');
+}
 
 // Add session types
 declare module "express-session" {
