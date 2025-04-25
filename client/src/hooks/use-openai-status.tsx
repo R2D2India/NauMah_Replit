@@ -15,7 +15,7 @@ export function useOpenAIStatus() {
     refetch
   } = useQuery<{ available: boolean; timestamp: string }>({
     queryKey: ["/api/openai-status"],
-    queryFn: getQueryFn(),
+    queryFn: getQueryFn({ on401: "returnNull" }),
     staleTime: 1000 * 60 * 5, // 5 minutes
     refetchOnWindowFocus: false,
   });
