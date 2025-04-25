@@ -7,8 +7,10 @@
 const STORAGE_PREFIX = 'naumah_';
 const KEYS = {
   PREGNANCY_DATA: STORAGE_PREFIX + 'pregnancy_data',
+  USER_PREGNANCY_DATA: STORAGE_PREFIX + 'user_pregnancy_data', // User-specified values that take precedence
   BABY_DEVELOPMENT: STORAGE_PREFIX + 'baby_development_',
   LAST_UPDATE: STORAGE_PREFIX + 'last_update',
+  PREVENT_OVERWRITE: STORAGE_PREFIX + 'prevent_overwrite',
 };
 
 // Types
@@ -44,16 +46,25 @@ export function isStorageAvailable(): boolean {
 }
 
 /**
- * Get pregnancy data from localStorage
+ * Get pregnancy data from localStorage with user data prioritization
  */
 export function getLocalPregnancyData(): PregnancyData | null {
   if (!isStorageAvailable()) return null;
   
   try {
-    const data = localStorage.getItem(KEYS.PREGNANCY_DATA);
-    if (!data) return null;
+    // First check for user-specified data which takes precedence
+    const userData = localStorage.getItem(KEYS.USER_PREGNANCY_DATA);
+    if (userData) {
+      const parsedUserData = JSON.parse(userData);
+      console.log("Using user-specified pregnancy data:", parsedUserData);
+      return parsedUserData;
+    }
     
-    return JSON.parse(data);
+    // Fall back to API-provided data
+    const apiData = localStorage.getItem(KEYS.PREGNANCY_DATA);
+    if (!apiData) return null;
+    
+    return JSON.parse(apiData);
   } catch (e) {
     console.error('Error retrieving pregnancy data from localStorage:', e);
     return null;
@@ -61,17 +72,56 @@ export function getLocalPregnancyData(): PregnancyData | null {
 }
 
 /**
- * Save pregnancy data to localStorage
+ * Save pregnancy data from API to localStorage
  */
 export function saveLocalPregnancyData(data: PregnancyData): boolean {
   if (!isStorageAvailable()) return false;
   
   try {
+    // Check if overwrite prevention is enabled
+    const preventOverwrite = localStorage.getItem(KEYS.PREVENT_OVERWRITE) === 'true';
+    const userData = localStorage.getItem(KEYS.USER_PREGNANCY_DATA);
+    
+    if (preventOverwrite && userData) {
+      // Don't overwrite user data with API data
+      console.log("Skip saving API data due to overwrite prevention");
+      return false;
+    }
+    
     localStorage.setItem(KEYS.PREGNANCY_DATA, JSON.stringify(data));
     localStorage.setItem(KEYS.LAST_UPDATE, new Date().toISOString());
     return true;
   } catch (e) {
     console.error('Error saving pregnancy data to localStorage:', e);
+    return false;
+  }
+}
+
+/**
+ * Save user-specified pregnancy data to localStorage
+ * This takes precedence over API-provided data
+ */
+export function saveUserPregnancyData(data: PregnancyData): boolean {
+  if (!isStorageAvailable()) return false;
+  
+  try {
+    // Add timestamp and flags for tracking
+    const enhancedData = {
+      ...data,
+      _userSpecified: true,
+      _timestamp: new Date().getTime()
+    };
+    
+    // Save to user data storage
+    localStorage.setItem(KEYS.USER_PREGNANCY_DATA, JSON.stringify(enhancedData));
+    localStorage.setItem(KEYS.LAST_UPDATE, new Date().toISOString());
+    
+    // Set the prevent overwrite flag
+    localStorage.setItem(KEYS.PREVENT_OVERWRITE, 'true');
+    
+    return true;
+  } catch (e) {
+    console.error('Error saving user pregnancy data to localStorage:', e);
     return false;
   }
 }

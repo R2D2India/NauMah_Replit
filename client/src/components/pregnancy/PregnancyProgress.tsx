@@ -7,9 +7,10 @@ import {
 
 interface PregnancyProgressProps {
   currentWeek: number;
+  isLocalData?: boolean;
 }
 
-const PregnancyProgress = ({ currentWeek }: PregnancyProgressProps) => {
+const PregnancyProgress = ({ currentWeek, isLocalData }: PregnancyProgressProps) => {
   // Calculate pregnancy metrics
   const dueDate = calculateDueDate(currentWeek);
   const completionPercentage = calculateCompletion(currentWeek);

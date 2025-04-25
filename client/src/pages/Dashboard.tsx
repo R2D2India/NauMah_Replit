@@ -12,6 +12,7 @@ import { apiRequest, queryClient, appEvents, APP_EVENTS, STORAGE_KEYS } from "@/
 import { 
   getLocalPregnancyData, 
   saveLocalPregnancyData, 
+  saveUserPregnancyData,
   getLocalBabyDevelopmentData,
   saveLocalBabyDevelopmentData 
 } from "@/lib/localDataStore";
@@ -221,15 +222,11 @@ const Dashboard = () => {
     const localData = {
       currentWeek: week,
       dueDate: dueDate.toISOString(),
-      _localTimestamp: new Date().getTime(), // Add timestamp to mark this as manually updated
-      _localUpdate: true // Flag to indicate this is a manual update
+      lastUpdated: new Date().toISOString()
     };
     
-    // Prevent future API calls from overwriting our data by setting a flag
-    window.localStorage.setItem('naumah_prevent_overwrite', 'true');
-    
-    // Save to localStorage with priority
-    saveLocalPregnancyData(localData);
+    // Save to localStorage as user-specified data (with highest priority)
+    saveUserPregnancyData(localData);
     
     // Update UI immediately
     queryClient.setQueryData(["/api/pregnancy"], localData);
@@ -406,7 +403,7 @@ const Dashboard = () => {
 
           <div className="flex flex-wrap gap-2">
             <Button 
-              onClick={handleSubmit}
+              onClick={isProductionMode ? handleManualFallback : handleSubmit}
               className="bg-primary hover:bg-primary-dark" 
               disabled={!stageValue || updateStageMutation.isPending}
             >
@@ -422,19 +419,6 @@ const Dashboard = () => {
                 </>
               )}
             </Button>
-            
-            {/* Show direct local update button in production mode */}
-            {isProductionMode && (
-              <Button 
-                onClick={handleManualFallback} 
-                variant="outline"
-                className="border-amber-500 text-amber-600 hover:bg-amber-50" 
-                disabled={!stageValue}
-              >
-                <i className="fas fa-bolt mr-2"></i>
-                Local Update
-              </Button>
-            )}
           </div>
         </div>
       </div>
