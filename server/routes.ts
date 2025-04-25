@@ -447,11 +447,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Updating pregnancy stage for userId ${userId}: `, { stageType, stageValue });
       
       // 5. Update pregnancy data
-      const updatedData = await storage.updatePregnancyStage(userId, {
+      // Create an object with just the required properties for PregnancyStageUpdate
+      const updateData: PregnancyStageUpdate = {
         stageType: "week",
-        stageValue: week.toString(), 
-        dueDate
-      });
+        stageValue: week.toString()
+      };
+      
+      const updatedData = await storage.updatePregnancyStage(userId, updateData);
       
       // 6. Get baby development info in the same request
       console.log(`Generating baby development information for week ${week}`);
