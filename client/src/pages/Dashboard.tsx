@@ -324,34 +324,18 @@ const Dashboard = () => {
         <h1 className="text-3xl md:text-4xl font-montserrat font-bold text-primary mb-2">Baby & Me</h1>
         <p className="text-neutral-dark max-w-2xl mx-auto">Track your pregnancy journey and follow your baby's development week by week</p>
         
-        {/* Production mode indicator with fallback option */}
+        {/* Production mode indicator */}
         {isProductionMode && (
           <div className="mt-2 inline-flex items-center py-1 px-3 text-sm bg-blue-50 text-blue-700 rounded-full">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            Deployed Mode{loadingFromLocal && " (using local data)"}
+            Deployed Mode
           </div>
         )}
       </div>
       
-      {/* Local data indicator */}
-      {loadingFromLocal && (
-        <div className="bg-amber-50 border-l-4 border-amber-500 p-4 mb-6 rounded-lg">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-amber-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <p className="text-sm text-amber-700">
-                Using cached data for stability. Your latest changes are stored locally and will sync when possible.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Removed the local data indicator message as requested */}
       
       {/* Pregnancy Stage Selector */}
       <div className="bg-white rounded-xl p-6 mb-8 shadow-md border-l-4 border-primary">
