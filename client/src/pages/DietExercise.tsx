@@ -11,6 +11,7 @@ import {
   getTrimeasterFromWeek 
 } from "@/lib/constants";
 import { queryClient, appEvents, APP_EVENTS, STORAGE_KEYS } from "@/lib/queryClient";
+import { getLocalPregnancyData, saveLocalPregnancyData } from "@/lib/localDataStore";
 import { 
   Apple, 
   Dumbbell, 
@@ -51,17 +52,46 @@ export default function DietExercise() {
     refetchOnWindowFocus: true, // Refetch when window gets focus
   });
   
+  // Track if we're using local data
+  const [loadingFromLocal, setLoadingFromLocal] = useState(false);
+  const localDataRef = useRef<PregnancyData | null>(null);
+  
   // Set up logging for data changes and sync status
   useEffect(() => {
     if (pregnancyData) {
       console.log("⚠️ Diet & Exercise: Pregnancy data updated", pregnancyData);
+      
+      // When we get server data, store it locally
+      if (!loadingFromLocal && !pregnancyData._userSpecified) {
+        saveLocalPregnancyData(pregnancyData);
+      }
+      
       // Clear synchronizing state
       setIsSynchronizing(false);
     }
-  }, [pregnancyData]);
+  }, [pregnancyData, loadingFromLocal]);
+  
+  // For production, use local data if needed
+  useEffect(() => {
+    // Check for local data if server data is missing or if it shows week 1
+    if ((!pregnancyData || pregnancyData.currentWeek === 1) && !loadingFromLocal) {
+      // Get local data with user preference priority
+      const localData = getLocalPregnancyData();
+      
+      if (localData && localData._userSpecified === true) {
+        console.log("Diet & Exercise: Using user-specified local data:", localData);
+        localDataRef.current = localData;
+        setLoadingFromLocal(true);
+        
+        // Update the UI with the local data
+        queryClient.setQueryData(["/api/pregnancy"], localData);
+      }
+    }
+  }, [pregnancyData, loadingFromLocal]);
 
-  // Default to week 1 if not available
-  const currentWeek = pregnancyData?.currentWeek || 1;
+  // Use either server data or local data with proper fallback
+  const currentWeek = (loadingFromLocal && localDataRef.current?.currentWeek) || 
+    pregnancyData?.currentWeek || 1;
 
   // Generate a meal plan
   const handleGenerateMealPlan = async () => {
@@ -130,8 +160,29 @@ export default function DietExercise() {
       if (isMounted.current) {
         // Show synchronizing state
         setIsSynchronizing(true);
-        // Force immediate refetch of pregnancy data
-        refetchPregnancyData();
+        
+        // Mark this as user-specified data for persistence
+        if (updatedData) {
+          // Create a copy with user metadata
+          const userUpdatedData = {
+            ...updatedData,
+            _userSpecified: true,
+            _localTimestamp: Date.now()
+          };
+          
+          // Save to local storage immediately
+          saveLocalPregnancyData(userUpdatedData);
+          
+          // Update the UI directly without waiting for API
+          queryClient.setQueryData(["/api/pregnancy"], userUpdatedData);
+          
+          // Still refresh from server to sync both ways
+          refetchPregnancyData();
+        } else {
+          // If no data, just refresh
+          refetchPregnancyData();
+        }
+        
         // Update our last timestamp
         lastUpdateTimestamp.current = Date.now();
       }
@@ -167,7 +218,18 @@ export default function DietExercise() {
           if (isMounted.current && data.timestamp > lastUpdateTimestamp.current) {
             lastUpdateTimestamp.current = data.timestamp;
             setIsSynchronizing(true);
-            refetchPregnancyData();
+            
+            // Check for user data in localStorage
+            const localData = getLocalPregnancyData();
+            if (localData && localData._userSpecified === true) {
+              // If we have userSpecified data, use it directly
+              queryClient.setQueryData(["/api/pregnancy"], localData);
+              // Still trigger a server sync (but we prioritize local data)
+              refetchPregnancyData();
+            } else {
+              // If no user data, fetch from server
+              refetchPregnancyData();
+            }
           }
         } catch (err) {
           console.error("Error processing storage event:", err);
@@ -182,6 +244,22 @@ export default function DietExercise() {
     const intervalId = setInterval(() => {
       if (isMounted.current) {
         console.log("Diet & Exercise: Periodic pregnancy data refresh");
+        
+        // First check for user-specified local data
+        const localData = getLocalPregnancyData();
+        if (localData && localData._userSpecified === true) {
+          // If we have user data with a timestamp that's newer than server data
+          const currentData = queryClient.getQueryData<PregnancyData | null>(["/api/pregnancy"]);
+          const serverTime = currentData?._serverTimestamp || 0;
+          const localTime = localData._localTimestamp || 0;
+          
+          if (localTime > serverTime) {
+            console.log("Diet & Exercise: Using fresher local data in periodic refresh");
+            queryClient.setQueryData(["/api/pregnancy"], localData);
+          }
+        }
+        
+        // Still fetch from server but local data will have priority when rendering
         refetchPregnancyData();
       }
     }, 30000); // Every 30 seconds as a fallback (reduced frequency)
