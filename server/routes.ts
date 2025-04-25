@@ -408,6 +408,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(status);
   });
   
+  // Production-ready combined endpoint for pregnancy updates and baby development
+  app.post("/api/pregnancy/update-with-development", async (req: Request, res: Response) => {
+    try {
+      // 1. Get user ID
+      const userId = req.session.userId || req.session.passport?.user;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      
+      // 2. Extract stage data
+      const { stageType, stageValue } = req.body;
+      if (!stageType || !stageValue) {
+        return res.status(400).json({ message: "Missing stageType or stageValue" });
+      }
+      
+      // 3. Convert to week format
+      let week: number;
+      if (stageType === "week") {
+        week = parseInt(stageValue);
+      } else if (stageType === "month") {
+        // Convert month to approximate week
+        week = parseInt(stageValue) * 4 + 1;
+      } else if (stageType === "trimester") {
+        // Convert trimester to approximate middle week
+        const trimesterValue = parseInt(stageValue);
+        if (trimesterValue === 1) week = 8;
+        else if (trimesterValue === 2) week = 20;
+        else week = 32;
+      } else {
+        return res.status(400).json({ message: "Invalid stageType" });
+      }
+      
+      // 4. Calculate due date (40 weeks from current week)
+      const dueDate = new Date();
+      dueDate.setDate(dueDate.getDate() + (40 - week) * 7);
+      
+      console.log(`Updating pregnancy stage for userId ${userId}: `, { stageType, stageValue });
+      
+      // 5. Update pregnancy data
+      const updatedData = await storage.updatePregnancyStage(userId, {
+        stageType: "week",
+        stageValue: week.toString(), 
+        dueDate
+      });
+      
+      // 6. Get baby development info in the same request
+      console.log(`Generating baby development information for week ${week}`);
+      const developmentInfo = await generateBabyDevelopment(week);
+      
+      // 7. Return combined response
+      res.json({
+        pregnancyData: updatedData,
+        babyDevelopment: developmentInfo,
+        success: true
+      });
+    } catch (error) {
+      console.error("Error updating pregnancy with development:", error);
+      res.status(500).json({ message: "Failed to update pregnancy and get development information" });
+    }
+  });
+  
   // Baby development information for given pregnancy week
   app.get("/api/baby-development/:week", async (req: Request, res: Response) => {
     // Set appropriate content type to ensure Vite doesn't intercept

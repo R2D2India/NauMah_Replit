@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 
 interface BabyDevelopmentProps {
   currentWeek: number;
+  preloadedData?: any; // For data from combined endpoint
 }
 
 interface MilestoneData {
@@ -17,7 +18,10 @@ interface MilestoneData {
   imageDescription?: string;
 }
 
-const BabyDevelopment = ({ currentWeek }: BabyDevelopmentProps) => {
+const BabyDevelopment = ({ currentWeek, preloadedData }: BabyDevelopmentProps) => {
+  // State to store combined data if provided
+  const [combinedData, setCombinedData] = useState<MilestoneData | null>(null);
+  
   // Use state to track if we should use AI-generated content
   const [useAIContent, setUseAIContent] = useState(false);
   
@@ -27,8 +31,16 @@ const BabyDevelopment = ({ currentWeek }: BabyDevelopmentProps) => {
   // Get baby size for current week from constants (fallback)
   const babySize = BABY_SIZE_COMPARISONS.find(item => item.week === currentWeek) || 
                   BABY_SIZE_COMPARISONS[0]; // Default to first week if not found
+  
+  // Store preloaded data when it changes
+  useEffect(() => {
+    if (preloadedData) {
+      console.log("Using preloaded baby development data:", preloadedData);
+      setCombinedData(preloadedData);
+    }
+  }, [preloadedData]);
                   
-  // Fetch dynamic baby development information from the API
+  // Fetch dynamic baby development information from the API only if we don't have preloaded data
   const { 
     data: aiMilestones, 
     isLoading, 
@@ -39,8 +51,15 @@ const BabyDevelopment = ({ currentWeek }: BabyDevelopmentProps) => {
     queryFn: async () => {
       if (!useAIContent) return null;
       
+      // Skip API call if we have combined data
+      if (combinedData) {
+        console.log("Using already loaded development data from combined endpoint");
+        return combinedData;
+      }
+      
       // Add cache-busting parameter for production environments
       const timestamp = new Date().getTime();
+      console.log(`Making direct API call to baby-development endpoint for week ${currentWeek}`);
       const response = await fetch(`/api/baby-development/${currentWeek}?t=${timestamp}`, {
         headers: {
           'Cache-Control': 'no-cache, no-store',
@@ -53,7 +72,7 @@ const BabyDevelopment = ({ currentWeek }: BabyDevelopmentProps) => {
       }
       return response.json();
     },
-    enabled: useAIContent && (isOpenAIAvailable || !checkingOpenAI), // Only run if OpenAI is available
+    enabled: useAIContent && (isOpenAIAvailable || !checkingOpenAI) && !combinedData, // Only if no combined data
     retry: 2, // Retry failed requests twice
     retryDelay: 1000 // Wait 1 second between retries
   });
@@ -62,12 +81,14 @@ const BabyDevelopment = ({ currentWeek }: BabyDevelopmentProps) => {
   useEffect(() => {
     if (!checkingOpenAI) {
       setUseAIContent(true);
-      console.log(`BabyDevelopment: Requesting AI data for week ${currentWeek}`);
+      if (!combinedData) {
+        console.log(`BabyDevelopment: Requesting AI data for week ${currentWeek}`);
+      }
     }
-  }, [currentWeek, checkingOpenAI]);
+  }, [currentWeek, checkingOpenAI, combinedData]);
   
-  // Determine the milestone data to display
-  const milestones: MilestoneData = aiMilestones || {
+  // Determine the milestone data to display (priority: combinedData > aiMilestones > fallback)
+  const milestones: MilestoneData = combinedData || aiMilestones || {
     description: "Your baby is continuing to grow and develop this week. Check back soon for more specific information.",
     keyDevelopments: ["Development information is being generated", "Please check back in a moment"],
     funFact: "Every baby develops at their own pace, and the information provided is a general guideline."

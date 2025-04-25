@@ -29,10 +29,15 @@ const Dashboard = () => {
     queryKey: ["/api/pregnancy"],
   });
 
-  // Update pregnancy stage mutation
+  // Add state for baby development data from the combined endpoint
+  const [combinedBabyDevelopment, setCombinedBabyDevelopment] = useState<any>(null);
+  
+  // Update pregnancy stage mutation using the new combined endpoint
   const updateStageMutation = useMutation({
     mutationFn: async (data: { stageType: string; stageValue: string }) => {
-      const response = await fetch("/api/pregnancy/stage", {
+      // Use the new combined endpoint that handles both pregnancy update and baby development
+      console.log("🔄 Using combined pregnancy update + development endpoint");
+      const response = await fetch("/api/pregnancy/update-with-development", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -40,15 +45,25 @@ const Dashboard = () => {
       });
       
       if (!response.ok) {
+        console.error("❌ Combined endpoint failed with status:", response.status);
         throw new Error("Failed to update pregnancy stage");
       }
       
       return await response.json();
     },
-    onSuccess: (updatedData) => {
-      console.log("✅ Dashboard: Pregnancy update success, data received:", updatedData);
+    onSuccess: (combinedData) => {
+      console.log("✅ Dashboard: Combined update success, data received:", combinedData);
       
-      // Force immediate refetch to get fresh data
+      // Store the combined development data for immediate use
+      if (combinedData.babyDevelopment) {
+        setCombinedBabyDevelopment(combinedData.babyDevelopment);
+        console.log("✅ Dashboard: Stored baby development data from combined response");
+      }
+      
+      // Use the pregnancy data from the combined response
+      const updatedData = combinedData.pregnancyData || combinedData;
+      
+      // Force immediate refetch to get fresh data - still needed for other components
       refetch();
       console.log("✅ Dashboard: Triggered refetch of pregnancy data");
       
@@ -215,8 +230,11 @@ const Dashboard = () => {
       {/* Pregnancy Progress */}
       <PregnancyProgress currentWeek={currentWeek} />
 
-      {/* Baby Development */}
-      <BabyDevelopment currentWeek={currentWeek} />
+      {/* Baby Development - Pass combined data when available */}
+      <BabyDevelopment 
+        currentWeek={currentWeek} 
+        preloadedData={combinedBabyDevelopment} 
+      />
       
       {/* Additional Features */}
       <AdditionalFeatures currentWeek={currentWeek} />
