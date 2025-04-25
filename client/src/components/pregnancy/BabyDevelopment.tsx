@@ -7,7 +7,8 @@ import { Card } from "@/components/ui/card";
 
 interface BabyDevelopmentProps {
   currentWeek: number;
-  preloadedData?: any; // Data from combined API call
+  developmentData?: any; // Data from combined API call
+  isLocalData?: boolean; // Indicator for local data source
 }
 
 interface BabyDevelopmentData {
@@ -19,7 +20,7 @@ interface BabyDevelopmentData {
   week: number;
 }
 
-const BabyDevelopment = ({ currentWeek, preloadedData }: BabyDevelopmentProps) => {
+const BabyDevelopment = ({ currentWeek, developmentData: preloadedData, isLocalData }: BabyDevelopmentProps) => {
   const [babyData, setBabyData] = useState<BabyDevelopmentData | null>(null);
   const [loadingFromLocal, setLoadingFromLocal] = useState(false);
   const [isProductionMode, setIsProductionMode] = useState(false);
@@ -27,17 +28,24 @@ const BabyDevelopment = ({ currentWeek, preloadedData }: BabyDevelopmentProps) =
   // Check if OpenAI is available
   const { isAvailable: isAIAvailable } = useOpenAIStatus();
   
-  // Detect if we're in production environment
+  // Set local data flag based on prop
+  useEffect(() => {
+    if (isLocalData) {
+      setLoadingFromLocal(true);
+    }
+  }, [isLocalData]);
+  
+  // Detect if we're in production environment and handle data loading
   useEffect(() => {
     const host = window.location.host;
     // Check if we're in a deployed Replit environment
     const isProduction = host.includes('.replit.app') || host.includes('.repl.co');
     setIsProductionMode(isProduction);
     
-    // If in production, try to use preloaded data first, then local storage data
+    // If in production, try to use provided data first, then local storage data
     if (isProduction) {
       if (preloadedData) {
-        console.log(`Using preloaded baby development data for week ${currentWeek}`);
+        console.log(`Using provided baby development data for week ${currentWeek}`);
         setBabyData(preloadedData);
       } else {
         const localData = getLocalBabyDevelopmentData(currentWeek);
@@ -50,10 +58,10 @@ const BabyDevelopment = ({ currentWeek, preloadedData }: BabyDevelopmentProps) =
     }
   }, [currentWeek, preloadedData]);
   
-  // If we have preloaded data, use it and save to localStorage
+  // If we have provided data, use it and save to localStorage
   useEffect(() => {
     if (preloadedData) {
-      console.log("BabyDevelopment: Using preloaded data from combined API call");
+      console.log("BabyDevelopment: Using provided data from parent component");
       setBabyData(preloadedData);
       
       if (isProductionMode) {
