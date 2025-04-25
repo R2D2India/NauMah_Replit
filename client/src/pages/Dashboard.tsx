@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
@@ -61,45 +60,6 @@ const Dashboard = () => {
     }
   }, []);
 
-  // For production, use local data if API fails or takes too long
-  useEffect(() => {
-    if (!pregnancyData && !isLoading && isProductionMode) {
-      const localData = localDataRef.current || getLocalPregnancyData();
-      if (localData) {
-        console.log("Using local storage data as fallback:", localData);
-        setLoadingFromLocal(true);
-        // Force a refresh of the pregnancy data
-        queryClient.setQueryData(["/api/pregnancy"], localData);
-      }
-    } else if (pregnancyData && isProductionMode) {
-      // When we have server data, store it locally for future use
-      saveLocalPregnancyData(pregnancyData);
-    }
-  }, [pregnancyData, isLoading, isProductionMode]);
-  
-  // Handle manual fallback for development/testing
-  const handleManualFallback = () => {
-    const week = stageValue ? parseInt(stageValue) : 17; // Default to week 17 if no selection
-    
-    // Create synthetic pregnancy data
-    const fallbackData = {
-      currentWeek: week,
-      dueDate: new Date(Date.now() + (40 - week) * 7 * 24 * 60 * 60 * 1000).toISOString()
-    };
-    
-    // Use client-side rendering only
-    saveLocalPregnancyData(fallbackData);
-    queryClient.setQueryData(["/api/pregnancy"], fallbackData);
-    setLoadingFromLocal(true);
-    
-    // Show notification
-    toast({
-      title: "Using local data mode",
-      description: "Updated pregnancy stage using local data mode for production compatibility.",
-      variant: "default"
-    });
-  };
-  
   // Update pregnancy stage mutation using the new combined endpoint
   const updateStageMutation = useMutation({
     mutationFn: async (data: { stageType: string; stageValue: string }) => {
@@ -204,6 +164,126 @@ const Dashboard = () => {
       console.error("Failed to update pregnancy stage:", error);
     }
   });
+
+  // For production, use local data if API fails or takes too long
+  useEffect(() => {
+    if (!pregnancyData && !isLoading && isProductionMode) {
+      const localData = localDataRef.current || getLocalPregnancyData();
+      if (localData) {
+        console.log("Using local storage data as fallback:", localData);
+        setLoadingFromLocal(true);
+        // Force a refresh of the pregnancy data
+        queryClient.setQueryData(["/api/pregnancy"], localData);
+      }
+    } else if (pregnancyData && isProductionMode) {
+      // When we have server data, store it locally for future use
+      const currentLocalData = getLocalPregnancyData();
+      
+      // Only save server data if it's more recent than local data
+      // This prevents API calls from overwriting our manual updates
+      if (!currentLocalData || 
+          !updateStageMutation.isSuccess || 
+          currentLocalData.currentWeek === pregnancyData.currentWeek) {
+        console.log("Saving server pregnancy data to localStorage:", pregnancyData);
+        saveLocalPregnancyData(pregnancyData);
+      } else {
+        console.log("Keeping local data as it's more recent than server data");
+      }
+    }
+  }, [pregnancyData, isLoading, isProductionMode, updateStageMutation.isSuccess]);
+  
+  // Handle direct local update for production mode
+  const handleManualFallback = () => {
+    if (!stageValue) {
+      toast({
+        title: "Selection Required",
+        description: "Please select a week, month, or trimester value first.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Convert stage type and value to week
+    let week = parseInt(stageValue);
+    if (stageType === "month") {
+      week = parseInt(stageValue) * 4;
+    } else if (stageType === "trimester") {
+      if (stageValue === "1") week = 8;
+      else if (stageValue === "2") week = 20;
+      else week = 33;
+    }
+    
+    // Calculate due date based on current week (40 weeks total)
+    const dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + (40 - week) * 7);
+    
+    // Create local pregnancy data with a timestamp to prevent API overwrites
+    const localData = {
+      currentWeek: week,
+      dueDate: dueDate.toISOString(),
+      _localTimestamp: new Date().getTime(), // Add timestamp to mark this as manually updated
+      _localUpdate: true // Flag to indicate this is a manual update
+    };
+    
+    // Prevent future API calls from overwriting our data by setting a flag
+    window.localStorage.setItem('naumah_prevent_overwrite', 'true');
+    
+    // Save to localStorage with priority
+    saveLocalPregnancyData(localData);
+    
+    // Update UI immediately
+    queryClient.setQueryData(["/api/pregnancy"], localData);
+    setLoadingFromLocal(true);
+    
+    // Also attempt to update the server in the background
+    try {
+      fetch("/api/pregnancy/update-with-development", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stageType, stageValue }),
+        credentials: "include"
+      }).then(response => {
+        if (response.ok) {
+          console.log("✅ Background server update successful");
+        }
+      }).catch(err => {
+        console.log("❌ Background server update failed, using local data only");
+      });
+    } catch (e) {
+      console.error("Failed to send background update:", e);
+    }
+    
+    // Show success notification
+    toast({
+      title: "Local Update Successful",
+      description: `Pregnancy information updated to ${stageType} ${stageValue} (Week ${week}).`,
+      variant: "default"
+    });
+    
+    // Attempt to get baby development data
+    (async () => {
+      try {
+        // Try to get cached data first
+        const cachedDevelopment = getLocalBabyDevelopmentData(week);
+        if (cachedDevelopment) {
+          console.log(`Found cached baby development data for week ${week}`);
+          setCombinedBabyDevelopment(cachedDevelopment);
+          return;
+        }
+        
+        // If no cached data, fetch from server
+        const response = await fetch(`/api/baby-development/${week}`);
+        if (response.ok) {
+          const developmentData = await response.json();
+          console.log(`Fetched baby development data for week ${week}`);
+          setCombinedBabyDevelopment(developmentData);
+          saveLocalBabyDevelopmentData(week, developmentData);
+        }
+      } catch (error) {
+        console.error("Failed to get baby development data:", error);
+      }
+    })();
+  };
 
   // Redirect to home if no pregnancy data is found
   useEffect(() => {
@@ -327,50 +407,56 @@ const Dashboard = () => {
           <div className="flex flex-wrap gap-2">
             <Button 
               onClick={handleSubmit}
+              className="bg-primary hover:bg-primary-dark" 
               disabled={!stageValue || updateStageMutation.isPending}
-              className="px-6"
             >
               {updateStageMutation.isPending ? (
-                <span className="flex items-center">
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
+                <>
+                  <i className="fas fa-spinner fa-spin mr-2"></i>
                   Updating...
-                </span>
-              ) : "Update Stage"}
+                </>
+              ) : (
+                <>
+                  <i className="fas fa-sync-alt mr-2"></i>
+                  Update
+                </>
+              )}
             </Button>
             
-            {/* Production fallback mode button */}
-            {(isProductionMode || window.location.hostname === 'localhost') && (
+            {/* Show direct local update button in production mode */}
+            {isProductionMode && (
               <Button 
-                onClick={handleManualFallback}
-                disabled={!stageValue}
+                onClick={handleManualFallback} 
                 variant="outline"
-                className="px-3"
-                title="Use this in production if regular updates aren't working"
+                className="border-amber-500 text-amber-600 hover:bg-amber-50" 
+                disabled={!stageValue}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
+                <i className="fas fa-bolt mr-2"></i>
                 Local Update
               </Button>
             )}
           </div>
         </div>
       </div>
-
-      {/* Pregnancy Progress */}
-      <PregnancyProgress currentWeek={currentWeek} />
-
-      {/* Baby Development - Pass combined data when available */}
-      <BabyDevelopment 
-        currentWeek={currentWeek} 
-        preloadedData={combinedBabyDevelopment} 
-      />
       
-      {/* Additional Features */}
-      <AdditionalFeatures currentWeek={currentWeek} />
+      {/* Current Pregnancy Week Section */}
+      <div className="mb-10">
+        <PregnancyProgress currentWeek={currentWeek} isLocalData={loadingFromLocal} />
+      </div>
+
+      {/* Baby Development Section */}
+      <div className="mb-10">
+        <BabyDevelopment 
+          currentWeek={currentWeek} 
+          developmentData={combinedBabyDevelopment}
+          isLocalData={loadingFromLocal}
+        />
+      </div>
+
+      {/* Additional Features Section */}
+      <div className="mb-10">
+        <AdditionalFeatures currentWeek={currentWeek} />
+      </div>
     </div>
   );
 };

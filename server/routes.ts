@@ -27,6 +27,7 @@ import {
   contactSchema,
   ContactFormData,
   journalEntrySchema,
+  PregnancyStageUpdate,
   // Auth schemas
   registerSchema,
   loginSchema,
