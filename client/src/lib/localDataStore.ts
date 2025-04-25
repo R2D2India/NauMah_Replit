@@ -52,19 +52,52 @@ export function getLocalPregnancyData(): PregnancyData | null {
   if (!isStorageAvailable()) return null;
   
   try {
-    // First check for user-specified data which takes precedence
+    // Check for user-specified data which takes highest precedence
     const userData = localStorage.getItem(KEYS.USER_PREGNANCY_DATA);
+    
+    // Check for API-provided data as a fallback
+    const apiData = localStorage.getItem(KEYS.PREGNANCY_DATA);
+    
+    // If we have both, compare them
+    if (userData && apiData) {
+      const parsedUserData = JSON.parse(userData);
+      const parsedApiData = JSON.parse(apiData);
+      
+      // If user data has explicit _userSpecified flag, it takes precedence
+      if (parsedUserData._userSpecified === true) {
+        console.log("Using user-specified pregnancy data with explicit priority:", parsedUserData);
+        return parsedUserData;
+      }
+      
+      // Compare timestamps if available to use the newest data
+      const userTimestamp = parsedUserData._timestamp || 0;
+      const apiTimestamp = parsedApiData._serverTimestamp || 0;
+      
+      if (userTimestamp > apiTimestamp) {
+        console.log(`Using user data (timestamp: ${userTimestamp}) which is newer than API data (timestamp: ${apiTimestamp})`);
+        return parsedUserData;
+      } else {
+        console.log(`Using API data (timestamp: ${apiTimestamp}) which is newer than user data (timestamp: ${userTimestamp})`);
+        return parsedApiData;
+      }
+    }
+    
+    // If we only have user data
     if (userData) {
       const parsedUserData = JSON.parse(userData);
-      console.log("Using user-specified pregnancy data:", parsedUserData);
+      console.log("Using user-specified pregnancy data only:", parsedUserData);
       return parsedUserData;
     }
     
-    // Fall back to API-provided data
-    const apiData = localStorage.getItem(KEYS.PREGNANCY_DATA);
-    if (!apiData) return null;
+    // If we only have API data
+    if (apiData) {
+      const parsedApiData = JSON.parse(apiData);
+      console.log("Using API-provided pregnancy data:", parsedApiData);
+      return parsedApiData;
+    }
     
-    return JSON.parse(apiData);
+    // No data available
+    return null;
   } catch (e) {
     console.error('Error retrieving pregnancy data from localStorage:', e);
     return null;
@@ -105,19 +138,44 @@ export function saveUserPregnancyData(data: PregnancyData): boolean {
   if (!isStorageAvailable()) return false;
   
   try {
-    // Add timestamp and flags for tracking
+    // Get current time for consistent timestamps
+    const now = new Date();
+    const timestamp = now.getTime();
+    const isoString = now.toISOString();
+    
+    // Add metadata flags for tracking and priority
     const enhancedData = {
       ...data,
       _userSpecified: true,
-      _timestamp: new Date().getTime()
+      _timestamp: timestamp,
+      _lastUpdated: isoString,
+      _source: 'user',
+      _priority: 100 // Highest priority for user data
     };
+    
+    // Log what we're storing
+    console.log("Saving user-specified pregnancy data:", enhancedData);
     
     // Save to user data storage
     localStorage.setItem(KEYS.USER_PREGNANCY_DATA, JSON.stringify(enhancedData));
-    localStorage.setItem(KEYS.LAST_UPDATE, new Date().toISOString());
+    localStorage.setItem(KEYS.LAST_UPDATE, isoString);
     
-    // Set the prevent overwrite flag
+    // Set the prevent overwrite flag to block API data overwrites
     localStorage.setItem(KEYS.PREVENT_OVERWRITE, 'true');
+    
+    // Dispatch a storage event for other tabs to detect changes
+    try {
+      // Create a custom event with the updated data
+      const event = new CustomEvent('storage', {
+        detail: {
+          key: KEYS.USER_PREGNANCY_DATA,
+          newValue: JSON.stringify(enhancedData)
+        }
+      });
+      window.dispatchEvent(event);
+    } catch (eventError) {
+      console.warn("Could not dispatch custom event:", eventError);
+    }
     
     return true;
   } catch (e) {

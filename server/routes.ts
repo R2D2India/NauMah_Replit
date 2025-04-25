@@ -84,13 +84,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`Fetching pregnancy data for userId ${userId}`);
       
+      // Try to get data from database
       const data = await storage.getPregnancyData(userId);
       
       console.log(`Retrieved pregnancy data: `, data);
       
-      // If no data exists yet, return a default object with currentWeek=1
-      // This provides better type consistency for the frontend
-      res.json(data || { currentWeek: 1 });
+      // Add a timestamp to help frontend prioritize data
+      const responseData = data ? 
+        { ...data, _serverTimestamp: new Date().getTime() } : 
+        { currentWeek: 1, _serverTimestamp: new Date().getTime() };
+      
+      // Add caching prevention headers
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      
+      // Return the data with timestamp
+      res.json(responseData);
     } catch (error) {
       console.error("Error fetching pregnancy data:", error);
       res.status(500).json({ message: "Failed to fetch pregnancy data" });
@@ -460,9 +470,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Generating baby development information for week ${week}`);
       const developmentInfo = await generateBabyDevelopment(week);
       
+      // Add timestamp for data prioritization
+      const enhancedData = {
+        ...updatedData,
+        _serverTimestamp: new Date().getTime(),
+        _updateType: 'combined'
+      };
+      
+      // Add caching prevention headers
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      
       // 7. Return combined response
       res.json({
-        pregnancyData: updatedData,
+        pregnancyData: enhancedData,
         babyDevelopment: developmentInfo,
         success: true
       });

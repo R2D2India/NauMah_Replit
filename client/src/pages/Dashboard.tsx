@@ -169,6 +169,7 @@ const Dashboard = () => {
   // For production, use local data if API fails or takes too long
   useEffect(() => {
     if (!pregnancyData && !isLoading && isProductionMode) {
+      // If we don't have server data, try to use local data
       const localData = localDataRef.current || getLocalPregnancyData();
       if (localData) {
         console.log("Using local storage data as fallback:", localData);
@@ -177,21 +178,27 @@ const Dashboard = () => {
         queryClient.setQueryData(["/api/pregnancy"], localData);
       }
     } else if (pregnancyData && isProductionMode) {
-      // When we have server data, store it locally for future use
-      const currentLocalData = getLocalPregnancyData();
+      // We have server data, check if we should use it or keep local data
+      const userSpecifiedData = getLocalPregnancyData();
       
-      // Only save server data if it's more recent than local data
-      // This prevents API calls from overwriting our manual updates
-      if (!currentLocalData || 
-          !updateStageMutation.isSuccess || 
-          currentLocalData.currentWeek === pregnancyData.currentWeek) {
-        console.log("Saving server pregnancy data to localStorage:", pregnancyData);
-        saveLocalPregnancyData(pregnancyData);
+      if (userSpecifiedData && userSpecifiedData._userSpecified === true) {
+        // User has explicitly set data, prioritize it over server data
+        console.log("Found user-specified pregnancy data, prioritizing it over server data");
+        
+        // Only use local data if it's different from server data
+        if (userSpecifiedData.currentWeek !== pregnancyData.currentWeek) {
+          console.log(`Using user-specified week ${userSpecifiedData.currentWeek} instead of server week ${pregnancyData.currentWeek}`);
+          setLoadingFromLocal(true);
+          // Update UI with user data
+          queryClient.setQueryData(["/api/pregnancy"], userSpecifiedData);
+        }
       } else {
-        console.log("Keeping local data as it's more recent than server data");
+        // No user-specified data, safe to use and cache server data
+        console.log("No user-specified data found, saving server data to localStorage:", pregnancyData);
+        saveLocalPregnancyData(pregnancyData);
       }
     }
-  }, [pregnancyData, isLoading, isProductionMode, updateStageMutation.isSuccess]);
+  }, [pregnancyData, isLoading, isProductionMode]);
   
   // Handle direct local update for production mode
   const handleManualFallback = () => {
@@ -218,11 +225,13 @@ const Dashboard = () => {
     const dueDate = new Date();
     dueDate.setDate(dueDate.getDate() + (40 - week) * 7);
     
-    // Create local pregnancy data with a timestamp to prevent API overwrites
+    // Create user-specified pregnancy data with additional metadata
     const localData = {
       currentWeek: week,
       dueDate: dueDate.toISOString(),
-      lastUpdated: new Date().toISOString()
+      lastUpdated: new Date().toISOString(),
+      _userSpecified: true, // Flag to identify user-specified data
+      _timestamp: new Date().getTime() // Timestamp for priority checking
     };
     
     // Save to localStorage as user-specified data (with highest priority)
