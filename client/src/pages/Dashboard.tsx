@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -10,6 +10,12 @@ import BabyDevelopment from "@/components/pregnancy/BabyDevelopment";
 import AdditionalFeatures from "@/components/pregnancy/AdditionalFeatures";
 import { WEEKS_OPTIONS, MONTHS_OPTIONS, TRIMESTER_OPTIONS } from "@/lib/constants";
 import { apiRequest, queryClient, appEvents, APP_EVENTS, STORAGE_KEYS } from "@/lib/queryClient";
+import { 
+  getLocalPregnancyData, 
+  saveLocalPregnancyData, 
+  getLocalBabyDevelopmentData,
+  saveLocalBabyDevelopmentData 
+} from "@/lib/localDataStore";
 
 const Dashboard = () => {
   const [, setLocation] = useLocation();
@@ -31,6 +37,68 @@ const Dashboard = () => {
 
   // Add state for baby development data from the combined endpoint
   const [combinedBabyDevelopment, setCombinedBabyDevelopment] = useState<any>(null);
+  // State to track if we're loading from local storage as a fallback
+  const [loadingFromLocal, setLoadingFromLocal] = useState(false);
+  // State to track if we should display a production mode message
+  const [isProductionMode, setIsProductionMode] = useState(false);
+  // Local pregnancy data reference
+  const localDataRef = useRef<PregnancyData | null>(null);
+  
+  // Check if we're in production mode on component mount
+  useEffect(() => {
+    const host = window.location.host;
+    // Check if we're in a deployed Replit environment
+    const isProduction = host.includes('.replit.app') || host.includes('.repl.co');
+    setIsProductionMode(isProduction);
+    
+    // If in production, immediately try to load local data
+    if (isProduction) {
+      const localData = getLocalPregnancyData();
+      if (localData) {
+        console.log("Production environment detected. Using local storage data:", localData);
+        localDataRef.current = localData;
+      }
+    }
+  }, []);
+
+  // For production, use local data if API fails or takes too long
+  useEffect(() => {
+    if (!pregnancyData && !isLoading && isProductionMode) {
+      const localData = localDataRef.current || getLocalPregnancyData();
+      if (localData) {
+        console.log("Using local storage data as fallback:", localData);
+        setLoadingFromLocal(true);
+        // Force a refresh of the pregnancy data
+        queryClient.setQueryData(["/api/pregnancy"], localData);
+      }
+    } else if (pregnancyData && isProductionMode) {
+      // When we have server data, store it locally for future use
+      saveLocalPregnancyData(pregnancyData);
+    }
+  }, [pregnancyData, isLoading, isProductionMode]);
+  
+  // Handle manual fallback for development/testing
+  const handleManualFallback = () => {
+    const week = stageValue ? parseInt(stageValue) : 17; // Default to week 17 if no selection
+    
+    // Create synthetic pregnancy data
+    const fallbackData = {
+      currentWeek: week,
+      dueDate: new Date(Date.now() + (40 - week) * 7 * 24 * 60 * 60 * 1000).toISOString()
+    };
+    
+    // Use client-side rendering only
+    saveLocalPregnancyData(fallbackData);
+    queryClient.setQueryData(["/api/pregnancy"], fallbackData);
+    setLoadingFromLocal(true);
+    
+    // Show notification
+    toast({
+      title: "Using local data mode",
+      description: "Updated pregnancy stage using local data mode for production compatibility.",
+      variant: "default"
+    });
+  };
   
   // Update pregnancy stage mutation using the new combined endpoint
   const updateStageMutation = useMutation({
@@ -62,6 +130,25 @@ const Dashboard = () => {
       
       // Use the pregnancy data from the combined response
       const updatedData = combinedData.pregnancyData || combinedData;
+      
+      // For production resilience, store in localStorage
+      if (isProductionMode) {
+        // Save pregnancy data to localStorage
+        if (updatedData) {
+          saveLocalPregnancyData(updatedData);
+          console.log("✅ Dashboard: Saved pregnancy data to localStorage for production resilience");
+        }
+        
+        // Save baby development data to localStorage
+        if (combinedData.babyDevelopment) {
+          const week = updatedData.currentWeek || parseInt(stageValue);
+          saveLocalBabyDevelopmentData(week, combinedData.babyDevelopment);
+          console.log(`✅ Dashboard: Saved baby development data for week ${week} to localStorage`);
+        }
+      }
+      
+      // Force immediate UI update
+      queryClient.setQueryData(["/api/pregnancy"], updatedData);
       
       // Force immediate refetch to get fresh data - still needed for other components
       refetch();
@@ -150,7 +237,35 @@ const Dashboard = () => {
       <div className="mb-8 text-center">
         <h1 className="text-3xl md:text-4xl font-montserrat font-bold text-primary mb-2">Baby & Me</h1>
         <p className="text-neutral-dark max-w-2xl mx-auto">Track your pregnancy journey and follow your baby's development week by week</p>
+        
+        {/* Production mode indicator with fallback option */}
+        {isProductionMode && (
+          <div className="mt-2 inline-flex items-center py-1 px-3 text-sm bg-blue-50 text-blue-700 rounded-full">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Deployed Mode{loadingFromLocal && " (using local data)"}
+          </div>
+        )}
       </div>
+      
+      {/* Local data indicator */}
+      {loadingFromLocal && (
+        <div className="bg-amber-50 border-l-4 border-amber-500 p-4 mb-6 rounded-lg">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-amber-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-amber-700">
+                Using cached data for stability. Your latest changes are stored locally and will sync when possible.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Pregnancy Stage Selector */}
       <div className="bg-white rounded-xl p-6 mb-8 shadow-md border-l-4 border-primary">
@@ -209,21 +324,39 @@ const Dashboard = () => {
             </Select>
           </div>
 
-          <Button 
-            onClick={handleSubmit}
-            disabled={!stageValue || updateStageMutation.isPending}
-            className="px-6"
-          >
-            {updateStageMutation.isPending ? (
-              <span className="flex items-center">
-                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          <div className="flex flex-wrap gap-2">
+            <Button 
+              onClick={handleSubmit}
+              disabled={!stageValue || updateStageMutation.isPending}
+              className="px-6"
+            >
+              {updateStageMutation.isPending ? (
+                <span className="flex items-center">
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Updating...
+                </span>
+              ) : "Update Stage"}
+            </Button>
+            
+            {/* Production fallback mode button */}
+            {(isProductionMode || window.location.hostname === 'localhost') && (
+              <Button 
+                onClick={handleManualFallback}
+                disabled={!stageValue}
+                variant="outline"
+                className="px-3"
+                title="Use this in production if regular updates aren't working"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
-                Updating...
-              </span>
-            ) : "Update Stage"}
-          </Button>
+                Local Update
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 

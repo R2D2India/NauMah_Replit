@@ -1,203 +1,200 @@
-import { BABY_SIZE_COMPARISONS } from "@/lib/constants";
-import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-import { Loader2, AlertTriangle, InfoIcon } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { getLocalBabyDevelopmentData, saveLocalBabyDevelopmentData } from "@/lib/localDataStore";
 import { useOpenAIStatus } from "@/hooks/use-openai-status";
-import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card } from "@/components/ui/card";
 
 interface BabyDevelopmentProps {
   currentWeek: number;
-  preloadedData?: any; // For data from combined endpoint
+  preloadedData?: any; // Data from combined API call
 }
 
-interface MilestoneData {
+interface BabyDevelopmentData {
   description: string;
   keyDevelopments: string[];
   funFact?: string;
   size?: string;
   imageDescription?: string;
+  week: number;
 }
 
 const BabyDevelopment = ({ currentWeek, preloadedData }: BabyDevelopmentProps) => {
-  // State to store combined data if provided
-  const [combinedData, setCombinedData] = useState<MilestoneData | null>(null);
+  const [babyData, setBabyData] = useState<BabyDevelopmentData | null>(null);
+  const [loadingFromLocal, setLoadingFromLocal] = useState(false);
+  const [isProductionMode, setIsProductionMode] = useState(false);
   
-  // Use state to track if we should use AI-generated content
-  const [useAIContent, setUseAIContent] = useState(false);
+  // Check if OpenAI is available
+  const { isAvailable: isAIAvailable } = useOpenAIStatus();
   
-  // Check if OpenAI integration is available
-  const { isAvailable: isOpenAIAvailable, isLoading: checkingOpenAI } = useOpenAIStatus();
+  // Detect if we're in production environment
+  useEffect(() => {
+    const host = window.location.host;
+    // Check if we're in a deployed Replit environment
+    const isProduction = host.includes('.replit.app') || host.includes('.repl.co');
+    setIsProductionMode(isProduction);
+    
+    // If in production, try to use preloaded data first, then local storage data
+    if (isProduction) {
+      if (preloadedData) {
+        console.log(`Using preloaded baby development data for week ${currentWeek}`);
+        setBabyData(preloadedData);
+      } else {
+        const localData = getLocalBabyDevelopmentData(currentWeek);
+        if (localData) {
+          console.log(`Using local storage baby development data for week ${currentWeek}`);
+          setBabyData(localData);
+          setLoadingFromLocal(true);
+        }
+      }
+    }
+  }, [currentWeek, preloadedData]);
   
-  // Get baby size for current week from constants (fallback)
-  const babySize = BABY_SIZE_COMPARISONS.find(item => item.week === currentWeek) || 
-                  BABY_SIZE_COMPARISONS[0]; // Default to first week if not found
-  
-  // Store preloaded data when it changes
+  // If we have preloaded data, use it and save to localStorage
   useEffect(() => {
     if (preloadedData) {
-      console.log("Using preloaded baby development data:", preloadedData);
-      setCombinedData(preloadedData);
+      console.log("BabyDevelopment: Using preloaded data from combined API call");
+      setBabyData(preloadedData);
+      
+      if (isProductionMode) {
+        saveLocalBabyDevelopmentData(currentWeek, preloadedData);
+        console.log(`Saved baby development data for week ${currentWeek} to localStorage`);
+      }
     }
-  }, [preloadedData]);
-                  
-  // Fetch dynamic baby development information from the API only if we don't have preloaded data
+  }, [preloadedData, currentWeek, isProductionMode]);
+  
+  // Fetch baby development data from API if needed
   const { 
-    data: aiMilestones, 
+    data: apiData, 
     isLoading, 
-    isError, 
-    error 
-  } = useQuery<MilestoneData>({
-    queryKey: ["/api/baby-development", currentWeek],
-    queryFn: async () => {
-      if (!useAIContent) return null;
-      
-      // Skip API call if we have combined data
-      if (combinedData) {
-        console.log("Using already loaded development data from combined endpoint");
-        return combinedData;
-      }
-      
-      // Add cache-busting parameter for production environments
-      const timestamp = new Date().getTime();
-      console.log(`Making direct API call to baby-development endpoint for week ${currentWeek}`);
-      const response = await fetch(`/api/baby-development/${currentWeek}?t=${timestamp}`, {
-        headers: {
-          'Cache-Control': 'no-cache, no-store',
-          'Pragma': 'no-cache'
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error("Failed to fetch baby development data");
-      }
-      return response.json();
-    },
-    enabled: useAIContent && (isOpenAIAvailable || !checkingOpenAI) && !combinedData, // Only if no combined data
-    retry: 2, // Retry failed requests twice
-    retryDelay: 1000 // Wait 1 second between retries
+    isError 
+  } = useQuery<BabyDevelopmentData>({
+    queryKey: ["/api/baby-development", currentWeek.toString()],
+    enabled: !babyData && isAIAvailable && !loadingFromLocal,
+    staleTime: 1000 * 60 * 60 * 24, // 1 day
   });
   
-  // Set useAIContent to true after component mounts and OpenAI status is checked
+  // Update local state when API data is received
   useEffect(() => {
-    if (!checkingOpenAI) {
-      setUseAIContent(true);
-      if (!combinedData) {
-        console.log(`BabyDevelopment: Requesting AI data for week ${currentWeek}`);
+    if (apiData && !babyData) {
+      console.log("BabyDevelopment: Setting data from API response");
+      setBabyData(apiData);
+      
+      if (isProductionMode) {
+        saveLocalBabyDevelopmentData(currentWeek, apiData);
+        console.log(`Saved baby development data for week ${currentWeek} to localStorage`);
       }
     }
-  }, [currentWeek, checkingOpenAI, combinedData]);
+  }, [apiData, babyData, currentWeek, isProductionMode]);
   
-  // Determine the milestone data to display (priority: combinedData > aiMilestones > fallback)
-  const milestones: MilestoneData = combinedData || aiMilestones || {
-    description: "Your baby is continuing to grow and develop this week. Check back soon for more specific information.",
-    keyDevelopments: ["Development information is being generated", "Please check back in a moment"],
-    funFact: "Every baby develops at their own pace, and the information provided is a general guideline."
-  };
-
-  // Use AI-provided size if available, otherwise use the value from constants
-  const displaySize = (aiMilestones?.size) || babySize.size;
+  // If preloaded data doesn't match current week, get data for current week from API or localStorage
+  useEffect(() => {
+    if (preloadedData?.week !== currentWeek) {
+      console.log(`BabyDevelopment: Preloaded data week ${preloadedData?.week} doesn't match current week ${currentWeek}`);
+      
+      // Try localStorage first
+      const localData = getLocalBabyDevelopmentData(currentWeek);
+      if (localData) {
+        console.log(`Using local storage baby development data for week ${currentWeek}`);
+        setBabyData(localData);
+        setLoadingFromLocal(true);
+      } else if (isAIAvailable) {
+        // If no local data, make direct API call
+        console.log("BabyDevelopment: Requesting AI data for week", currentWeek);
+        console.log("Making direct API call to baby-development endpoint for week", currentWeek);
+        
+        // Reset data to trigger a new query
+        setBabyData(null);
+        setLoadingFromLocal(false);
+      }
+    }
+  }, [currentWeek, preloadedData, isAIAvailable]);
+  
+  // If we're still loading or have an error without backup data
+  if ((isLoading || isError) && !babyData) {
+    return (
+      <div className="mb-8">
+        <h2 className="text-2xl font-montserrat font-bold text-primary mb-6 flex items-center">
+          <span className="bg-primary/10 p-2 rounded-full mr-3">
+            <i className="fas fa-baby text-primary"></i>
+          </span>
+          Baby Development - Week {currentWeek}
+        </h2>
+        
+        <Card className="p-6">
+          <div className="space-y-4">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-4 w-4/5" />
+            <Skeleton className="h-4 w-2/3" />
+            
+            <div className="pt-4">
+              <Skeleton className="h-6 w-40 mb-2" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-4/5" />
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+  
+  const developmentData = babyData || apiData;
   
   return (
-    <div className="mb-8">
-      <div className="bg-white rounded-xl p-6 shadow-md border border-primary/10">
-        {/* Section Header */}
-        <div className="mb-6">
-          <h2 className="text-2xl font-montserrat font-bold text-primary flex items-center">
-            <span className="bg-primary/10 p-2 rounded-full mr-3">
-              <i className="fas fa-baby text-primary"></i>
-            </span>
-            Your Baby's Development
-          </h2>
-          <p className="text-neutral-dark mt-1 ml-11">Track how your baby is growing week by week</p>
-        </div>
+    <div className="mb-8" id="baby-development-section">
+      <div className="flex flex-wrap justify-between items-center mb-4">
+        <h2 className="text-2xl font-montserrat font-bold text-primary flex items-center">
+          <span className="bg-primary/10 p-2 rounded-full mr-3">
+            <i className="fas fa-baby text-primary"></i>
+          </span>
+          Baby Development - Week {currentWeek}
+        </h2>
         
-        {isLoading ? (
-          <div className="flex justify-center items-center py-10">
-            <div className="text-center">
-              <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
-              <p className="text-neutral-dark">Loading baby development information...</p>
-            </div>
-          </div>
-        ) : isError ? (
-          <div className="bg-red-50 text-red-700 p-4 rounded-lg border border-red-200 mb-4">
-            <h3 className="font-bold mb-2 flex items-center">
-              <i className="fas fa-exclamation-circle mr-2"></i>
-              Error Loading Development Data
-            </h3>
-            <p className="text-sm">We couldn't load the latest development information. Using saved information instead.</p>
-            <p className="text-xs mt-2 text-red-500">{error instanceof Error ? error.message : "Unknown error"}</p>
-          </div>
-        ) : (
-          <div className="flex flex-col md:flex-row items-start gap-8">
-            <div className="md:w-1/2 mb-6 md:mb-0">
-              {/* Enhanced image container with subtle decoration */}
-              <div className="relative">
-                <div className="absolute -top-4 -left-4 w-16 h-16 bg-primary/10 rounded-full z-0"></div>
-                <div className="relative z-10 bg-white p-2 rounded-xl shadow-md border border-gray-100">
-                  <img 
-                    src="https://images.unsplash.com/photo-1610122748280-d0ae76b10750?w=500&auto=format&fit=crop&q=60" 
-                    alt="Baby Development Stage" 
-                    className="w-full rounded-lg h-80 object-cover"
-                  />
-                </div>
-                <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-primary/5 rounded-full z-0"></div>
-              </div>
-            </div>
-            
-            <div className="md:w-1/2">
-              <div className="flex items-center mb-4">
-                <div className="relative mr-4">
-                  <div className="rounded-lg shadow-md flex items-center justify-center bg-gradient-to-br from-neutral-light to-white h-[180px] w-[180px] text-center border border-gray-100">
-                    <div className="flex flex-col items-center">
-                      <span className="text-7xl mb-3" aria-hidden="true">{babySize.image}</span>
-                      <span className="text-lg font-montserrat font-medium text-primary">Week {currentWeek}</span>
-                    </div>
-                  </div>
-                  <div className="absolute -bottom-3 right-1/2 transform translate-x-1/2 bg-primary text-white rounded-full px-4 py-1 shadow-md">
-                    <span className="font-montserrat font-medium text-sm">Size: {displaySize}</span>
-                  </div>
-                </div>
-                
-                <div className="flex-1">
-                  <h3 className="text-xl font-montserrat font-bold text-primary-dark mb-2">Your Baby This Week</h3>
-                  <p className="text-neutral-dark text-sm leading-relaxed">{milestones.description}</p>
-                </div>
-              </div>
-
-              <div className="bg-neutral-light/80 rounded-lg p-5 shadow-sm border border-primary/5 mt-6">
-                <h3 className="font-montserrat font-bold text-lg mb-3 text-primary-dark flex items-center">
-                  <i className="fas fa-list-check text-primary mr-2"></i>
-                  Key Developments
-                </h3>
-                <ul className="space-y-3">
-                  {milestones.keyDevelopments.map((development, index) => (
-                    <li key={index} className="flex items-start">
-                      <div className="h-5 w-5 rounded-full bg-primary/10 flex-shrink-0 flex items-center justify-center text-primary mr-3 mt-0.5">
-                        <i className="fas fa-check text-xs"></i>
-                      </div>
-                      <span className="text-neutral-dark">{development}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {'funFact' in milestones && milestones.funFact && (
-                <div className="mt-4 bg-primary/5 rounded-lg p-4 border border-primary/10">
-                  <div className="flex items-start">
-                    <i className="fas fa-lightbulb text-primary text-lg mt-1 mr-3"></i>
-                    <p className="text-neutral-dark italic">{milestones.funFact}</p>
-                  </div>
-                </div>
-              )}
-              
-              {aiMilestones && (
-                <div className="mt-4 text-xs text-right text-neutral-400">
-                  <p>AI-generated content for Week {currentWeek}</p>
-                </div>
-              )}
-            </div>
-          </div>
+        {loadingFromLocal && (
+          <span className="text-xs text-orange-600 flex items-center bg-orange-50 py-1 px-2 rounded-full">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Cached data
+          </span>
         )}
+      </div>
+      
+      <div className="bg-white rounded-xl overflow-hidden shadow-md">
+        <div className="p-6">
+          <p className="text-neutral-dark mb-6 leading-relaxed">
+            {developmentData?.description || "Information not available for this week. Please try updating your pregnancy stage again."}
+          </p>
+          
+          {developmentData?.keyDevelopments && developmentData.keyDevelopments.length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-xl font-bold text-primary mb-3">Key Developments This Week</h3>
+              <ul className="list-disc pl-5 space-y-2 text-neutral-dark">
+                {developmentData.keyDevelopments.map((development, index) => (
+                  <li key={index} className="leading-relaxed">{development}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          
+          {developmentData?.funFact && (
+            <div className="bg-blue-50 p-4 rounded-lg mb-6">
+              <h3 className="text-lg font-bold text-blue-700 mb-2">Fun Fact</h3>
+              <p className="text-blue-700">{developmentData.funFact}</p>
+            </div>
+          )}
+          
+          {developmentData?.size && (
+            <div className="bg-primary/5 p-4 rounded-lg">
+              <h3 className="text-lg font-bold text-primary mb-2">Size Comparison</h3>
+              <p className="text-neutral-dark">{developmentData.size}</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
