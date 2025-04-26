@@ -230,6 +230,7 @@ export function setupAuth(app: Express) {
       try {
         const { sendWelcomeEmail } = await import('./email');
         await sendWelcomeEmail({
+          id: newUser.id,
           email: newUser.email,
           firstName: newUser.firstName,
           lastName: newUser.lastName,
@@ -351,6 +352,7 @@ export function setupAuth(app: Express) {
       // Send password reset email
       try {
         const { sendEmail, NAUMAH_SUPPORT_EMAIL } = await import('./email');
+        const { storage } = await import('./storage');
         
         // Determine the appropriate app URL
         const appUrl = process.env.APP_URL || 'https://naumah.com';
@@ -459,12 +461,35 @@ export function setupAuth(app: Express) {
           </html>
         `;
         
-        await sendEmail({
+        // Track email sending attempt
+        await storage.trackEmail({
+          userId: user.id,
+          emailType: 'password-reset',
+          emailTo: user.email,
+          emailFrom: NAUMAH_SUPPORT_EMAIL,
+          subject: subject,
+          status: 'pending',
+          statusDetails: 'Password reset email sending initiated'
+        });
+        
+        // Send the email
+        const result = await sendEmail({
           to: user.email,
-          from: 'info@sendgrid.net',
+          from: NAUMAH_SUPPORT_EMAIL,
           replyTo: NAUMAH_SUPPORT_EMAIL,
           subject,
           html
+        });
+        
+        // Track the result
+        await storage.trackEmail({
+          userId: user.id,
+          emailType: 'password-reset',
+          emailTo: user.email,
+          emailFrom: NAUMAH_SUPPORT_EMAIL,
+          subject: subject,
+          status: result ? 'sent' : 'failed',
+          statusDetails: result ? 'Password reset email sent successfully' : 'Failed to send password reset email'
         });
         
         console.log(`Password reset email sent to ${user.email}`);
@@ -472,6 +497,22 @@ export function setupAuth(app: Express) {
         // Log error but don't fail the password reset request
         console.error("Error sending password reset email:", emailError);
         console.log(`Password reset link: ${process.env.APP_URL || 'https://naumah.com'}/auth?token=${token}`);
+        
+        // Track the error
+        try {
+          const { storage } = await import('./storage');
+          await storage.trackEmail({
+            userId: user.id,
+            emailType: 'password-reset',
+            emailTo: user.email,
+            emailFrom: NAUMAH_SUPPORT_EMAIL,
+            subject: 'Reset Your NauMah Password',
+            status: 'failed',
+            statusDetails: `Error: ${emailError.message || 'Unknown error'}`
+          });
+        } catch (trackError) {
+          console.error("Error tracking password reset email failure:", trackError);
+        }
       }
 
       return res.status(200).json({ message: "Password reset email sent if account exists" });

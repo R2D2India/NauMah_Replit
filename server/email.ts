@@ -83,6 +83,7 @@ export async function sendWaitlistNotification(
  */
 export async function sendWelcomeEmail(
   user: { 
+    id: number;
     email: string; 
     firstName?: string | null; 
     lastName?: string | null;
@@ -90,9 +91,9 @@ export async function sendWelcomeEmail(
   }
 ): Promise<boolean> {
   const userName = user.firstName || user.username;
-  const subject = 'Welcome to NauMah - Your Pregnancy Companion';
+  const subject = '💛 Pregnancy Made Beautiful, Safe, and Joyful — Welcome to NauMah !';
   
-  // Create a beautiful and responsive HTML email template
+  // Create the HTML email template using the provided design
   const html = `
 <!DOCTYPE html>
 <html lang="en">
@@ -114,11 +115,9 @@ export async function sendWelcomeEmail(
       padding: 20px;
     }
     .header {
-      background: linear-gradient(135deg, #FF8080 0%, #FF4D4D 100%);
-      color: white;
-      padding: 30px;
+      color: #FF4D4D;
+      padding: 20px;
       text-align: center;
-      border-radius: 10px 10px 0 0;
     }
     .content {
       background-color: #ffffff;
@@ -132,59 +131,48 @@ export async function sendWelcomeEmail(
       text-align: center;
       font-size: 12px;
       color: #777;
-      border-radius: 0 0 10px 10px;
-      border: 1px solid #eeeeee;
+      border-bottom: 1px solid #eeeeee;
+      border-left: 1px solid #eeeeee;
+      border-right: 1px solid #eeeeee;
     }
     h1 {
-      color: #ffffff;
-      margin: 0;
-      font-size: 28px;
-    }
-    h2 {
       color: #FF4D4D;
-      font-size: 22px;
+      margin: 0;
+      font-size: 24px;
     }
-    .logo {
-      margin-bottom: 20px;
-      width: 120px;
-      height: auto;
+    p {
+      margin: 10px 0;
     }
-    .btn {
-      display: inline-block;
-      background-color: #FF4D4D;
-      color: white;
-      text-decoration: none;
-      padding: 12px 25px;
-      border-radius: 25px;
-      margin: 20px 0;
+    .emoji {
+      font-size: 18px;
+    }
+    .highlight {
+      color: #FF4D4D;
       font-weight: bold;
-      text-align: center;
     }
-    .features {
-      margin: 30px 0;
+    .mission-list {
+      margin: 20px 0;
     }
-    .feature {
-      margin-bottom: 15px;
+    .mission-item {
+      margin-bottom: 10px;
       padding-left: 25px;
       position: relative;
     }
-    .feature:before {
-      content: "•";
+    .mission-item:before {
+      content: "🌟";
       position: absolute;
       left: 0;
-      color: #FF4D4D;
-      font-size: 20px;
     }
-    .social-links {
-      margin-top: 20px;
-    }
-    .social-link {
-      margin: 0 10px;
-      text-decoration: none;
+    .support-info {
+      margin-top: 30px;
+      padding: 15px;
+      background-color: #f9f9f9;
+      border-radius: 5px;
     }
     @media screen and (max-width: 480px) {
-      .header, .content, .footer {
-        padding: 15px;
+      .container {
+        width: 100%;
+        padding: 10px;
       }
     }
   </style>
@@ -192,45 +180,91 @@ export async function sendWelcomeEmail(
 <body>
   <div class="container">
     <div class="header">
-      <h1>Welcome to NauMah!</h1>
+      <h1>💛 Pregnancy Made Beautiful, Safe, and Joyful — Welcome to NauMah !</h1>
     </div>
     <div class="content">
-      <h2>Hi ${userName},</h2>
-      <p>Thank you for joining NauMah, your dedicated pregnancy companion. We're excited to be part of your beautiful journey into motherhood.</p>
+      <p>Dear ${userName},</p>
       
-      <a href="https://naumah.com/dashboard" class="btn">Go to Your Dashboard</a>
+      <p>Congratulations and welcome to NauMah – your trusted companion for the extraordinary journey ahead! <span class="emoji">🌸</span></p>
       
-      <h2>Here's what NauMah offers:</h2>
-      <div class="features">
-        <div class="feature">AI-powered assistance for all your pregnancy questions</div>
-        <div class="feature">Advanced mood tracking to understand your emotional well-being</div>
-        <div class="feature">Food and medication safety checker for peace of mind</div>
-        <div class="feature">Personalized pregnancy journal to document your journey</div>
-        <div class="feature">Weekly updates on your baby's development</div>
+      <p>At NauMah, we believe that pregnancy should be a time of joy, confidence, and celebration — not stress. The name NauMah comes from two Hindi words — "Nau" (Nine) and "Mah" (Months) — symbolizing the nine incredible months that bring a new life into the world.</p>
+      
+      <p>With the power of advanced AI technology, we're here to support you every step of the way — offering personalized insights, timely reminders, and round-the-clock assistance, tailored just for you.</p>
+      
+      <p><strong>Our Mission at NauMah AI Technologies:</strong></p>
+      <div class="mission-list">
+        <div class="mission-item">Empower expectant mothers with personalized, week-by-week guidance.</div>
+        <div class="mission-item">Make pregnancy journeys safer, happier, and better informed.</div>
+        <div class="mission-item">Provide 24/7 AI-powered pregnancy support — whenever you need it.</div>
+        <div class="mission-item">Be your trusted partner through the beautiful, life-changing journey of motherhood.</div>
       </div>
       
-      <p>We recommend starting with a quick tour of your dashboard to understand all the features available to you. You can also customize your profile and pregnancy details for a more personalized experience.</p>
+      <p>You're not alone in this journey. With NauMah, you have a loving, intelligent support system at your fingertips — making every moment memorable, meaningful, and magical. <span class="emoji">💛</span></p>
       
-      <p>If you have any questions or need assistance, please don't hesitate to reply to this email or reach out to our support team.</p>
+      <div class="support-info">
+        <p><strong>Have questions or need assistance?</strong></p>
+        <p>Write to us anytime at <a href="mailto:${NAUMAH_SUPPORT_EMAIL}">${NAUMAH_SUPPORT_EMAIL}</a> — we're always here for you!</p>
+      </div>
       
-      <p>Wishing you a healthy and joyful pregnancy journey,</p>
-      <p><strong>The NauMah Team</strong></p>
+      <p>Warm wishes,<br>Team NauMah<br>Your AI Companion for a Beautiful 9-Month Journey</p>
     </div>
     <div class="footer">
-      <p>This email was sent to ${user.email}</p>
-      <p>&copy; ${new Date().getFullYear()} NauMah. All rights reserved.</p>
-      <p>For assistance, contact us at <a href="mailto:${NAUMAH_SUPPORT_EMAIL}">${NAUMAH_SUPPORT_EMAIL}</a></p>
+      <p>© ${new Date().getFullYear()} NauMah AI Technologies. All rights reserved.</p>
     </div>
   </div>
 </body>
 </html>
   `;
   
-  return sendEmail({
-    to: user.email,
-    from: SENDGRID_SENDER,
-    replyTo: NAUMAH_SUPPORT_EMAIL,
-    subject,
-    html
+  // Track the email sending attempt
+  const { storage } = await import('./storage');
+  
+  // First log that we're about to send the email
+  await storage.trackEmail({
+    userId: user.id,
+    emailType: 'welcome',
+    emailTo: user.email,
+    emailFrom: NAUMAH_SUPPORT_EMAIL,
+    subject: subject,
+    status: 'pending',
+    statusDetails: 'Email sending initiated'
   });
+  
+  try {
+    // Send email using SendGrid
+    const result = await sendEmail({
+      to: user.email,
+      from: NAUMAH_SUPPORT_EMAIL, // Use the NauMah support email as sender
+      replyTo: NAUMAH_SUPPORT_EMAIL,
+      subject,
+      html
+    });
+    
+    // Track the result
+    await storage.trackEmail({
+      userId: user.id,
+      emailType: 'welcome',
+      emailTo: user.email,
+      emailFrom: NAUMAH_SUPPORT_EMAIL,
+      subject: subject,
+      status: result ? 'sent' : 'failed',
+      statusDetails: result ? 'Email sent successfully' : 'Failed to send email'
+    });
+    
+    return result;
+  } catch (error: any) {
+    // Track the error
+    await storage.trackEmail({
+      userId: user.id,
+      emailType: 'welcome',
+      emailTo: user.email,
+      emailFrom: NAUMAH_SUPPORT_EMAIL,
+      subject: subject,
+      status: 'failed',
+      statusDetails: `Error: ${error.message || 'Unknown error'}`
+    });
+    
+    console.error('Error sending welcome email:', error);
+    return false;
+  }
 }

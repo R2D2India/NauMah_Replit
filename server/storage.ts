@@ -86,6 +86,18 @@ export class MemStorage implements IStorage {
   private appointments: Map<number, Appointment[]>; // userId -> entries
   private supportMessages: SupportMessage[]; // all support messages
   private journalEntries: Map<number, JournalEntry[]>; // userId -> entries
+  private emailTracking: Map<number, { 
+    id: number; 
+    userId: number; 
+    emailType: string; 
+    emailTo: string; 
+    emailFrom: string; 
+    subject: string; 
+    status: string; 
+    statusDetails?: string;
+    sentAt: Date; 
+    updatedAt: Date; 
+  }[]>; // userId -> email tracking entries
   private currentId: number;
   private pregnancyDataId: number;
   private moodEntryId: number;
@@ -95,6 +107,7 @@ export class MemStorage implements IStorage {
   private appointmentId: number;
   private supportMessageId: number;
   private journalEntryId: number;
+  private emailTrackingId: number;
 
   private passwordResetTokens: Map<number, { id: number; userId: number; token: string; expiresAt: Date; isUsed: boolean; createdAt: Date }>;
   private passwordResetTokenId: number;
@@ -109,6 +122,7 @@ export class MemStorage implements IStorage {
     this.appointments = new Map();
     this.supportMessages = [];
     this.journalEntries = new Map();
+    this.emailTracking = new Map();
     this.passwordResetTokens = new Map();
     this.currentId = 1;
     this.pregnancyDataId = 1;
@@ -119,6 +133,7 @@ export class MemStorage implements IStorage {
     this.appointmentId = 1;
     this.supportMessageId = 1;
     this.journalEntryId = 1;
+    this.emailTrackingId = 1;
     this.passwordResetTokenId = 1;
   }
 
@@ -475,6 +490,58 @@ export class MemStorage implements IStorage {
     };
     
     return this.supportMessages[index];
+  }
+  
+  // Email tracking methods
+  async trackEmail(entry: { 
+    userId: number; 
+    emailType: string; 
+    emailTo: string;
+    emailFrom: string;
+    subject: string;
+    status: string;
+    statusDetails?: string 
+  }): Promise<any> {
+    const id = this.emailTrackingId++;
+    const now = new Date();
+    
+    const trackingEntry = {
+      id,
+      userId: entry.userId,
+      emailType: entry.emailType,
+      emailTo: entry.emailTo,
+      emailFrom: entry.emailFrom,
+      subject: entry.subject,
+      status: entry.status,
+      statusDetails: entry.statusDetails,
+      sentAt: now,
+      updatedAt: now
+    };
+    
+    // Initialize array if it doesn't exist
+    if (!this.emailTracking.has(entry.userId)) {
+      this.emailTracking.set(entry.userId, []);
+    }
+    
+    // Add entry to array
+    const entries = this.emailTracking.get(entry.userId)!;
+    entries.push(trackingEntry);
+    
+    return trackingEntry;
+  }
+  
+  async getEmailTrackingByUser(userId: number): Promise<any[]> {
+    return this.emailTracking.get(userId) || [];
+  }
+  
+  async getAllEmailTracking(): Promise<any[]> {
+    const allTracking: any[] = [];
+    this.emailTracking.forEach((userTracking) => {
+      allTracking.push(...userTracking);
+    });
+    
+    // Sort by sent date, newest first
+    return allTracking.sort((a, b) => b.sentAt.getTime() - a.sentAt.getTime());
   }
 
   // Journal entries methods
