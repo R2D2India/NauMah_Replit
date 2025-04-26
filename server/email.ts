@@ -9,8 +9,9 @@ if (!process.env.SENDGRID_API_KEY) {
 
 // NAUMAH support email address for replies
 export const NAUMAH_SUPPORT_EMAIL = 'asknaumah@gmail.com';
-// SendGrid verified sender email
-const SENDGRID_SENDER = 'info@sendgrid.net';
+// SendGrid verified sender email - Must be verified in SendGrid dashboard
+// This will need to be replaced with an actual verified sender from your SendGrid account
+const SENDGRID_VERIFIED_SENDER = 'no-reply@example.com';
 
 interface EmailOptions {
   to: string;
@@ -42,13 +43,17 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
   try {
     console.log('🔍 DEBUG: Using SendGrid API Key:', process.env.SENDGRID_API_KEY.substring(0, 5) + '...');
     
-    // Check if the sender domain is verified with SendGrid
-    if (options.from !== NAUMAH_SUPPORT_EMAIL && options.from !== SENDGRID_SENDER) {
-      console.warn(`🔍 DEBUG: Using non-standard sender email: ${options.from}. This domain may not be verified with SendGrid.`);
-      // Use a verified sender
-      options.from = NAUMAH_SUPPORT_EMAIL;
-      console.log(`🔍 DEBUG: Switched to verified sender: ${options.from}`);
-    }
+    // Always use the verified sender, regardless of what was passed
+  const originalSender = options.from;
+  console.log(`🔍 DEBUG: Original sender email: ${originalSender}`);
+  options.from = SENDGRID_VERIFIED_SENDER; // Always use the verified sender
+  console.log(`🔍 DEBUG: Using verified sender: ${options.from}`);
+  
+  // Add the original sender as a reply-to if not already set
+  if (!options.replyTo && originalSender !== SENDGRID_VERIFIED_SENDER) {
+    options.replyTo = NAUMAH_SUPPORT_EMAIL;
+    console.log(`🔍 DEBUG: Set reply-to address: ${options.replyTo}`);
+  }
     
     const result = await sgMail.send({
       to: options.to,
@@ -102,7 +107,7 @@ export async function sendWaitlistNotification(
   
   return sendEmail({
     to: recipientEmail,
-    from: SENDGRID_SENDER,
+    from: SENDGRID_VERIFIED_SENDER,
     subject,
     html
   });
@@ -261,11 +266,11 @@ export async function sendWelcomeEmail(
   });
   
   try {
-    // Send email using SendGrid
+    // Send email using SendGrid with verified sender
     const result = await sendEmail({
       to: user.email,
-      from: NAUMAH_SUPPORT_EMAIL, // Use the NauMah support email as sender
-      replyTo: NAUMAH_SUPPORT_EMAIL,
+      from: SENDGRID_VERIFIED_SENDER, // Use the verified sender
+      replyTo: NAUMAH_SUPPORT_EMAIL, // But set reply-to as our support email
       subject,
       html
     });
