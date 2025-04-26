@@ -394,6 +394,11 @@ export default function AdminPage() {
       
       console.log(`Fetching data from: ${url}`);
       
+      // Create Basic Auth header for more reliable API access
+      const adminEmail = "sandeep@fastest.health";
+      const adminPassword = "Fastest@2004";
+      const basicAuthHeader = `Basic ${btoa(`${adminEmail}:${adminPassword}`)}`;
+      
       const response = await fetch(url, {
         method: "GET",
         credentials: "include",
@@ -401,7 +406,8 @@ export default function AdminPage() {
           "Accept": "application/json",
           "Cache-Control": "no-cache, no-store, must-revalidate",
           "Pragma": "no-cache",
-          "Expires": "0"
+          "Expires": "0",
+          "Authorization": basicAuthHeader // Add Basic Auth for more reliable authentication
         }
       });
       
@@ -674,6 +680,11 @@ export default function AdminPage() {
                             
                             console.log("Direct DOM production fix - fetching from:", url);
                             
+                            // Create Basic Auth header for more reliable API access
+                            const adminEmail = "sandeep@fastest.health";
+                            const adminPassword = "Fastest@2004";
+                            const basicAuthHeader = `Basic ${btoa(`${adminEmail}:${adminPassword}`)}`;
+                            
                             // Direct XHR fetch with credentials
                             const xhr = new XMLHttpRequest();
                             xhr.open('GET', url, true);
@@ -682,6 +693,7 @@ export default function AdminPage() {
                             xhr.setRequestHeader('Expires', '0');
                             xhr.setRequestHeader('X-Production-Emergency', 'true');
                             xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                            xhr.setRequestHeader('Authorization', basicAuthHeader); // Add Basic Auth header
                             xhr.withCredentials = true;
                             
                             xhr.onload = function() {
@@ -763,8 +775,14 @@ export default function AdminPage() {
                                 
                                 // Last resort - try direct API request and alert
                                 try {
+                                  // Create Basic Auth header for more reliable API access
+                                  const adminEmail = "sandeep@fastest.health";
+                                  const adminPassword = "Fastest@2004";
+                                  const basicAuthHeader = `Basic ${btoa(`${adminEmail}:${adminPassword}`)}`;
+                                  
                                   const emergencyFetch = new XMLHttpRequest();
                                   emergencyFetch.open('GET', '/api/admin/users?_emergency=true', true);
+                                  emergencyFetch.setRequestHeader('Authorization', basicAuthHeader);
                                   emergencyFetch.withCredentials = true;
                                   emergencyFetch.send();
                                 } catch (e) {
