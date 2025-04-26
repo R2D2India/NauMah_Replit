@@ -780,17 +780,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.log("Admin session check - Session ID:", req.sessionID);
     console.log("Admin session check - Session data:", req.session);
     
+    // Add cache prevention headers
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    
     if (req.session && req.session.isAdmin) {
       console.log("Admin session is valid, returning admin data");
       return res.status(200).json({ 
         isAdmin: true,
-        email: req.session.adminEmail
+        email: req.session.adminEmail,
+        timestamp: new Date().toISOString() // Add timestamp to help client detect stale data
       });
     }
     
     console.log("Admin session check failed - not an admin");
     return res.status(200).json({ 
-      isAdmin: false 
+      isAdmin: false,
+      timestamp: new Date().toISOString()
     });
   });
   
@@ -848,7 +855,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/admin/users", adminAuth, async (req: Request, res: Response) => {
     try {
+      console.log("Admin request: Fetching user data");
+      
+      // Add caching prevention headers 
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      
+      // Fetch user data from database
       const users = await db.select().from(schema.users);
+      console.log(`Admin request: Found ${users.length} users`);
+      
       res.json(users);
     } catch (error) {
       console.error("Error getting users:", error);
@@ -858,7 +875,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/admin/pregnancy-data", adminAuth, async (req: Request, res: Response) => {
     try {
+      console.log("Admin request: Fetching pregnancy data");
+      
+      // Add caching prevention headers
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      
       const data = await db.select().from(schema.pregnancyData);
+      console.log(`Admin request: Found ${data.length} pregnancy data records`);
+      
       res.json(data);
     } catch (error) {
       console.error("Error getting pregnancy data:", error);
@@ -868,7 +894,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/admin/mood-entries", adminAuth, async (req: Request, res: Response) => {
     try {
+      console.log("Admin request: Fetching mood entries");
+      
+      // Add caching prevention headers
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      
       const entries = await db.select().from(schema.moodEntries);
+      console.log(`Admin request: Found ${entries.length} mood entries`);
+      
       res.json(entries);
     } catch (error) {
       console.error("Error getting mood entries:", error);
@@ -878,7 +913,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/admin/medication-checks", adminAuth, async (req: Request, res: Response) => {
     try {
+      console.log("Admin request: Fetching medication checks");
+      
+      // Add caching prevention headers
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      
       const checks = await db.select().from(schema.medicationChecks);
+      console.log(`Admin request: Found ${checks.length} medication checks`);
+      
       res.json(checks);
     } catch (error) {
       console.error("Error getting medication checks:", error);
@@ -889,7 +933,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Support messages admin endpoints
   app.get("/api/admin/support-messages", adminAuth, async (req: Request, res: Response) => {
     try {
+      console.log("Admin request: Fetching support messages");
+      
+      // Add caching prevention headers
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      
       const messages = await storage.getSupportMessages();
+      console.log(`Admin request: Found ${messages.length} support messages`);
+      
       res.json(messages);
     } catch (error) {
       console.error("Error getting support messages:", error);

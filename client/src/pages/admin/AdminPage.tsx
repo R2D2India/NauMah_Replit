@@ -68,17 +68,32 @@ export default function AdminPage() {
   useEffect(() => {
     const checkSession = async () => {
       try {
+        console.log("Checking admin session...");
         const response = await fetch("/api/admin/session", {
           method: "GET", 
-          credentials: "include"
+          credentials: "include",
+          headers: {
+            "Accept": "application/json",
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache"
+          }
         });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error ${response.status}`);
+        }
+        
         const data = await response.json();
+        console.log("Admin session check response:", data);
         
         if (data.isAdmin) {
+          console.log("Valid admin session found");
           setIsAdmin(true);
           if (data.email) {
             setAdminEmail(data.email);
           }
+        } else {
+          console.log("No admin session found");
         }
       } catch (error) {
         console.error("Error checking admin session:", error);
@@ -88,6 +103,10 @@ export default function AdminPage() {
     };
     
     checkSession();
+    
+    // Periodically check session to ensure it doesn't expire
+    const sessionCheckInterval = setInterval(checkSession, 60000);
+    return () => clearInterval(sessionCheckInterval);
   }, []);
 
   const handleLogin = async (data: z.infer<typeof loginSchema>) => {
@@ -162,19 +181,35 @@ export default function AdminPage() {
 
   const fetchData = async (endpoint: string, setterFunction: React.Dispatch<React.SetStateAction<any[]>>) => {
     try {
+      setDataLoading(true);
+      console.log(`Fetching data from: ${endpoint}`);
+      
       const response = await fetch(endpoint, {
         method: "GET",
-        credentials: "include"
+        credentials: "include",
+        headers: {
+          "Accept": "application/json",
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          "Pragma": "no-cache"
+        }
       });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error ${response.status}`);
+      }
+      
       const data = await response.json();
+      console.log(`Data received from ${endpoint}:`, data);
       setterFunction(data);
+      setDataLoading(false);
     } catch (error) {
       console.error(`Error fetching data from ${endpoint}:`, error);
+      setDataLoading(false);
     }
   };
 
   const loadTabData = async (tab: string) => {
-    setDataLoading(true);
+    console.log(`Loading data for tab: ${tab}`);
     
     switch (tab) {
       case "users":
@@ -194,10 +229,9 @@ export default function AdminPage() {
         break;
       case "settings":
         // No data to load for settings tab
+        setDataLoading(false);
         break;
     }
-    
-    setDataLoading(false);
   };
 
   // Load data when tab changes
@@ -206,6 +240,20 @@ export default function AdminPage() {
       loadTabData(activeTab);
     }
   }, [isAdmin, activeTab]);
+  
+  // Refresh data periodically (every 30 seconds)
+  useEffect(() => {
+    if (!isAdmin) return;
+    
+    const refreshInterval = setInterval(() => {
+      if (!dataLoading) {
+        console.log('Refreshing admin data...');
+        loadTabData(activeTab);
+      }
+    }, 30000);
+    
+    return () => clearInterval(refreshInterval);
+  }, [isAdmin, activeTab, dataLoading]);
 
   if (loading) {
     return (
