@@ -383,9 +383,18 @@ export default function AdminPage() {
 
           <TabsContent value="users" className="space-y-4">
             <Card>
-              <CardHeader>
-                <CardTitle>User Data</CardTitle>
-                <CardDescription>List of all registered users in the system</CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>User Data</CardTitle>
+                  <CardDescription>List of all registered users in the system</CardDescription>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => loadTabData("users")}
+                >
+                  Refresh Data
+                </Button>
               </CardHeader>
               <CardContent>
                 {dataLoading ? (
@@ -393,43 +402,52 @@ export default function AdminPage() {
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                   </div>
                 ) : (
-                  <Table>
-                    <TableCaption>List of all registered users</TableCaption>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>ID</TableHead>
-                        <TableHead>Username</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Mobile</TableHead>
-                        <TableHead>Age</TableHead>
-                        <TableHead>Pregnancy Week</TableHead>
-                        <TableHead>Created At</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {users.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={8} className="text-center">No users found</TableCell>
-                        </TableRow>
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-2">
+                      {users.length > 0 ? (
+                        <span>Showing {users.length} users</span>
                       ) : (
-                        users.map((user) => (
-                          <TableRow key={user.id}>
-                            <TableCell>{user.id}</TableCell>
-                            <TableCell>{user.username}</TableCell>
-                            <TableCell>{user.email}</TableCell>
-                            <TableCell>
-                              {user.firstName} {user.lastName}
-                            </TableCell>
-                            <TableCell>{user.mobileNumber || "—"}</TableCell>
-                            <TableCell>{user.age || "—"}</TableCell>
-                            <TableCell>{user.pregnancyWeek || user.pregnancyMonth || user.pregnancyTrimester || "—"}</TableCell>
-                            <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
-                          </TableRow>
-                        ))
+                        <span>No users found in database</span>
                       )}
-                    </TableBody>
-                  </Table>
+                    </div>
+                    <Table>
+                      <TableCaption>List of all registered users</TableCaption>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>ID</TableHead>
+                          <TableHead>Username</TableHead>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Name</TableHead>
+                          <TableHead>Mobile</TableHead>
+                          <TableHead>Age</TableHead>
+                          <TableHead>Pregnancy Week</TableHead>
+                          <TableHead>Created At</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {users.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={8} className="text-center">No users found</TableCell>
+                          </TableRow>
+                        ) : (
+                          users.map((user) => (
+                            <TableRow key={user.id}>
+                              <TableCell>{user.id}</TableCell>
+                              <TableCell>{user.username}</TableCell>
+                              <TableCell>{user.email}</TableCell>
+                              <TableCell>
+                                {user.firstName || user.first_name} {user.lastName || user.last_name}
+                              </TableCell>
+                              <TableCell>{user.mobileNumber || user.mobile_number || "—"}</TableCell>
+                              <TableCell>{user.age || "—"}</TableCell>
+                              <TableCell>{user.pregnancyWeek || user.pregnancyMonth || user.pregnancyTrimester || "—"}</TableCell>
+                              <TableCell>{new Date(user.createdAt || user.created_at).toLocaleDateString()}</TableCell>
+                            </TableRow>
+                          ))
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -437,9 +455,18 @@ export default function AdminPage() {
 
           <TabsContent value="pregnancy" className="space-y-4">
             <Card>
-              <CardHeader>
-                <CardTitle>Pregnancy Data</CardTitle>
-                <CardDescription>Pregnancy information for all users</CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Pregnancy Data</CardTitle>
+                  <CardDescription>Pregnancy information for all users</CardDescription>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => loadTabData("pregnancy")}
+                >
+                  Refresh Data
+                </Button>
               </CardHeader>
               <CardContent>
                 {dataLoading ? (
@@ -447,37 +474,46 @@ export default function AdminPage() {
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                   </div>
                 ) : (
-                  <Table>
-                    <TableCaption>Pregnancy data for all users</TableCaption>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>ID</TableHead>
-                        <TableHead>User ID</TableHead>
-                        <TableHead>Current Week</TableHead>
-                        <TableHead>Due Date</TableHead>
-                        <TableHead>Created At</TableHead>
-                        <TableHead>Updated At</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {pregnancyData.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={6} className="text-center">No pregnancy data found</TableCell>
-                        </TableRow>
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-2">
+                      {pregnancyData.length > 0 ? (
+                        <span>Showing {pregnancyData.length} pregnancy records</span>
                       ) : (
-                        pregnancyData.map((data) => (
-                          <TableRow key={data.id}>
-                            <TableCell>{data.id}</TableCell>
-                            <TableCell>{data.userId}</TableCell>
-                            <TableCell>{data.currentWeek}</TableCell>
-                            <TableCell>{new Date(data.dueDate).toLocaleDateString()}</TableCell>
-                            <TableCell>{new Date(data.createdAt).toLocaleDateString()}</TableCell>
-                            <TableCell>{new Date(data.updatedAt).toLocaleDateString()}</TableCell>
-                          </TableRow>
-                        ))
+                        <span>No pregnancy data found in database</span>
                       )}
-                    </TableBody>
-                  </Table>
+                    </div>
+                    <Table>
+                      <TableCaption>Pregnancy data for all users</TableCaption>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>ID</TableHead>
+                          <TableHead>User ID</TableHead>
+                          <TableHead>Current Week</TableHead>
+                          <TableHead>Due Date</TableHead>
+                          <TableHead>Created At</TableHead>
+                          <TableHead>Updated At</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {pregnancyData.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={6} className="text-center">No pregnancy data found</TableCell>
+                          </TableRow>
+                        ) : (
+                          pregnancyData.map((data) => (
+                            <TableRow key={data.id}>
+                              <TableCell>{data.id}</TableCell>
+                              <TableCell>{data.userId || data.user_id}</TableCell>
+                              <TableCell>{data.currentWeek || data.current_week}</TableCell>
+                              <TableCell>{new Date(data.dueDate || data.due_date).toLocaleDateString()}</TableCell>
+                              <TableCell>{new Date(data.createdAt || data.created_at).toLocaleDateString()}</TableCell>
+                              <TableCell>{new Date(data.updatedAt || data.updated_at).toLocaleDateString()}</TableCell>
+                            </TableRow>
+                          ))
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -485,9 +521,18 @@ export default function AdminPage() {
 
           <TabsContent value="mood" className="space-y-4">
             <Card>
-              <CardHeader>
-                <CardTitle>Mood Entries</CardTitle>
-                <CardDescription>All mood tracking entries</CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Mood Entries</CardTitle>
+                  <CardDescription>All mood tracking entries</CardDescription>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => loadTabData("mood")}
+                >
+                  Refresh Data
+                </Button>
               </CardHeader>
               <CardContent>
                 {dataLoading ? (
@@ -495,37 +540,46 @@ export default function AdminPage() {
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                   </div>
                 ) : (
-                  <Table>
-                    <TableCaption>Mood entries from all users</TableCaption>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>ID</TableHead>
-                        <TableHead>User ID</TableHead>
-                        <TableHead>Week</TableHead>
-                        <TableHead>Mood</TableHead>
-                        <TableHead>Note</TableHead>
-                        <TableHead>Created At</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {moodEntries.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={6} className="text-center">No mood entries found</TableCell>
-                        </TableRow>
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-2">
+                      {moodEntries.length > 0 ? (
+                        <span>Showing {moodEntries.length} mood entries</span>
                       ) : (
-                        moodEntries.map((entry) => (
-                          <TableRow key={entry.id}>
-                            <TableCell>{entry.id}</TableCell>
-                            <TableCell>{entry.userId}</TableCell>
-                            <TableCell>{entry.week}</TableCell>
-                            <TableCell>{entry.mood}</TableCell>
-                            <TableCell>{entry.note || "—"}</TableCell>
-                            <TableCell>{new Date(entry.createdAt).toLocaleDateString()}</TableCell>
-                          </TableRow>
-                        ))
+                        <span>No mood entries found in database</span>
                       )}
-                    </TableBody>
-                  </Table>
+                    </div>
+                    <Table>
+                      <TableCaption>Mood entries from all users</TableCaption>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>ID</TableHead>
+                          <TableHead>User ID</TableHead>
+                          <TableHead>Week</TableHead>
+                          <TableHead>Mood</TableHead>
+                          <TableHead>Note</TableHead>
+                          <TableHead>Created At</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {moodEntries.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={6} className="text-center">No mood entries found</TableCell>
+                          </TableRow>
+                        ) : (
+                          moodEntries.map((entry) => (
+                            <TableRow key={entry.id}>
+                              <TableCell>{entry.id}</TableCell>
+                              <TableCell>{entry.userId || entry.user_id}</TableCell>
+                              <TableCell>{entry.week}</TableCell>
+                              <TableCell>{entry.mood}</TableCell>
+                              <TableCell>{entry.note || "—"}</TableCell>
+                              <TableCell>{new Date(entry.createdAt || entry.created_at).toLocaleDateString()}</TableCell>
+                            </TableRow>
+                          ))
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -533,9 +587,18 @@ export default function AdminPage() {
 
           <TabsContent value="medication" className="space-y-4">
             <Card>
-              <CardHeader>
-                <CardTitle>Medication Checks</CardTitle>
-                <CardDescription>All medication safety checks</CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Medication Checks</CardTitle>
+                  <CardDescription>All medication safety checks</CardDescription>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => loadTabData("medication")}
+                >
+                  Refresh Data
+                </Button>
               </CardHeader>
               <CardContent>
                 {dataLoading ? (
@@ -543,41 +606,52 @@ export default function AdminPage() {
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                   </div>
                 ) : (
-                  <Table>
-                    <TableCaption>Medication safety checks from all users</TableCaption>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>ID</TableHead>
-                        <TableHead>User ID</TableHead>
-                        <TableHead>Medication</TableHead>
-                        <TableHead>Safe</TableHead>
-                        <TableHead>Notes</TableHead>
-                        <TableHead>Created At</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {medicationChecks.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={6} className="text-center">No medication checks found</TableCell>
-                        </TableRow>
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-2">
+                      {medicationChecks.length > 0 ? (
+                        <span>Showing {medicationChecks.length} medication checks</span>
                       ) : (
-                        medicationChecks.map((check) => (
-                          <TableRow key={check.id}>
-                            <TableCell>{check.id}</TableCell>
-                            <TableCell>{check.userId}</TableCell>
-                            <TableCell>{check.medicationName}</TableCell>
-                            <TableCell>
-                              {check.isSafe === true && "Safe"}
-                              {check.isSafe === false && "Not Safe"}
-                              {check.isSafe === null && "Unknown"}
-                            </TableCell>
-                            <TableCell>{check.notes || "—"}</TableCell>
-                            <TableCell>{new Date(check.createdAt).toLocaleDateString()}</TableCell>
-                          </TableRow>
-                        ))
+                        <span>No medication checks found in database</span>
                       )}
-                    </TableBody>
-                  </Table>
+                    </div>
+                    <Table>
+                      <TableCaption>Medication safety checks from all users</TableCaption>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>ID</TableHead>
+                          <TableHead>User ID</TableHead>
+                          <TableHead>Medication</TableHead>
+                          <TableHead>Safe</TableHead>
+                          <TableHead>Notes</TableHead>
+                          <TableHead>Created At</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {medicationChecks.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={6} className="text-center">No medication checks found</TableCell>
+                          </TableRow>
+                        ) : (
+                          medicationChecks.map((check) => (
+                            <TableRow key={check.id}>
+                              <TableCell>{check.id}</TableCell>
+                              <TableCell>{check.userId || check.user_id}</TableCell>
+                              <TableCell>{check.medicationName || check.medication_name}</TableCell>
+                              <TableCell>
+                                {check.isSafe === true && "Safe"}
+                                {check.isSafe === false && "Not Safe"}
+                                {check.is_safe === true && "Safe"}
+                                {check.is_safe === false && "Not Safe"}
+                                {(check.isSafe === null && check.is_safe === null) && "Unknown"}
+                              </TableCell>
+                              <TableCell>{check.notes || "—"}</TableCell>
+                              <TableCell>{new Date(check.createdAt || check.created_at).toLocaleDateString()}</TableCell>
+                            </TableRow>
+                          ))
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -585,9 +659,18 @@ export default function AdminPage() {
 
           <TabsContent value="support" className="space-y-4">
             <Card>
-              <CardHeader>
-                <CardTitle>Support Messages</CardTitle>
-                <CardDescription>Messages from the contact form</CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Support Messages</CardTitle>
+                  <CardDescription>Messages from the contact form</CardDescription>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => loadTabData("support")}
+                >
+                  Refresh Data
+                </Button>
               </CardHeader>
               <CardContent>
                 {dataLoading ? (
@@ -595,39 +678,48 @@ export default function AdminPage() {
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                   </div>
                 ) : (
-                  <Table>
-                    <TableCaption>Support messages from users</TableCaption>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>ID</TableHead>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Subject</TableHead>
-                        <TableHead>Message</TableHead>
-                        <TableHead>Read</TableHead>
-                        <TableHead>Created At</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {supportMessages.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={7} className="text-center">No support messages found</TableCell>
-                        </TableRow>
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-2">
+                      {supportMessages.length > 0 ? (
+                        <span>Showing {supportMessages.length} support messages</span>
                       ) : (
-                        supportMessages.map((message) => (
-                          <TableRow key={message.id}>
-                            <TableCell>{message.id}</TableCell>
-                            <TableCell>{message.name}</TableCell>
-                            <TableCell>{message.email}</TableCell>
-                            <TableCell>{message.subject || "—"}</TableCell>
-                            <TableCell className="max-w-xs truncate">{message.message}</TableCell>
-                            <TableCell>{message.isRead ? "Yes" : "No"}</TableCell>
-                            <TableCell>{new Date(message.createdAt).toLocaleDateString()}</TableCell>
-                          </TableRow>
-                        ))
+                        <span>No support messages found in database</span>
                       )}
-                    </TableBody>
-                  </Table>
+                    </div>
+                    <Table>
+                      <TableCaption>Support messages from users</TableCaption>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>ID</TableHead>
+                          <TableHead>Name</TableHead>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Subject</TableHead>
+                          <TableHead>Message</TableHead>
+                          <TableHead>Read</TableHead>
+                          <TableHead>Created At</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {supportMessages.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={7} className="text-center">No support messages found</TableCell>
+                          </TableRow>
+                        ) : (
+                          supportMessages.map((message) => (
+                            <TableRow key={message.id}>
+                              <TableCell>{message.id}</TableCell>
+                              <TableCell>{message.name}</TableCell>
+                              <TableCell>{message.email}</TableCell>
+                              <TableCell>{message.subject || "—"}</TableCell>
+                              <TableCell className="max-w-xs truncate">{message.message}</TableCell>
+                              <TableCell>{message.isRead || message.is_read ? "Yes" : "No"}</TableCell>
+                              <TableCell>{new Date(message.createdAt || message.created_at).toLocaleDateString()}</TableCell>
+                            </TableRow>
+                          ))
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -635,9 +727,18 @@ export default function AdminPage() {
 
           <TabsContent value="settings" className="space-y-4">
             <Card>
-              <CardHeader>
-                <CardTitle>Admin Settings</CardTitle>
-                <CardDescription>Change your admin password</CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Admin Settings</CardTitle>
+                  <CardDescription>Change your admin password</CardDescription>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => resetPasswordForm.reset()}
+                >
+                  Reset Form
+                </Button>
               </CardHeader>
               <CardContent>
                 <Form {...resetPasswordForm}>
