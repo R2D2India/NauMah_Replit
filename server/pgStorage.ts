@@ -13,12 +13,15 @@ import {
   appointmentsTable,
   supportMessagesTable,
   journalEntriesTable,
+  emailTrackingTable,
   type WeightEntry,
   type SymptomEntry,
   type Appointment,
   type SupportMessage,
   type JournalEntry,
-  type ContactFormData
+  type ContactFormData,
+  type EmailTracking,
+  type InsertEmailTracking
 } from "@shared/schema";
 import { IStorage } from './storage';
 import { addWeeks } from "date-fns";
@@ -340,6 +343,44 @@ export class PgStorage implements IStorage {
       ...results[0],
       mood: results[0].mood || null
     };
+  }
+  
+  // Email tracking methods
+  async trackEmail(entry: { 
+    userId: number; 
+    emailType: string; 
+    emailTo: string;
+    emailFrom: string;
+    subject: string;
+    status: string;
+    statusDetails?: string 
+  }): Promise<any> {
+    const results = await db.insert(emailTrackingTable).values({
+      userId: entry.userId,
+      emailType: entry.emailType,
+      emailTo: entry.emailTo,
+      emailFrom: entry.emailFrom,
+      subject: entry.subject,
+      status: entry.status,
+      statusDetails: entry.statusDetails || null,
+      sentAt: new Date(),
+      updatedAt: new Date()
+    }).returning();
+    
+    return results[0];
+  }
+
+  async getEmailTrackingByUser(userId: number): Promise<any[]> {
+    return await db.select()
+      .from(emailTrackingTable)
+      .where(eq(emailTrackingTable.userId, userId))
+      .orderBy(desc(emailTrackingTable.sentAt));
+  }
+
+  async getAllEmailTracking(): Promise<any[]> {
+    return await db.select()
+      .from(emailTrackingTable)
+      .orderBy(desc(emailTrackingTable.sentAt));
   }
 
   async createJournalEntry(entry: { userId: number; title: string; content: string; mood?: string; date: Date }): Promise<JournalEntry> {

@@ -69,6 +69,11 @@ export interface IStorage {
   getJournalEntries(userId: number): Promise<JournalEntry[]>;
   getJournalEntry(id: number): Promise<JournalEntry | undefined>;
   createJournalEntry(entry: { userId: number; title: string; content: string; mood?: string; date: Date }): Promise<JournalEntry>;
+  
+  // Email tracking methods
+  trackEmail(entry: { userId: number; emailType: string; emailTo: string; emailFrom: string; subject: string; status: string; statusDetails?: string }): Promise<any>;
+  getEmailTrackingByUser(userId: number): Promise<any[]>;
+  getAllEmailTracking(): Promise<any[]>;
 }
 
 export class MemStorage implements IStorage {

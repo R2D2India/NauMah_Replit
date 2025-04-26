@@ -345,6 +345,33 @@ export type JournalEntryRequest = z.infer<typeof journalEntrySchema>;
 export type JournalEntry = typeof journalEntriesTable.$inferSelect;
 export type InsertJournalEntry = typeof journalEntriesTable.$inferInsert;
 
+// Email tracking table
+export const emailTrackingTable = pgTable("email_tracking", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  emailType: text("email_type").notNull(), // "welcome", "password_reset", etc.
+  emailTo: text("email_to").notNull(),
+  emailFrom: text("email_from").notNull(),
+  subject: text("subject").notNull(),
+  status: text("status").notNull(), // "sent", "failed", "pending"
+  statusDetails: text("status_details"),
+  sentAt: timestamp("sent_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertEmailTrackingSchema = createInsertSchema(emailTrackingTable).pick({
+  userId: true,
+  emailType: true,
+  emailTo: true,
+  emailFrom: true,
+  subject: true,
+  status: true,
+  statusDetails: true,
+});
+
+export type EmailTracking = typeof emailTrackingTable.$inferSelect;
+export type InsertEmailTracking = z.infer<typeof insertEmailTrackingSchema>;
+
 export type ContactFormData = z.infer<typeof contactSchema>;
 export type SupportMessage = typeof supportMessagesTable.$inferSelect;
 export type InsertSupportMessage = typeof supportMessagesTable.$inferInsert;
