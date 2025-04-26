@@ -20,11 +20,14 @@ export async function apiRequest<T = any>(
   };
   
   // Add Basic Auth for admin endpoints (if not already provided)
-  if (isAdminEndpoint && !headers['Authorization']) {
+  if (isAdminEndpoint && !('Authorization' in headers)) {
     const adminEmail = "sandeep@fastest.health";
     const adminPassword = "Fastest@2004";
     const basicAuthHeader = `Basic ${btoa(`${adminEmail}:${adminPassword}`)}`;
-    headers["Authorization"] = basicAuthHeader;
+    headers = { 
+      ...headers,
+      "Authorization": basicAuthHeader 
+    };
   }
   
   const res = await fetch(url, {
@@ -76,7 +79,10 @@ export const getQueryFn: <T>(options: {
       const adminEmail = "sandeep@fastest.health";
       const adminPassword = "Fastest@2004";
       const basicAuthHeader = `Basic ${btoa(`${adminEmail}:${adminPassword}`)}`;
-      headers["Authorization"] = basicAuthHeader;
+      headers = {
+        ...headers,
+        "Authorization": basicAuthHeader
+      };
     }
     
     const res = await fetch(url, {

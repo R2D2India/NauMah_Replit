@@ -30,8 +30,27 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
     return false;
   }
   
+  console.log('🔍 DEBUG: Attempting to send email:', {
+    to: options.to,
+    from: options.from,
+    subject: options.subject,
+    hasText: !!options.text,
+    hasHtml: !!options.html,
+    replyTo: options.replyTo || 'not set'
+  });
+  
   try {
-    await sgMail.send({
+    console.log('🔍 DEBUG: Using SendGrid API Key:', process.env.SENDGRID_API_KEY.substring(0, 5) + '...');
+    
+    // Check if the sender domain is verified with SendGrid
+    if (options.from !== NAUMAH_SUPPORT_EMAIL && options.from !== SENDGRID_SENDER) {
+      console.warn(`🔍 DEBUG: Using non-standard sender email: ${options.from}. This domain may not be verified with SendGrid.`);
+      // Use a verified sender
+      options.from = NAUMAH_SUPPORT_EMAIL;
+      console.log(`🔍 DEBUG: Switched to verified sender: ${options.from}`);
+    }
+    
+    const result = await sgMail.send({
       to: options.to,
       from: options.from,
       subject: options.subject,
@@ -40,13 +59,24 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
       replyTo: options.replyTo
     });
     
+    console.log('🔍 DEBUG: Email sent successfully:', result);
     return true;
   } catch (error: any) {
-    console.error('Error sending email:', error);
+    console.error('❌ Error sending email:', error);
+    
     // Log additional details if available
     if (error && error.response && error.response.body) {
-      console.error('SendGrid error details:', JSON.stringify(error.response.body));
+      console.error('❌ SendGrid error details:', JSON.stringify(error.response.body));
+      
+      // Extract and log specific error messages
+      const errors = error.response.body.errors;
+      if (errors && Array.isArray(errors)) {
+        errors.forEach((err: any, index: number) => {
+          console.error(`❌ Error ${index + 1}:`, err.message || err);
+        });
+      }
     }
+    
     return false;
   }
 }
