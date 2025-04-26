@@ -25,7 +25,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { apiRequest } from '@/lib/queryClient';
+import { apiRequest, getQueryFn } from '@/lib/queryClient';
 import { toast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from '@tanstack/react-query';
@@ -57,19 +57,7 @@ export function EmailTracking() {
   // Fetch all email tracking entries
   const { data: emailTrackingData, isLoading, error, refetch } = useQuery<EmailTrackingEntry[]>({
     queryKey: ['/api/admin/email-tracking'],
-    queryFn: async () => {
-      try {
-        return await apiRequest<EmailTrackingEntry[]>('/api/admin/email-tracking', {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json'
-          }
-        });
-      } catch (error) {
-        console.error("Failed to fetch email tracking data:", error);
-        throw error;
-      }
-    }
+    queryFn: getQueryFn({ on401: "throw" })
   });
 
   // Handle loading and error states
