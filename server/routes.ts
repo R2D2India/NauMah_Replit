@@ -1,6 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { PgStorage } from "./pgStorage";
+import { sql } from "drizzle-orm";
 import { 
   generateMealPlan, 
   checkMedicationSafety, 
@@ -775,15 +776,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // EMERGENCY DB DIAGNOSTIC ENDPOINT - no auth check to help debug production issues
+  app.get("/api/admin/emergency-db-check", async (req: Request, res: Response) => {
+    try {
+      console.log("🔴 EMERGENCY DATABASE CHECK REQUESTED");
+      
+      // Set max permissive headers
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, private, max-age=0');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '-1');
+      res.setHeader('X-Production-Fix', 'true');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      
+      // Test direct database connection
+      try {
+        // Simple test query without using SQL tag template
+        const testQuery = await db.select().from(schema.users).limit(1);
+        console.log("Database connection test result:", testQuery);
+      } catch (testError) {
+        console.error("Database test query failed:", testError);
+      }
+      
+      // Fetch data directly from users table
+      const users = await db.select().from(schema.users);
+      console.log(`EMERGENCY CHECK: Found ${users.length} users directly from database`);
+      
+      // Return diagnostic info and actual data
+      return res.json({
+        dbConnectionOk: true,
+        userCount: users.length,
+        userSample: users.slice(0, 3).map(u => ({ 
+          id: u.id, 
+          username: u.username,
+          email: u.email
+        })),
+        timestamp: new Date().toISOString(),
+        sessionInfo: {
+          id: req.sessionID,
+          isAdmin: req.session?.isAdmin || false,
+          adminEmail: req.session?.adminEmail || null
+        },
+        fullData: users // Include complete user data for emergency troubleshooting
+      });
+    } catch (dbError) {
+      console.error("🔴 EMERGENCY DATABASE CHECK FAILED:", dbError);
+      return res.status(500).json({ 
+        dbConnectionOk: false,
+        error: String(dbError),
+        timestamp: new Date().toISOString(),
+        sessionInfo: {
+          id: req.sessionID,
+          isAdmin: req.session?.isAdmin || false,
+          adminEmail: req.session?.adminEmail || null
+        }
+      });
+    }
+  });
+
   // Admin session check
   app.get("/api/admin/session", (req: Request, res: Response) => {
     console.log("Admin session check - Session ID:", req.sessionID);
     console.log("Admin session check - Session data:", req.session);
     
-    // Add cache prevention headers
-    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    // Enhanced cache prevention headers
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, private, max-age=0');
     res.setHeader('Pragma', 'no-cache');
-    res.setHeader('Expires', '0');
+    res.setHeader('Expires', '-1');
+    res.setHeader('Vary', '*');
+    res.setHeader('ETag', Date.now().toString());
     
     if (req.session && req.session.isAdmin) {
       console.log("Admin session is valid, returning admin data");
@@ -857,24 +918,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log("Admin request: Fetching user data", req.headers);
       
-      // Enhanced caching prevention headers for production environments 
-      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, private');
+      // Maximum caching prevention headers for production emergency fix
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, private, max-age=0');
       res.setHeader('Pragma', 'no-cache');
-      res.setHeader('Expires', '0');
+      res.setHeader('Expires', '-1');
       res.setHeader('Access-Control-Max-Age', '0');
       res.setHeader('Surrogate-Control', 'no-store');
+      res.setHeader('Vary', '*');
+      res.setHeader('ETag', Date.now().toString());
       
-      // Check for production force refresh header
-      const isForceRefresh = req.headers['x-production-force-refresh'] === 'true';
-      const isXHRFetch = req.headers['x-production-xhr-fetch'] === 'true';
+      // Production access headers
+      res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
       
-      if (isForceRefresh || isXHRFetch) {
-        console.log("Production force refresh request detected");
-      }
-      
-      // Set additional debug headers
+      // Special emergency headers
+      res.setHeader('X-Production-Fix', 'true');
       res.setHeader('X-Request-Time', new Date().toISOString());
       res.setHeader('X-Cache-Buster', Date.now().toString());
+      
+      // Check if this is an emergency request
+      const isEmergencyRequest = 
+        req.headers['x-production-emergency'] === 'true' || 
+        req.headers['x-requested-with'] === 'XMLHttpRequest' ||
+        req.query._emergency === 'true' ||
+        req.query._nocache !== undefined;
+        
+      // Check for XHR fetch explicitly
+      const isXHRFetch = 
+        req.headers['x-requested-with'] === 'XMLHttpRequest' ||
+        req.headers['x-production-xhr-fetch'] === 'true';
+        
+      if (isEmergencyRequest) {
+        console.log("PRODUCTION EMERGENCY REQUEST DETECTED", req.headers);
+      }
       
       // Fetch user data directly from database
       try {

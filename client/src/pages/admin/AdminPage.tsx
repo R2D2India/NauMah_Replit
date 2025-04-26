@@ -578,66 +578,127 @@ export default function AdminPage() {
                         variant="link" 
                         size="sm"
                         onClick={async () => {
-                          console.log("Force refresh button clicked");
+                          console.log("PRODUCTION DIRECT DOM UPDATE ATTEMPT");
                           try {
                             setDataLoading(true);
-                            // Use more aggressive cache prevention techniques for production
-                            const cacheBuster = `nocache=${Date.now()}-${Math.random()}`;
-                            const url = `/api/admin/users?${cacheBuster}`;
                             
-                            console.log("Production emergency direct data fetch:", url);
+                            // Extremely aggressive cache prevention
+                            const uniqueId = Math.random().toString(36).substring(2, 15) + 
+                                           Math.random().toString(36).substring(2, 15);
+                            const timestamp = Date.now();
+                            const url = `/api/admin/users?_nocache=${timestamp}&_uid=${uniqueId}`;
                             
-                            const response = await fetch(url, {
-                              method: 'GET',
-                              credentials: 'include',
-                              headers: {
-                                'Accept': 'application/json',
-                                'Cache-Control': 'no-cache, no-store, must-revalidate, private',
-                                'Pragma': 'no-cache',
-                                'Expires': '0',
-                                'X-Production-Force-Refresh': 'true'
-                              }
-                            });
+                            console.log("Direct DOM production fix - fetching from:", url);
                             
-                            if (response.ok) {
-                              console.log("Force refresh response status:", response.status);
-                              const responseText = await response.text();
-                              console.log("Force refresh raw response:", responseText.substring(0, 100) + "...");
-                              
-                              try {
-                                const data = JSON.parse(responseText);
-                                console.log("Force refresh direct fetch found", data.length, "users");
-                                
-                                // Always update the data, even if it appears empty first
-                                setUsers(Array.isArray(data) ? data : []);
-                                
-                                // Set state directly after a delay to ensure rendering
-                                setTimeout(() => {
-                                  if (Array.isArray(data) && data.length > 0) {
-                                    console.log("Setting users data with timeout:", data.length, "users");
-                                    setUsers(data);
+                            // Direct XHR fetch with credentials
+                            const xhr = new XMLHttpRequest();
+                            xhr.open('GET', url, true);
+                            xhr.setRequestHeader('Cache-Control', 'no-cache, no-store, must-revalidate, private, max-age=0');
+                            xhr.setRequestHeader('Pragma', 'no-cache');
+                            xhr.setRequestHeader('Expires', '0');
+                            xhr.setRequestHeader('X-Production-Emergency', 'true');
+                            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                            xhr.withCredentials = true;
+                            
+                            xhr.onload = function() {
+                              if (xhr.status >= 200 && xhr.status < 300) {
+                                try {
+                                  console.log("XHR response received:", xhr.status);
+                                  console.log("Raw response (first 100 chars):", xhr.responseText.substring(0, 100));
+                                  
+                                  // Parse the response
+                                  const userData = JSON.parse(xhr.responseText);
+                                  
+                                  if (Array.isArray(userData) && userData.length > 0) {
+                                    console.log("DIRECT DOM UPDATE: Found", userData.length, "users");
                                     
-                                    // Force a re-render by toggling a state variable
-                                    setActiveTab(prev => {
-                                      setTimeout(() => setActiveTab("users"), 10);
-                                      return "users";
-                                    });
+                                    // Update React state first as a fallback
+                                    setUsers(userData);
+                                    
+                                    // DIRECT DOM MANIPULATION FOR PRODUCTION
+                                    // First, clear current table rows except header
+                                    setTimeout(() => {
+                                      try {
+                                        const table = document.querySelector('table');
+                                        if (table) {
+                                          const tbody = table.querySelector('tbody');
+                                          if (tbody) {
+                                            // Check if we need to replace "No users found" row
+                                            const emptyRow = tbody.querySelector('tr td[colspan="8"]');
+                                            if (emptyRow) {
+                                              // Clear the tbody
+                                              tbody.innerHTML = '';
+                                            }
+                                            
+                                            // Add new rows with user data
+                                            userData.forEach(user => {
+                                              const row = document.createElement('tr');
+                                              row.className = 'border-b transition-colors hover:bg-muted/50';
+                                              
+                                              // Add cells
+                                              [
+                                                user.id,
+                                                user.username,
+                                                user.email || '',
+                                                `${user.firstName || user.first_name || ''} ${user.lastName || user.last_name || ''}`,
+                                                user.mobileNumber || user.mobile_number || '—',
+                                                user.age || '—',
+                                                user.pregnancyWeek || user.pregnancyMonth || user.pregnancyTrimester || '—',
+                                                new Date(user.createdAt || user.created_at).toLocaleDateString()
+                                              ].forEach(text => {
+                                                const cell = document.createElement('td');
+                                                cell.className = 'p-4 align-middle';
+                                                cell.textContent = String(text);
+                                                row.appendChild(cell);
+                                              });
+                                              
+                                              tbody.appendChild(row);
+                                            });
+                                            
+                                            // Update count text
+                                            const countSpan = document.querySelector('.text-sm.text-muted-foreground span');
+                                            if (countSpan) {
+                                              countSpan.textContent = `Showing ${userData.length} users`;
+                                            }
+                                            
+                                            console.log("PRODUCTION FIX: Direct DOM update completed");
+                                          }
+                                        }
+                                      } catch (domError) {
+                                        console.error("Direct DOM manipulation failed:", domError);
+                                      }
+                                    }, 200);
+                                  } else {
+                                    console.error("No user data found in response");
                                   }
-                                }, 500);
-                              } catch (jsonError) {
-                                console.error("JSON parse error:", jsonError);
-                                // Try again with a simpler fetch
-                                forceRefreshWithXHR();
+                                } catch (parseError) {
+                                  console.error("Failed to parse response:", parseError);
+                                }
+                              } else {
+                                console.error("XHR request failed:", xhr.status);
+                                
+                                // Last resort - try direct API request and alert
+                                try {
+                                  const emergencyFetch = new XMLHttpRequest();
+                                  emergencyFetch.open('GET', '/api/admin/users?_emergency=true', true);
+                                  emergencyFetch.withCredentials = true;
+                                  emergencyFetch.send();
+                                } catch (e) {
+                                  console.error("Emergency XHR failed:", e);
+                                }
                               }
-                            } else {
-                              console.error("Force refresh failed with status:", response.status);
-                              forceRefreshWithXHR();
-                            }
+                              setDataLoading(false);
+                            };
+                            
+                            xhr.onerror = function() {
+                              console.error("XHR network error");
+                              setDataLoading(false);
+                            };
+                            
+                            xhr.send();
                           } catch (e) {
-                            console.error("Emergency fetch failed", e);
-                            forceRefreshWithXHR();
-                          } finally {
-                            setTimeout(() => setDataLoading(false), 1000);
+                            console.error("Production fix attempt failed:", e);
+                            setDataLoading(false);
                           }
                         }}
                       >
