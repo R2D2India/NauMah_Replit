@@ -1187,8 +1187,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.setHeader('X-Direct-Check', 'true');
     
     try {
-      // First, check session data (fastest path)
-      if (req.session && req.session.isAdmin) {
+      // For security, only check session data and no longer respond to Basic Auth
+      // This ensures users must go through the proper login process
+      if (req.session && req.session.isAdmin === true) {
         console.log("🔴 DIRECT ADMIN CHECK: Found isAdmin flag in session");
         return res.status(200).json({
           isAdmin: true,
@@ -1199,66 +1200,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // If authentication headers are provided, try direct credential check
-      const authHeader = req.headers.authorization;
-      if (authHeader && authHeader.startsWith('Basic ')) {
-        try {
-          // Extract and decode credentials
-          const base64Credentials = authHeader.split(' ')[1];
-          const credentials = Buffer.from(base64Credentials, 'base64').toString('utf-8');
-          const [username, password] = credentials.split(':');
-          
-          // Fixed admin credentials
-          const adminEmail = "sandeep@fastest.health";
-          const adminPassword = "Fastest@2004";
-          
-          if (username === adminEmail && password === adminPassword) {
-            console.log("🔴 DIRECT ADMIN CHECK: Valid Basic Auth credentials");
-            
-            // Set session data for future requests
-            if (req.session) {
-              req.session.isAdmin = true;
-              req.session.adminEmail = adminEmail;
-              
-              // Save session
-              req.session.save((err) => {
-                if (err) {
-                  console.error("Error saving admin session from Basic Auth:", err);
-                } else {
-                  console.log("Admin session saved from Basic Auth");
-                }
-              });
-            }
-            
-            return res.status(200).json({
-              isAdmin: true,
-              email: adminEmail,
-              method: "basicAuth",
-              timestamp: new Date().toISOString(),
-              sessionId: req.sessionID
-            });
-          }
-        } catch (authError) {
-          console.error("🔴 DIRECT ADMIN CHECK: Basic Auth parsing error:", authError);
-        }
-      }
-      
-      // Last resort - check query parameters for emergency access
+      // Only use emergency key for emergency admin page, which we'll restrict separately
+      // We do not create sessions from Basic Auth here anymore to prevent login bypass
       const emergencyKey = req.query.emergency_key;
-      if (emergencyKey === process.env.ADMIN_KEY) {
-        console.log("🔴 DIRECT ADMIN CHECK: Valid emergency key in query params");
+      const isEmergencyEndpoint = req.headers['x-emergency-request'] === 'true';
+      
+      if (isEmergencyEndpoint && emergencyKey === process.env.ADMIN_KEY) {
+        console.log("🔴 DIRECT ADMIN CHECK: Emergency access granted");
         
-        // Set session data for future requests
+        // Set session data for emergency access (temporary)
         if (req.session) {
           req.session.isAdmin = true;
           req.session.adminEmail = "sandeep@fastest.health";
+          req.session.isEmergencyAccess = true;
           
           // Save session
           req.session.save((err) => {
             if (err) {
-              console.error("Error saving admin session from emergency key:", err);
+              console.error("Error saving emergency admin session:", err);
             } else {
-              console.log("Admin session saved from emergency key");
+              console.log("Emergency admin session saved");
             }
           });
         }
@@ -1268,14 +1229,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           email: "sandeep@fastest.health",
           method: "emergencyKey",
           timestamp: new Date().toISOString(),
-          sessionId: req.sessionID
+          sessionId: req.sessionID,
+          isEmergencyAccess: true
         });
       }
       
-      console.log("🔴 DIRECT ADMIN CHECK: No valid auth method found");
-      return res.status(200).json({
+      // No valid session found - this will force the client-side to show login form
+      console.log("🔴 DIRECT ADMIN CHECK: No valid session found, login required");
+      return res.status(401).json({
         isAdmin: false,
         method: "none",
+        message: "Authentication required",
+        requireLogin: true,
         timestamp: new Date().toISOString(),
         sessionId: req.sessionID
       });

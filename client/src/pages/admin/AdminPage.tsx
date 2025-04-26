@@ -228,9 +228,29 @@ export default function AdminPage() {
               console.log("Valid admin session found via direct status check");
               setIsAdmin(true);
               setAdminEmail(directData.email || null);
+              // Also load initial data when we detect an admin
+              console.log("Admin authenticated, loading initial data for tab:", activeTab);
+              loadTabData(activeTab);
               return; // Skip the regular session check
             } else {
               console.log("Not admin via direct status check, falling back to regular session check");
+            }
+          } else if (directResponse.status === 401) {
+            // Server explicitly returned 401 Unauthorized with requireLogin flag
+            // This means login is required - don't try alternative methods
+            try {
+              const errorData = await directResponse.json();
+              console.log("Login required:", errorData);
+              if (errorData.requireLogin) {
+                console.log("Server requires explicit login, showing login form");
+                setIsAdmin(false);
+                setAdminEmail(null);
+                setLoginError("Please log in to access admin features");
+                setLoading(false);
+                return; // Skip other checks
+              }
+            } catch (parseError) {
+              console.error("Error parsing 401 response:", parseError);
             }
           }
         } catch (directError) {
