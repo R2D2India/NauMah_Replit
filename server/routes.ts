@@ -834,6 +834,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // New emergency direct database stats endpoint - bypass all complex code
+  app.get("/api/admin/emergency-stats", async (req: Request, res: Response) => {
+    console.log("🔴 EMERGENCY STATS REQUEST");
+    
+    // Add aggressive caching prevention headers
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, private, max-age=0');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '-1');
+    res.setHeader('Surrogate-Control', 'no-store');
+    res.setHeader('Vary', '*');
+    res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('ETag', Date.now().toString());
+    res.setHeader('X-Emergency-Response', 'true');
+    
+    try {
+      // Check for session - if admin, we're okay to proceed
+      if (!req.session.isAdmin) {
+        console.log("🔴 EMERGENCY STATS: Not an admin session");
+        return res.status(401).json({ 
+          success: false, 
+          message: "Admin authentication required",
+          timestamp: new Date().toISOString(),
+          sessionInfo: {
+            id: req.sessionID,
+            exists: req.session ? true : false
+          }
+        });
+      }
+      
+      // Direct database queries with timing information
+      const startTime = Date.now();
+      const results: Record<string, any> = {
+        timestamp: new Date().toISOString(),
+        timing: {},
+        counts: {},
+        samples: {},
+        sessionInfo: {
+          id: req.sessionID,
+          isAdmin: req.session.isAdmin || false,
+          adminEmail: req.session.adminEmail || null
+        }
+      };
+      
+      // User count
+      const usersStartTime = Date.now();
+      const users = await db.select().from(schema.users);
+      results.timing.users = Date.now() - usersStartTime;
+      results.counts.users = users.length;
+      results.samples.users = users.slice(0, 2);
+      
+      // Pregnancy data count
+      const pregnancyStartTime = Date.now();
+      const pregnancyData = await db.select().from(schema.pregnancyData);
+      results.timing.pregnancyData = Date.now() - pregnancyStartTime;
+      results.counts.pregnancyData = pregnancyData.length;
+      results.samples.pregnancyData = pregnancyData.slice(0, 2);
+      
+      // Mood entries count
+      const moodStartTime = Date.now();
+      const moodEntries = await db.select().from(schema.moodEntries);
+      results.timing.moodEntries = Date.now() - moodStartTime;
+      results.counts.moodEntries = moodEntries.length;
+      results.samples.moodEntries = moodEntries.slice(0, 2);
+      
+      // Total time
+      results.timing.total = Date.now() - startTime;
+      
+      console.log("🔴 EMERGENCY STATS SUCCESS:", results.counts);
+      return res.json(results);
+    } catch (error) {
+      console.error("🔴 EMERGENCY STATS ERROR:", error);
+      return res.status(500).json({
+        success: false,
+        error: String(error),
+        timestamp: new Date().toISOString(),
+        sessionInfo: {
+          id: req.sessionID,
+          isAdmin: req.session?.isAdmin || false
+        }
+      });
+    }
+  });
+
   // Admin session check
   app.get("/api/admin/session", (req: Request, res: Response) => {
     console.log("Admin session check - Session ID:", req.sessionID);

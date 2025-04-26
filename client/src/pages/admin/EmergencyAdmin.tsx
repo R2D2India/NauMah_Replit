@@ -63,82 +63,175 @@ export default function EmergencyAdmin() {
   const loadEmergencyData = async () => {
     try {
       console.log("EMERGENCY: Loading diagnostic data");
+      setErrorMessage(null);
       const timestamp = Date.now();
+      const uniqueId = Math.random().toString(36).substring(2, 15);
       
-      // First try the emergency endpoint 
-      const emergencyResponse = await fetch(`/api/admin/emergency-db-check?t=${timestamp}`, {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          "Accept": "application/json",
-          "Cache-Control": "no-cache, no-store, must-revalidate, private",
-          "Pragma": "no-cache"
-        }
-      });
-
-      if (emergencyResponse.ok) {
-        const data = await emergencyResponse.json();
-        console.log("EMERGENCY CHECK RESPONSE:", data);
-        setDebugInfo(data);
-        
-        if (data.fullData && Array.isArray(data.fullData)) {
-          setUserData(data.fullData);
-          return; // If we got data, we're done
-        }
-      }
-
-      // If the emergency endpoint failed, try the regular endpoint
-      console.log("EMERGENCY: Trying regular users endpoint");
-      const usersResponse = await fetch(`/api/admin/users?t=${timestamp}`, {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          "Accept": "application/json",
-          "Cache-Control": "no-cache, no-store, must-revalidate, private",
-          "Pragma": "no-cache"
-        }
-      });
-
-      if (usersResponse.ok) {
-        const users = await usersResponse.json();
-        console.log("EMERGENCY: Regular users response:", users);
-        if (Array.isArray(users)) {
-          setUserData(users);
-        }
-      } else {
-        // If both failed, try one more with XHR
-        console.log("EMERGENCY: Trying XHR as last resort");
-        const xhr = new XMLHttpRequest();
-        xhr.open("GET", `/api/admin/users?t=${timestamp}`, true);
-        xhr.setRequestHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-        xhr.setRequestHeader("Pragma", "no-cache");
-        xhr.withCredentials = true;
-        
-        xhr.onload = function() {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            try {
-              const xhrData = JSON.parse(xhr.responseText);
-              console.log("EMERGENCY: XHR response:", xhrData);
-              if (Array.isArray(xhrData)) {
-                setUserData(xhrData);
-              }
-            } catch (e) {
-              console.error("EMERGENCY: XHR parse error:", e);
-              setErrorMessage("XHR parse error: " + String(e));
-            }
-          } else {
-            console.error("EMERGENCY: XHR failed with status:", xhr.status);
-            setErrorMessage(`XHR request failed: ${xhr.status}`);
+      // Try the specialized emergency stats endpoint first
+      console.log("EMERGENCY: Trying emergency-stats endpoint");
+      try {
+        const statsResponse = await fetch(`/api/admin/emergency-stats?t=${timestamp}&uid=${uniqueId}`, {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Accept": "application/json",
+            "Cache-Control": "no-cache, no-store, must-revalidate, private, max-age=0",
+            "Pragma": "no-cache",
+            "X-Emergency-Request": "true"
           }
-        };
-        
-        xhr.onerror = function() {
-          console.error("EMERGENCY: XHR network error");
-          setErrorMessage("XHR network error");
-        };
-        
-        xhr.send();
+        });
+
+        if (statsResponse.ok) {
+          const statsData = await statsResponse.json();
+          console.log("🟢 EMERGENCY STATS SUCCESS:", statsData);
+          
+          setDebugInfo({
+            dbConnectionOk: true,
+            userCount: statsData.counts.users,
+            timestamp: statsData.timestamp,
+            sessionInfo: statsData.sessionInfo,
+            timing: statsData.timing,
+            databaseStats: statsData.counts
+          });
+          
+          // If we have user samples, display them
+          if (statsData.samples && statsData.samples.users && statsData.samples.users.length > 0) {
+            console.log("EMERGENCY: Got user samples from emergency-stats");
+            
+            // Try to get full user data now that we know the connection works
+            try {
+              const usersResponse = await fetch(`/api/admin/users?t=${timestamp}&emergency=true`, {
+                method: "GET",
+                credentials: "include",
+                headers: {
+                  "Accept": "application/json",
+                  "Cache-Control": "no-cache, no-store, must-revalidate, private, max-age=0",
+                  "Pragma": "no-cache",
+                  "X-Emergency-Request": "true"
+                }
+              });
+              
+              if (usersResponse.ok) {
+                const users = await usersResponse.json();
+                console.log("EMERGENCY: Got full user data:", users.length, "users");
+                if (Array.isArray(users) && users.length > 0) {
+                  setUserData(users);
+                  return; // Success
+                }
+              }
+              
+              // If that fails, at least show the samples
+              console.log("EMERGENCY: Using samples as fallback");
+              setUserData(statsData.samples.users);
+              return;
+            } catch (usersError) {
+              console.error("EMERGENCY: Error fetching full users:", usersError);
+              // Still use the samples
+              setUserData(statsData.samples.users);
+              return;
+            }
+          }
+        }
+      } catch (statsError) {
+        console.error("EMERGENCY: Stats endpoint error:", statsError);
+        setErrorMessage("Stats endpoint error: " + String(statsError));
       }
+      
+      // If the new endpoint failed, try the older emergency endpoint 
+      console.log("EMERGENCY: Trying emergency-db-check endpoint");
+      try {
+        const emergencyResponse = await fetch(`/api/admin/emergency-db-check?t=${timestamp}`, {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Accept": "application/json",
+            "Cache-Control": "no-cache, no-store, must-revalidate, private",
+            "Pragma": "no-cache"
+          }
+        });
+
+        if (emergencyResponse.ok) {
+          const data = await emergencyResponse.json();
+          console.log("EMERGENCY CHECK RESPONSE:", data);
+          setDebugInfo(data);
+          
+          if (data.fullData && Array.isArray(data.fullData)) {
+            setUserData(data.fullData);
+            return; // If we got data, we're done
+          }
+        }
+      } catch (emergencyError) {
+        console.error("EMERGENCY: Emergency check error:", emergencyError);
+      }
+
+      // If the emergency endpoints failed, try the regular endpoint
+      console.log("EMERGENCY: Trying regular users endpoint");
+      try {
+        const usersResponse = await fetch(`/api/admin/users?t=${timestamp}&nocache=true`, {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Accept": "application/json",
+            "Cache-Control": "no-cache, no-store, must-revalidate, private",
+            "Pragma": "no-cache"
+          }
+        });
+
+        if (usersResponse.ok) {
+          const users = await usersResponse.json();
+          console.log("EMERGENCY: Regular users response:", users);
+          if (Array.isArray(users)) {
+            setUserData(users);
+            return;
+          }
+        }
+      } catch (usersError) {
+        console.error("EMERGENCY: Users endpoint error:", usersError);
+      }
+      
+      // As absolute last resort, try with XHR
+      console.log("EMERGENCY: Trying XHR as last resort");
+      const xhr = new XMLHttpRequest();
+      const xhrUrl = `/api/admin/users?t=${timestamp}&xhr=true`;
+      console.log("EMERGENCY: XHR URL:", xhrUrl);
+      
+      xhr.open("GET", xhrUrl, true);
+      xhr.setRequestHeader("Cache-Control", "no-cache, no-store, must-revalidate, private, max-age=0");
+      xhr.setRequestHeader("Pragma", "no-cache");
+      xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+      xhr.setRequestHeader("X-Production-Emergency", "true");
+      xhr.withCredentials = true;
+      
+      xhr.onload = function() {
+        console.log("EMERGENCY: XHR status:", xhr.status);
+        console.log("EMERGENCY: XHR headers:", xhr.getAllResponseHeaders());
+        
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            console.log("EMERGENCY: XHR response text (first 100 chars):", xhr.responseText.substring(0, 100));
+            const xhrData = JSON.parse(xhr.responseText);
+            console.log("EMERGENCY: XHR parsed response:", xhrData);
+            if (Array.isArray(xhrData)) {
+              setUserData(xhrData);
+            } else {
+              setErrorMessage("XHR response not an array: " + typeof xhrData);
+            }
+          } catch (e) {
+            console.error("EMERGENCY: XHR parse error:", e);
+            setErrorMessage("XHR parse error: " + String(e));
+          }
+        } else {
+          console.error("EMERGENCY: XHR failed with status:", xhr.status);
+          setErrorMessage(`XHR request failed: ${xhr.status}`);
+        }
+      };
+      
+      xhr.onerror = function() {
+        console.error("EMERGENCY: XHR network error");
+        setErrorMessage("XHR network error");
+      };
+      
+      xhr.send();
     } catch (error) {
       console.error("EMERGENCY: Data load error:", error);
       setErrorMessage("Data load error: " + String(error));
@@ -341,10 +434,36 @@ export default function EmergencyAdmin() {
       {debugInfo ? (
         <div style={{ marginBottom: "30px" }}>
           <div>Connection Status: {debugInfo.dbConnectionOk ? "✅ Connected" : "❌ Failed"}</div>
-          <div>User Count: {debugInfo.userCount}</div>
           <div>Timestamp: {debugInfo.timestamp}</div>
+          
+          {debugInfo.databaseStats && (
+            <div style={{ marginTop: "10px", marginBottom: "10px" }}>
+              <h3>Database Counts:</h3>
+              <ul style={{ listStyleType: "none", padding: "10px", backgroundColor: "#f0f8ff", border: "1px solid #cce5ff", borderRadius: "4px" }}>
+                {Object.entries(debugInfo.databaseStats).map(([key, value]) => (
+                  <li key={key} style={{ marginBottom: "5px" }}>
+                    <strong>{key}:</strong> {String(value)}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          
+          {debugInfo.timing && (
+            <div style={{ marginTop: "10px", marginBottom: "10px" }}>
+              <h3>Query Times:</h3>
+              <ul style={{ listStyleType: "none", padding: "10px", backgroundColor: "#fff3cd", border: "1px solid #ffeeba", borderRadius: "4px" }}>
+                {Object.entries(debugInfo.timing).map(([key, value]) => (
+                  <li key={key} style={{ marginBottom: "5px" }}>
+                    <strong>{key}:</strong> {String(value)}ms
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          
           <div>
-            Session Info: 
+            <h3>Session Info:</h3>
             <pre style={{ backgroundColor: "#f5f5f5", padding: "10px", borderRadius: "4px", overflow: "auto" }}>
               {formatJSON(debugInfo.sessionInfo)}
             </pre>
