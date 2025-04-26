@@ -855,23 +855,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/admin/users", adminAuth, async (req: Request, res: Response) => {
     try {
-      console.log("Admin request: Fetching user data");
+      console.log("Admin request: Fetching user data", req.headers);
       
-      // Add caching prevention headers 
-      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      // Enhanced caching prevention headers for production environments 
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, private');
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
+      res.setHeader('Access-Control-Max-Age', '0');
+      res.setHeader('Surrogate-Control', 'no-store');
       
-      // Fetch user data from database
-      const users = await db.select().from(schema.users);
-      console.log(`Admin request: Found ${users.length} users`);
-      console.log("User data:", JSON.stringify(users, null, 2).substring(0, 500) + "...");
+      // Check for production force refresh header
+      const isForceRefresh = req.headers['x-production-force-refresh'] === 'true';
+      const isXHRFetch = req.headers['x-production-xhr-fetch'] === 'true';
       
-      // Add additional debugging information
-      res.setHeader('X-Data-Count', users.length.toString());
-      res.setHeader('X-Data-Time', new Date().toISOString());
+      if (isForceRefresh || isXHRFetch) {
+        console.log("Production force refresh request detected");
+      }
       
-      res.json(users);
+      // Set additional debug headers
+      res.setHeader('X-Request-Time', new Date().toISOString());
+      res.setHeader('X-Cache-Buster', Date.now().toString());
+      
+      // Fetch user data directly from database
+      try {
+        const users = await db.select().from(schema.users);
+        console.log(`Admin request: Found ${users.length} users`);
+        console.log("User data:", JSON.stringify(users, null, 2).substring(0, 500) + "...");
+        
+        // Add additional debugging information
+        res.setHeader('X-Data-Count', users.length.toString());
+        res.setHeader('X-Data-Time', new Date().toISOString());
+        
+        if (isXHRFetch) {
+          // Set additional headers for XHR requests
+          res.setHeader('X-Production-Response', 'true');
+        }
+        
+        // Return the response
+        return res.json(users);
+      } catch (dbError) {
+        console.error("Database error getting users:", dbError);
+        return res.status(500).json({ message: "Failed to get users from database" });
+      }
     } catch (error) {
       console.error("Error getting users:", error);
       res.status(500).json({ message: "Failed to get users" });

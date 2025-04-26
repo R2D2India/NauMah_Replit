@@ -46,6 +46,58 @@ export default function AdminPage() {
   const [medicationChecks, setMedicationChecks] = useState<any[]>([]);
   const [supportMessages, setSupportMessages] = useState<any[]>([]);
   const [dataLoading, setDataLoading] = useState(false);
+  
+  // Function to force refresh using XMLHttpRequest as a fallback
+  const forceRefreshWithXHR = () => {
+    console.log("Using XHR as fallback for data fetch");
+    try {
+      const xhr = new XMLHttpRequest();
+      const timestamp = Date.now();
+      
+      xhr.open('GET', `/api/admin/users?_=${timestamp}`, true);
+      xhr.setRequestHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      xhr.setRequestHeader('Pragma', 'no-cache');
+      xhr.setRequestHeader('Expires', '0');
+      xhr.setRequestHeader('X-Production-XHR-Fetch', 'true');
+      xhr.withCredentials = true;
+      
+      xhr.onload = function() {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          console.log("XHR response received, status:", xhr.status);
+          console.log("XHR response text (first 100 chars):", xhr.responseText.substring(0, 100) + "...");
+          
+          try {
+            const data = JSON.parse(xhr.responseText);
+            console.log("XHR fetch found", data.length, "users");
+            
+            if (Array.isArray(data) && data.length > 0) {
+              setUsers(data);
+              console.log("Users updated via XHR");
+              
+              // Force a UI update
+              setTimeout(() => {
+                const tempTab = activeTab;
+                setActiveTab("settings");
+                setTimeout(() => setActiveTab(tempTab), 50);
+              }, 200);
+            }
+          } catch (e) {
+            console.error("Failed to parse XHR JSON response", e);
+          }
+        } else {
+          console.error("XHR fetch failed with status:", xhr.status);
+        }
+      };
+      
+      xhr.onerror = function() {
+        console.error("XHR request failed");
+      };
+      
+      xhr.send();
+    } catch (e) {
+      console.error("XHR fallback failed", e);
+    }
+  };
 
   const loginForm = useForm({
     resolver: zodResolver(loginSchema),
@@ -162,6 +214,46 @@ export default function AdminPage() {
         
         setIsAdmin(true);
         setAdminEmail(data.username);
+        
+        // After login immediately try to load the user data
+        // with a production-specific approach for reliable data loading
+        setTimeout(async () => {
+          try {
+            console.log("Production post-login data load starting");
+            
+            // Create a unique cache buster
+            const timestamp = Date.now();
+            const random = Math.floor(Math.random() * 1000000);
+            const cacheBuster = `nocache=${timestamp}-${random}`;
+            
+            // Make the request with all cache prevention headers
+            const response = await fetch(`/api/admin/users?${cacheBuster}`, {
+              method: 'GET',
+              credentials: 'include',
+              headers: {
+                'Accept': 'application/json',
+                'Cache-Control': 'no-cache, no-store, must-revalidate, private',
+                'Pragma': 'no-cache',
+                'Expires': '0',
+                'X-Production-Login-Load': 'true'
+              }
+            });
+            
+            if (response.ok) {
+              const data = await response.json();
+              console.log("Post-login load found", data.length, "users");
+              
+              if (Array.isArray(data) && data.length > 0) {
+                setUsers(data);
+                console.log("User data loaded directly after login");
+              }
+            }
+          } catch (e) {
+            console.error("Post-login data load failed", e);
+            // If direct fetch fails, try XHR as fallback
+            forceRefreshWithXHR();
+          }
+        }, 500);
       } else {
         console.error("Login failed:", result.message);
         setLoginError(result.message || "Login failed");
@@ -486,25 +578,66 @@ export default function AdminPage() {
                         variant="link" 
                         size="sm"
                         onClick={async () => {
+                          console.log("Force refresh button clicked");
                           try {
-                            // Emergency direct data fetch for debugging
-                            const response = await fetch('/api/admin/users', {
+                            setDataLoading(true);
+                            // Use more aggressive cache prevention techniques for production
+                            const cacheBuster = `nocache=${Date.now()}-${Math.random()}`;
+                            const url = `/api/admin/users?${cacheBuster}`;
+                            
+                            console.log("Production emergency direct data fetch:", url);
+                            
+                            const response = await fetch(url, {
+                              method: 'GET',
                               credentials: 'include',
                               headers: {
-                                'Cache-Control': 'no-cache',
-                                'Pragma': 'no-cache'
+                                'Accept': 'application/json',
+                                'Cache-Control': 'no-cache, no-store, must-revalidate, private',
+                                'Pragma': 'no-cache',
+                                'Expires': '0',
+                                'X-Production-Force-Refresh': 'true'
                               }
                             });
+                            
                             if (response.ok) {
-                              const data = await response.json();
-                              console.log("Direct fetch found", data.length, "users");
-                              if (data.length > 0 && users.length === 0) {
-                                console.log("Forcing user data update");
-                                setUsers(data);
+                              console.log("Force refresh response status:", response.status);
+                              const responseText = await response.text();
+                              console.log("Force refresh raw response:", responseText.substring(0, 100) + "...");
+                              
+                              try {
+                                const data = JSON.parse(responseText);
+                                console.log("Force refresh direct fetch found", data.length, "users");
+                                
+                                // Always update the data, even if it appears empty first
+                                setUsers(Array.isArray(data) ? data : []);
+                                
+                                // Set state directly after a delay to ensure rendering
+                                setTimeout(() => {
+                                  if (Array.isArray(data) && data.length > 0) {
+                                    console.log("Setting users data with timeout:", data.length, "users");
+                                    setUsers(data);
+                                    
+                                    // Force a re-render by toggling a state variable
+                                    setActiveTab(prev => {
+                                      setTimeout(() => setActiveTab("users"), 10);
+                                      return "users";
+                                    });
+                                  }
+                                }, 500);
+                              } catch (jsonError) {
+                                console.error("JSON parse error:", jsonError);
+                                // Try again with a simpler fetch
+                                forceRefreshWithXHR();
                               }
+                            } else {
+                              console.error("Force refresh failed with status:", response.status);
+                              forceRefreshWithXHR();
                             }
                           } catch (e) {
                             console.error("Emergency fetch failed", e);
+                            forceRefreshWithXHR();
+                          } finally {
+                            setTimeout(() => setDataLoading(false), 1000);
                           }
                         }}
                       >
