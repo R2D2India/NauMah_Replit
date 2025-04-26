@@ -526,6 +526,14 @@ export default function AdminPage() {
                 Logged in as: <span className="font-semibold">{adminEmail}</span>
               </span>
             )}
+            <Button 
+              variant="secondary" 
+              size="sm" 
+              onClick={() => navigate('/admin/emergency')}
+              className="bg-amber-50 text-amber-700 hover:bg-amber-100 border-amber-300"
+            >
+              Emergency Mode
+            </Button>
             <Button variant="outline" size="sm" onClick={handleLogout}>
               Logout
             </Button>

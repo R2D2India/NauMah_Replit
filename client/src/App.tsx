@@ -54,6 +54,7 @@ function Router() {
         <AdminLayout>
           <Switch>
             <Route path="/admin" component={AdminPage} />
+            <Route path="/admin/emergency" component={lazy(() => import("./pages/admin/EmergencyAdmin"))} />
             <Route component={NotFound} />
           </Switch>
         </AdminLayout>
