@@ -64,7 +64,7 @@ export default function AdminPage() {
     },
   });
 
-  // Check admin session on load
+  // Check admin session on load and pre-load data
   useEffect(() => {
     const checkSession = async () => {
       try {
@@ -92,6 +92,29 @@ export default function AdminPage() {
           if (data.email) {
             setAdminEmail(data.email);
           }
+          
+          // Pre-load user data to ensure it's always available
+          try {
+            console.log("Pre-loading user data...");
+            const userResponse = await fetch("/api/admin/users", {
+              credentials: "include",
+              headers: {
+                "Accept": "application/json",
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+                "Pragma": "no-cache"
+              }
+            });
+            
+            if (userResponse.ok) {
+              const userData = await userResponse.json();
+              console.log(`Pre-loaded ${userData.length} users`);
+              if (Array.isArray(userData) && userData.length > 0) {
+                setUsers(userData);
+              }
+            }
+          } catch (userError) {
+            console.error("Error pre-loading user data:", userError);
+          }
         } else {
           console.log("No admin session found");
         }
@@ -112,21 +135,35 @@ export default function AdminPage() {
   const handleLogin = async (data: z.infer<typeof loginSchema>) => {
     try {
       setLoginError(null);
+      console.log("Attempting admin login with email:", data.username);
+      
       const response = await fetch("/api/admin/login", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache, no-store, must-revalidate"
         },
         credentials: "include",
         body: JSON.stringify(data)
       });
       
       const result = await response.json();
+      console.log("Login response:", result);
       
       if (result.success) {
+        console.log("Login successful, setting admin state");
+        
+        // Reset all data states before setting admin flag
+        setUsers([]);
+        setPregnancyData([]);
+        setMoodEntries([]);
+        setMedicationChecks([]);
+        setSupportMessages([]);
+        
         setIsAdmin(true);
         setAdminEmail(data.username);
       } else {
+        console.error("Login failed:", result.message);
         setLoginError(result.message || "Login failed");
       }
     } catch (error) {
@@ -205,12 +242,29 @@ export default function AdminPage() {
       }
       
       const data = await response.json();
-      console.log(`Data received from ${endpoint}: ${Array.isArray(data) ? data.length : 0} items`);
+      const dataCount = Array.isArray(data) ? data.length : 0;
+      const dataCountHeader = response.headers.get('X-Data-Count');
+      const dataTimeHeader = response.headers.get('X-Data-Time');
+      
+      console.log(`Data received from ${endpoint}: ${dataCount} items`);
+      console.log(`Response headers: X-Data-Count=${dataCountHeader}, X-Data-Time=${dataTimeHeader}`);
+      console.log(`First item sample:`, data.length > 0 ? JSON.stringify(data[0]) : 'No data');
       
       if (Array.isArray(data)) {
+        console.log(`Setting ${dataCount} items from ${endpoint}`);
         setterFunction(data);
+        
+        // Force a component update with a timeout
+        setTimeout(() => {
+          console.log(`Current state after setting ${endpoint} data:`, 
+            endpoint.includes('users') ? `${users.length} users` : 
+            endpoint.includes('pregnancy') ? `${pregnancyData.length} pregnancy records` : 
+            endpoint.includes('mood') ? `${moodEntries.length} mood entries` : 
+            endpoint.includes('medication') ? `${medicationChecks.length} medication checks` : 
+            endpoint.includes('support') ? `${supportMessages.length} support messages` : 'unknown');
+        }, 100);
       } else {
-        console.error(`Expected array but received: ${typeof data}`);
+        console.error(`Expected array but received: ${typeof data}`, data);
         setterFunction([]);
       }
     } catch (error) {
@@ -420,12 +474,42 @@ export default function AdminPage() {
                   </div>
                 ) : (
                   <div>
-                    <div className="text-sm text-muted-foreground mb-2">
-                      {users.length > 0 ? (
-                        <span>Showing {users.length} users</span>
-                      ) : (
-                        <span>No users found in database</span>
-                      )}
+                    <div className="text-sm text-muted-foreground mb-2 flex justify-between items-center">
+                      <span>
+                        {users.length > 0 ? (
+                          <span>Showing {users.length} users</span>
+                        ) : (
+                          <span>No users found in database</span>
+                        )}
+                      </span>
+                      <Button 
+                        variant="link" 
+                        size="sm"
+                        onClick={async () => {
+                          try {
+                            // Emergency direct data fetch for debugging
+                            const response = await fetch('/api/admin/users', {
+                              credentials: 'include',
+                              headers: {
+                                'Cache-Control': 'no-cache',
+                                'Pragma': 'no-cache'
+                              }
+                            });
+                            if (response.ok) {
+                              const data = await response.json();
+                              console.log("Direct fetch found", data.length, "users");
+                              if (data.length > 0 && users.length === 0) {
+                                console.log("Forcing user data update");
+                                setUsers(data);
+                              }
+                            }
+                          } catch (e) {
+                            console.error("Emergency fetch failed", e);
+                          }
+                        }}
+                      >
+                        Force Refresh
+                      </Button>
                     </div>
                     <Table>
                       <TableCaption>List of all registered users</TableCaption>
@@ -444,7 +528,17 @@ export default function AdminPage() {
                       <TableBody>
                         {users.length === 0 ? (
                           <TableRow>
-                            <TableCell colSpan={8} className="text-center">No users found</TableCell>
+                            <TableCell colSpan={8} className="text-center">
+                              <div>No users found</div>
+                              <Button 
+                                onClick={() => loadTabData("users")} 
+                                variant="ghost" 
+                                size="sm"
+                                className="mt-2"
+                              >
+                                Try Again
+                              </Button>
+                            </TableCell>
                           </TableRow>
                         ) : (
                           users.map((user) => (

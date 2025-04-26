@@ -865,6 +865,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Fetch user data from database
       const users = await db.select().from(schema.users);
       console.log(`Admin request: Found ${users.length} users`);
+      console.log("User data:", JSON.stringify(users, null, 2).substring(0, 500) + "...");
+      
+      // Add additional debugging information
+      res.setHeader('X-Data-Count', users.length.toString());
+      res.setHeader('X-Data-Time', new Date().toISOString());
       
       res.json(users);
     } catch (error) {
