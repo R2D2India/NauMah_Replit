@@ -244,8 +244,38 @@ export default function EmergencyAdmin() {
       setLoading(true);
       setErrorMessage(null);
       
-      console.log("EMERGENCY: Attempting admin login");
+      console.log("EMERGENCY: Attempting admin login via emergency endpoint");
       
+      // Try the emergency login endpoint first
+      try {
+        const emergencyResponse = await fetch("/api/admin/emergency-login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "X-Emergency-Request": "true"
+          },
+          credentials: "include",
+          body: JSON.stringify(loginData)
+        });
+        
+        const emergencyResult = await emergencyResponse.json();
+        console.log("EMERGENCY: Emergency login response:", emergencyResult);
+        
+        if (emergencyResult.success) {
+          console.log("EMERGENCY: Login successful via emergency endpoint");
+          setIsAdmin(true);
+          loadEmergencyData();
+          return;
+        } else {
+          console.log("EMERGENCY: Emergency login failed, trying regular endpoint");
+        }
+      } catch (emergencyError) {
+        console.error("EMERGENCY: Emergency login error:", emergencyError);
+      }
+      
+      // Fall back to regular admin login if emergency login failed
+      console.log("EMERGENCY: Attempting admin login via regular endpoint");
       const response = await fetch("/api/admin/login", {
         method: "POST",
         headers: {
@@ -257,7 +287,7 @@ export default function EmergencyAdmin() {
       });
       
       const result = await response.json();
-      console.log("EMERGENCY: Login response:", result);
+      console.log("EMERGENCY: Regular login response:", result);
       
       if (result.success) {
         setIsAdmin(true);

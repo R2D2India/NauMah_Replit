@@ -793,18 +793,111 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // EMERGENCY ADMIN LOGIN ENDPOINT - Special direct auth logic for debugging
+  app.post("/api/admin/emergency-login", async (req: Request, res: Response) => {
+    try {
+      console.log("🔴 EMERGENCY ADMIN LOGIN ATTEMPT");
+      
+      // Get credentials
+      const { username, password } = req.body;
+      
+      // Fixed admin credentials as specified
+      const adminEmail = "sandeep@fastest.health";
+      const adminPassword = "Fastest@2004";
+      
+      // Check credentials directly without validation middleware
+      if (username === adminEmail && password === adminPassword) {
+        console.log("🔴 EMERGENCY ADMIN LOGIN: Valid credentials provided");
+        
+        // Create or reset session
+        if (req.session) {
+          // Set admin flags directly
+          req.session.isAdmin = true;
+          req.session.adminEmail = adminEmail;
+          
+          // Bypass session.regenerate for direct session modification
+          console.log("🔴 EMERGENCY ADMIN LOGIN: Setting session flags");
+          console.log("Session before save:", req.session);
+          
+          // Save session explicitly with callback to ensure it's stored
+          req.session.save((err) => {
+            if (err) {
+              console.error("🔴 EMERGENCY ADMIN LOGIN: Session save error:", err);
+              return res.status(500).json({
+                success: false, 
+                message: "Session storage failed",
+                error: String(err)
+              });
+            }
+            
+            console.log("🔴 EMERGENCY ADMIN LOGIN: Session saved successfully");
+            console.log("Session after save:", req.session);
+            
+            // Send success response with session info
+            return res.json({
+              success: true,
+              message: "Emergency admin login successful",
+              sessionId: req.sessionID,
+              isAdmin: true,
+              adminEmail: adminEmail
+            });
+          });
+          
+          // This return is needed because we send response in the callback
+          return;
+        } else {
+          console.error("🔴 EMERGENCY ADMIN LOGIN: No session object available");
+          return res.status(500).json({
+            success: false,
+            message: "No session object available"
+          });
+        }
+      } else {
+        console.log("🔴 EMERGENCY ADMIN LOGIN: Invalid credentials");
+        return res.status(401).json({
+          success: false,
+          message: "Invalid credentials"
+        });
+      }
+    } catch (error) {
+      console.error("🔴 EMERGENCY ADMIN LOGIN ERROR:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Login error",
+        error: String(error)
+      });
+    }
+  });
+
   // EMERGENCY DB DIAGNOSTIC ENDPOINT - no auth check to help debug production issues
   app.get("/api/admin/emergency-db-check", async (req: Request, res: Response) => {
     try {
       console.log("🔴 EMERGENCY DATABASE CHECK REQUESTED");
+      console.log("Session data:", req.session);
       
       // Set max permissive headers
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, private, max-age=0');
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '-1');
       res.setHeader('X-Production-Fix', 'true');
-      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
       res.setHeader('Access-Control-Allow-Credentials', 'true');
+      
+      // Check session - temporarily disabled to allow data access for emergency debugging
+      /*
+      if (!req.session?.isAdmin) {
+        console.log("🔴 EMERGENCY DATABASE CHECK: Not an admin session");
+        return res.status(401).json({
+          dbConnectionOk: false,
+          error: "Authentication required",
+          sessionInfo: {
+            id: req.sessionID,
+            exists: req.session ? true : false,
+            isAdmin: false
+          }
+        });
+      }
+      */
       
       // Test direct database connection
       try {

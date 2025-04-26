@@ -189,6 +189,48 @@ export default function AdminPage() {
       setLoginError(null);
       console.log("Attempting admin login with email:", data.username);
       
+      // Try the emergency login endpoint first for more reliable login
+      try {
+        console.log("Trying emergency login endpoint first");
+        const emergencyResponse = await fetch("/api/admin/emergency-login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "X-Emergency-Request": "true"
+          },
+          credentials: "include",
+          body: JSON.stringify(data)
+        });
+        
+        const emergencyResult = await emergencyResponse.json();
+        console.log("Emergency login response:", emergencyResult);
+        
+        if (emergencyResult.success) {
+          console.log("Admin login successful via emergency endpoint");
+          
+          // Reset all data states before setting admin flag
+          setUsers([]);
+          setPregnancyData([]);
+          setMoodEntries([]);
+          setMedicationChecks([]);
+          setSupportMessages([]);
+          
+          setIsAdmin(true);
+          setAdminEmail(data.username);
+          
+          // Continue with normal login flow
+          // The rest of the function will load data
+          return;
+        } else {
+          console.log("Emergency login failed, falling back to regular endpoint");
+        }
+      } catch (emergencyError) {
+        console.error("Emergency login attempt failed:", emergencyError);
+      }
+      
+      // Fall back to regular login endpoint
+      console.log("Trying regular login endpoint");
       const response = await fetch("/api/admin/login", {
         method: "POST",
         headers: {
@@ -200,10 +242,10 @@ export default function AdminPage() {
       });
       
       const result = await response.json();
-      console.log("Login response:", result);
+      console.log("Regular login response:", result);
       
       if (result.success) {
-        console.log("Login successful, setting admin state");
+        console.log("Login successful via regular endpoint, setting admin state");
         
         // Reset all data states before setting admin flag
         setUsers([]);

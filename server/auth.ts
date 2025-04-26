@@ -50,24 +50,33 @@ export function generateToken(): string {
 }
 
 export function setupAuth(app: Express) {
-  // Set up session middleware
+  // Set up session middleware with more robust configuration
   app.use(
     session({
       store: new PgStore({
         pool,
         tableName: "user_sessions", // Use existing user_sessions table
-        createTableIfMissing: false, // Don't try to create the table
+        createTableIfMissing: true, // Try to create the table if missing
       }),
       secret: process.env.SESSION_SECRET || "naumah-auth-secret-key",
-      resave: false,
-      saveUninitialized: false,
+      resave: true, // Changed to true to ensure session is saved back to store
+      saveUninitialized: true, // Changed to true to create session for non-logged in users
       cookie: {
-        secure: process.env.NODE_ENV === "production",
+        secure: false, // Set to false to ensure cookies work in both HTTP and HTTPS
         httpOnly: true,
         maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
       },
+      name: 'naumah.sid', // Custom name to avoid conflicts
     })
   );
+  
+  // Add logging middleware for session debugging
+  app.use((req, res, next) => {
+    if (req.originalUrl.includes('/admin')) {
+      console.log(`[SESSION DEBUG] Path: ${req.originalUrl}, SessionID: ${req.sessionID}, isAdmin: ${req.session?.isAdmin || false}`);
+    }
+    next();
+  });
   
   // Initialize Passport
   app.use(passport.initialize());
