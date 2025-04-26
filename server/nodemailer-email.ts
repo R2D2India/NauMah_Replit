@@ -1,8 +1,13 @@
+/**
+ * Email implementation using Nodemailer with Ethereal for testing.
+ * Ethereal creates disposable test email accounts that don't require verified senders.
+ */
+
 import nodemailer from 'nodemailer';
 
 // NAUMAH support email address for replies
 export const NAUMAH_SUPPORT_EMAIL = 'asknaumah@gmail.com';
-// Simulated sender address
+// Simulated verified sender
 const NAUMAH_SENDER = 'noreply@naumah.com';
 
 // Store the test account information
@@ -27,20 +32,15 @@ async function createTestAccount() {
     }
   }
   
-  // If we have a test account, create a transporter
-  if (testAccount) {
-    return nodemailer.createTransport({
-      host: testAccount.smtp.host,
-      port: testAccount.smtp.port,
-      secure: testAccount.smtp.secure,
-      auth: {
-        user: testAccount.user,
-        pass: testAccount.pass,
-      },
-    });
-  }
-  
-  return null;
+  return nodemailer.createTransport({
+    host: testAccount.smtp.host,
+    port: testAccount.smtp.port,
+    secure: testAccount.smtp.secure,
+    auth: {
+      user: testAccount.user,
+      pass: testAccount.pass,
+    },
+  });
 }
 
 interface EmailOptions {
@@ -270,18 +270,18 @@ export async function sendWelcomeEmail(
     userId: user.id,
     emailType: 'welcome',
     emailTo: user.email,
-    emailFrom: NAUMAH_SUPPORT_EMAIL,
+    emailFrom: NAUMAH_SENDER,
     subject: subject,
     status: 'pending',
     statusDetails: 'Email sending initiated'
   });
   
   try {
-    // Send email using Nodemailer/Ethereal
+    // Send email using nodemailer/ethereal
     const result = await sendEmail({
       to: user.email,
-      from: NAUMAH_SENDER, // Use our simulated sender
-      replyTo: NAUMAH_SUPPORT_EMAIL, // Set reply-to as our support email
+      from: NAUMAH_SENDER,
+      replyTo: NAUMAH_SUPPORT_EMAIL,
       subject,
       html
     });
@@ -294,7 +294,7 @@ export async function sendWelcomeEmail(
       emailFrom: NAUMAH_SENDER,
       subject: subject,
       status: result ? 'sent' : 'failed',
-      statusDetails: result ? 'Email sent successfully (testmode)' : 'Failed to send email'
+      statusDetails: result ? 'Email sent successfully' : 'Failed to send email'
     });
     
     return result;
