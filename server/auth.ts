@@ -501,6 +501,7 @@ export function setupAuth(app: Express) {
         // Track the error
         try {
           const { storage } = await import('./storage');
+          const { NAUMAH_SUPPORT_EMAIL } = await import('./email');
           await storage.trackEmail({
             userId: user.id,
             emailType: 'password-reset',
@@ -508,7 +509,7 @@ export function setupAuth(app: Express) {
             emailFrom: NAUMAH_SUPPORT_EMAIL,
             subject: 'Reset Your NauMah Password',
             status: 'failed',
-            statusDetails: `Error: ${emailError.message || 'Unknown error'}`
+            statusDetails: `Error: ${(emailError as Error).message || 'Unknown error'}`
           });
         } catch (trackError) {
           console.error("Error tracking password reset email failure:", trackError);

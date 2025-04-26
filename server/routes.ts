@@ -1458,6 +1458,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Email tracking admin endpoints
+  app.get("/api/admin/email-tracking", adminAuth, async (req: Request, res: Response) => {
+    try {
+      console.log("Admin request: Fetching email tracking data");
+      
+      // Add caching prevention headers
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      
+      const emailTracking = await storage.getAllEmailTracking();
+      console.log(`Admin request: Found ${emailTracking.length} email tracking records`);
+      
+      // Enhance tracking data with user details
+      const enhancedData = await Promise.all(emailTracking.map(async (entry) => {
+        try {
+          const user = await storage.getUser(entry.userId);
+          return {
+            ...entry,
+            userDetails: user ? {
+              username: user.username,
+              email: user.email
+            } : undefined
+          };
+        } catch (error) {
+          console.error(`Error fetching user details for tracking entry ${entry.id}:`, error);
+          return entry;
+        }
+      }));
+      
+      res.json(enhancedData);
+    } catch (error) {
+      console.error("Error getting email tracking data:", error);
+      res.status(500).json({ message: "Failed to get email tracking data" });
+    }
+  });
+  
   // Support messages admin endpoints
   app.get("/api/admin/support-messages", adminAuth, async (req: Request, res: Response) => {
     try {

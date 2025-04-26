@@ -121,14 +121,14 @@ export function EmailTracking() {
   );
 
   // Get status badge variant based on email status
-  const getStatusBadgeVariant = (status: string) => {
+  const getStatusBadgeVariant = (status: string): "destructive" | "secondary" | "default" | "outline" => {
     switch (status.toLowerCase()) {
       case 'sent':
-        return 'success';
+        return 'default'; // use default (green) for success
       case 'pending':
-        return 'warning';
+        return 'outline'; // use outline for warning/pending
       case 'failed':
-        return 'destructive';
+        return 'destructive'; // use destructive for failures
       default:
         return 'secondary';
     }
@@ -272,7 +272,7 @@ export function EmailTracking() {
 // Table component extracted to avoid duplication in tabs
 interface EmailTrackingTableProps {
   data: EmailTrackingEntry[];
-  getStatusBadgeVariant: (status: string) => string;
+  getStatusBadgeVariant: (status: string) => "destructive" | "secondary" | "default" | "outline";
   formatDate: (dateString: string) => string;
 }
 
