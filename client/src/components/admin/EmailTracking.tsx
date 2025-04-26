@@ -59,8 +59,12 @@ export function EmailTracking() {
     queryKey: ['/api/admin/email-tracking'],
     queryFn: async () => {
       try {
-        const response = await apiRequest('GET', '/api/admin/email-tracking');
-        return await response.json();
+        return await apiRequest<EmailTrackingEntry[]>('/api/admin/email-tracking', {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
       } catch (error) {
         console.error("Failed to fetch email tracking data:", error);
         throw error;

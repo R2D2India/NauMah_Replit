@@ -46,6 +46,7 @@ export default function AdminPage() {
   const [moodEntries, setMoodEntries] = useState<any[]>([]);
   const [medicationChecks, setMedicationChecks] = useState<any[]>([]);
   const [supportMessages, setSupportMessages] = useState<any[]>([]);
+  const [emailTrackingData, setEmailTrackingData] = useState<any[]>([]);
   const [dataLoading, setDataLoading] = useState(false);
   
   // Function to force refresh using XMLHttpRequest as a fallback
@@ -353,6 +354,7 @@ export default function AdminPage() {
           setMoodEntries([]);
           setMedicationChecks([]);
           setSupportMessages([]);
+          setEmailTrackingData([]);
           
           setIsAdmin(true);
           setAdminEmail(data.username);
@@ -391,6 +393,7 @@ export default function AdminPage() {
         setMoodEntries([]);
         setMedicationChecks([]);
         setSupportMessages([]);
+        setEmailTrackingData([]);
         
         setIsAdmin(true);
         setAdminEmail(data.username);
@@ -571,6 +574,9 @@ export default function AdminPage() {
         break;
       case "support":
         await fetchData("/api/admin/support-messages", setSupportMessages);
+        break;
+      case "emails":
+        await fetchData("/api/admin/email-tracking", setEmailTrackingData);
         break;
       case "settings":
         // No data to load for settings tab
