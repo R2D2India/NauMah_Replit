@@ -12,17 +12,127 @@ export default function EmergencyAdmin() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [statusMessage, setStatusMessage] = useState<{text: string, type: 'info' | 'success' | 'warning' | 'error'} | null>(null);
   const [debugInfo, setDebugInfo] = useState<any>(null);
   const [userData, setUserData] = useState<any[]>([]);
   const [loginData, setLoginData] = useState({
-    username: "",
-    password: "",
+    username: "sandeep@fastest.health",
+    password: "Fastest@2004",
   });
 
   // Check admin session on load
   useEffect(() => {
     checkAdminSession();
   }, []);
+  
+  // Monitor for server restarts
+  useEffect(() => {
+    // Function to handle the Vite server connection status
+    const handleServerStatus = (event: MessageEvent) => {
+      try {
+        // Check for server restart messages
+        if (typeof event.data === 'string') {
+          // If we detect the message "server connection lost" or "connected", it's a server restart
+          if (event.data.includes('server connection lost')) {
+            console.log("⚠️ EMERGENCY: SERVER RESTART DETECTED - Connection lost");
+            setStatusMessage({
+              text: "Server connection lost. Will attempt to reconnect...",
+              type: 'warning'
+            });
+          } else if (event.data.includes('connected')) {
+            console.log("⚠️ EMERGENCY: SERVER RESTART DETECTED - Reconnected");
+            setStatusMessage({
+              text: "Server reconnected. Attempting to restore session...",
+              type: 'info'
+            });
+            
+            // Delay the reconnection to allow the server to fully start
+            setTimeout(() => {
+              console.log("⚠️ EMERGENCY: Attempting to restore admin session after server restart");
+              // Try to reconnect with Basic Auth
+              reconnectAfterServerRestart();
+            }, 2000);
+          }
+        }
+      } catch (error) {
+        console.error("EMERGENCY: Error processing server status message:", error);
+      }
+    };
+    
+    // Add listener for server restart detection
+    window.addEventListener('message', handleServerStatus);
+    
+    // Clean up
+    return () => {
+      window.removeEventListener('message', handleServerStatus);
+    };
+  }, []);
+  
+  // Reconnect function to be called after server restart
+  const reconnectAfterServerRestart = async () => {
+    try {
+      console.log("⚠️ EMERGENCY: Executing reconnection process after server restart");
+      setStatusMessage({
+        text: "Attempting emergency reconnection after server restart...",
+        type: 'info'
+      });
+      
+      // Create Basic Auth header for direct authentication
+      const adminEmail = "sandeep@fastest.health";
+      const adminPassword = "Fastest@2004";
+      const basicAuthHeader = `Basic ${btoa(`${adminEmail}:${adminPassword}`)}`;
+      
+      // Use direct status endpoint with Basic Auth
+      const timestamp = Date.now();
+      const directResponse = await fetch(`/api/admin/direct-status?t=${timestamp}&reconnect=true&emergency=true`, {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Accept": "application/json",
+          "Cache-Control": "no-cache, no-store, must-revalidate, private, max-age=0",
+          "Pragma": "no-cache",
+          "Expires": "0",
+          "Authorization": basicAuthHeader,
+          "X-Server-Restart": "true",
+          "X-Emergency-Request": "true"
+        }
+      });
+      
+      if (directResponse.ok) {
+        const directData = await directResponse.json();
+        console.log("⚠️ EMERGENCY: Reconnection response:", directData);
+        
+        if (directData.isAdmin) {
+          console.log("✅ EMERGENCY: Successfully reconnected admin session after server restart");
+          setStatusMessage({
+            text: "Admin session successfully restored after server restart!",
+            type: 'success'
+          });
+          setIsAdmin(true);
+          // Reload emergency data
+          loadEmergencyData();
+        } else {
+          console.log("❌ EMERGENCY: Failed to reconnect admin session, will try login");
+          setStatusMessage({
+            text: "Failed to restore session. Attempting emergency login...",
+            type: 'warning'
+          });
+          // Attempt an emergency login
+          handleEmergencyLogin();
+        }
+      } else {
+        throw new Error(`HTTP error ${directResponse.status}`);
+      }
+    } catch (error) {
+      console.error("⚠️ EMERGENCY: Error during reconnection:", error);
+      setStatusMessage({
+        text: `Reconnection failed: ${error.message}. Attempting emergency login...`,
+        type: 'error'
+      });
+      // Try emergency login as a last resort
+      handleEmergencyLogin();
+    }
+  };
 
   const checkAdminSession = async () => {
     try {

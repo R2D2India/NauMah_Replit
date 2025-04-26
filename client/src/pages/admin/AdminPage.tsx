@@ -116,6 +116,86 @@ export default function AdminPage() {
     },
   });
 
+  // Monitor for server restarts
+  useEffect(() => {
+    // Function to handle the Vite server connection status
+    const handleServerStatus = (event: MessageEvent) => {
+      try {
+        // Check for server restart messages
+        if (typeof event.data === 'string') {
+          // If we detect the message "server connection lost" or "connected", it's a server restart
+          if (event.data.includes('server connection lost') || event.data.includes('connected')) {
+            console.log("⚠️ SERVER RESTART DETECTED - Will attempt to reconnect admin session");
+            
+            // Delay the reconnection to allow the server to fully start
+            setTimeout(() => {
+              if (isAdmin) {
+                console.log("⚠️ Attempting to restore admin session after server restart");
+                // Reconnect using direct status with Basic Auth credentials
+                reconnectAfterServerRestart();
+              }
+            }, 2000);
+          }
+        }
+      } catch (error) {
+        console.error("Error processing server status message:", error);
+      }
+    };
+    
+    // Add listener for server restart detection
+    window.addEventListener('message', handleServerStatus);
+    
+    // Clean up
+    return () => {
+      window.removeEventListener('message', handleServerStatus);
+    };
+  }, [isAdmin]);
+  
+  // Reconnect function to be called after server restart
+  const reconnectAfterServerRestart = async () => {
+    try {
+      console.log("⚠️ Executing reconnection process after server restart");
+      
+      // Create Basic Auth header for direct authentication
+      const adminEmail = "sandeep@fastest.health";
+      const adminPassword = "Fastest@2004";
+      const basicAuthHeader = `Basic ${btoa(`${adminEmail}:${adminPassword}`)}`;
+      
+      // Use direct status endpoint with Basic Auth
+      const timestamp = Date.now();
+      const directResponse = await fetch(`/api/admin/direct-status?t=${timestamp}&reconnect=true`, {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Accept": "application/json",
+          "Cache-Control": "no-cache, no-store, must-revalidate, private, max-age=0",
+          "Pragma": "no-cache",
+          "Expires": "0",
+          "Authorization": basicAuthHeader,
+          "X-Server-Restart": "true"
+        }
+      });
+      
+      if (directResponse.ok) {
+        const directData = await directResponse.json();
+        console.log("⚠️ Reconnection response:", directData);
+        
+        if (directData.isAdmin) {
+          console.log("✅ Successfully reconnected admin session after server restart");
+          
+          // Reload the current data tab to refresh the data
+          loadTabData(activeTab);
+        } else {
+          console.log("❌ Failed to reconnect admin session, will try again");
+          // Wait a bit longer and try again
+          setTimeout(reconnectAfterServerRestart, 3000);
+        }
+      }
+    } catch (error) {
+      console.error("⚠️ Error during reconnection:", error);
+    }
+  };
+
   // Check admin session on load and pre-load data
   useEffect(() => {
     const checkSession = async () => {
