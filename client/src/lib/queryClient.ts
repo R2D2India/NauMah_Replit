@@ -11,9 +11,26 @@ export async function apiRequest<T = any>(
   url: string,
   options?: RequestInit
 ): Promise<T> {
+  // Determine if this is an admin endpoint that needs Basic Auth
+  const isAdminEndpoint = url.includes('/api/admin/');
+  
+  // Set up headers
+  let headers: HeadersInit = {
+    ...(options?.headers || {}),
+  };
+  
+  // Add Basic Auth for admin endpoints (if not already provided)
+  if (isAdminEndpoint && !headers['Authorization']) {
+    const adminEmail = "sandeep@fastest.health";
+    const adminPassword = "Fastest@2004";
+    const basicAuthHeader = `Basic ${btoa(`${adminEmail}:${adminPassword}`)}`;
+    headers["Authorization"] = basicAuthHeader;
+  }
+  
   const res = await fetch(url, {
     credentials: "include",
-    ...options
+    ...options,
+    headers
   });
 
   await throwIfResNotOk(res);
@@ -44,14 +61,30 @@ export const getQueryFn: <T>(options: {
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     console.log("Fetching:", queryKey[0]);
-    const res = await fetch(queryKey[0] as string, {
+    const url = queryKey[0] as string;
+    
+    // Determine if this is an admin endpoint that needs Basic Auth
+    const isAdminEndpoint = url.includes('/api/admin/');
+    
+    // Set up basic headers
+    let headers: HeadersInit = {
+      "Accept": "application/json"
+    };
+    
+    // Add Basic Auth for admin endpoints
+    if (isAdminEndpoint) {
+      const adminEmail = "sandeep@fastest.health";
+      const adminPassword = "Fastest@2004";
+      const basicAuthHeader = `Basic ${btoa(`${adminEmail}:${adminPassword}`)}`;
+      headers["Authorization"] = basicAuthHeader;
+    }
+    
+    const res = await fetch(url, {
       credentials: "include",
-      headers: {
-        "Accept": "application/json"
-      }
+      headers
     });
     
-    console.log("Response status:", res.status, "for", queryKey[0]);
+    console.log("Response status:", res.status, "for", url);
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
       console.log("Unauthorized but configured to return null");
@@ -60,7 +93,7 @@ export const getQueryFn: <T>(options: {
 
     await throwIfResNotOk(res);
     const data = await res.json();
-    console.log("Response data:", data, "for", queryKey[0]);
+    console.log("Response data:", data, "for", url);
     return data;
   };
 
