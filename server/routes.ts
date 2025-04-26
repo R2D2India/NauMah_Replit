@@ -712,30 +712,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (username === adminEmail && password === adminPassword) {
         // Set admin session
         if (req.session) {
-          req.session.isAdmin = true;
-          req.session.adminEmail = adminEmail;
-          console.log("Admin session set:", { 
-            isAdmin: req.session.isAdmin, 
-            adminEmail: req.session.adminEmail,
-            sessionID: req.sessionID 
+          // First regenerate the session to prevent session fixation
+          req.session.regenerate((regErr) => {
+            if (regErr) {
+              console.error("Error regenerating session:", regErr);
+              return res.status(500).json({ success: false, message: "Session error" });
+            }
+            
+            // Set admin flags on regenerated session
+            req.session.isAdmin = true;
+            req.session.adminEmail = adminEmail;
+            
+            console.log("Admin session set:", { 
+              isAdmin: req.session.isAdmin, 
+              adminEmail: req.session.adminEmail,
+              sessionID: req.sessionID 
+            });
+            
+            // Save session explicitly to ensure persistence
+            req.session.save((saveErr) => {
+              if (saveErr) {
+                console.error("Error saving admin session:", saveErr);
+                return res.status(500).json({ success: false, message: "Session save error" });
+              }
+              
+              console.log("Admin session saved successfully");
+              return res.json({ 
+                success: true, 
+                message: "Admin login successful",
+                sessionId: req.sessionID,
+                isAdmin: true,
+                adminEmail: adminEmail
+              });
+            });
           });
           
-          // Save session explicitly to ensure persistence
-          req.session.save(err => {
-            if (err) {
-              console.error("Error saving admin session:", err);
-            } else {
-              console.log("Admin session saved successfully");
-            }
-          });
+          // This return is needed because we send the response inside the callbacks
+          return;
         } else {
           console.error("Session object not available in request");
+          return res.status(500).json({ success: false, message: "Session not available" });
         }
-        
-        return res.json({ 
-          success: true, 
-          message: "Admin login successful" 
-        });
       }
       
       return res.status(401).json({ 
