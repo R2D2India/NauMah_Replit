@@ -26,6 +26,7 @@ declare module "express-session" {
     isAdmin?: boolean;
     userId?: number; // Add userId to store unique user identifier
     adminEmail?: string; // Admin email for session
+    isEmergencyAccess?: boolean; // Flag for emergency admin access
     passport?: {
       user: number; // User ID for authenticated users
     };

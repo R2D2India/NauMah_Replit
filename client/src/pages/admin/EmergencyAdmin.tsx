@@ -123,10 +123,10 @@ export default function EmergencyAdmin() {
       } else {
         throw new Error(`HTTP error ${directResponse.status}`);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("⚠️ EMERGENCY: Error during reconnection:", error);
       setStatusMessage({
-        text: `Reconnection failed: ${error.message}. Attempting emergency login...`,
+        text: `Reconnection failed: ${error.message || "Unknown error"}. Attempting emergency login...`,
         type: 'error'
       });
       // Try emergency login as a last resort
@@ -246,6 +246,56 @@ export default function EmergencyAdmin() {
     }
   };
 
+  // Emergency login function for server restart recovery
+  const handleEmergencyLogin = async () => {
+    try {
+      console.log("⚠️ EMERGENCY LOGIN: Attempting emergency login after server restart");
+      setStatusMessage({
+        text: "Attempting emergency login...",
+        type: 'info'
+      });
+      
+      // Use the emergency login endpoint with credentials
+      const response = await fetch("/api/admin/emergency-login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          "X-Emergency-Request": "true"
+        },
+        credentials: "include",
+        body: JSON.stringify(loginData)
+      });
+      
+      const result = await response.json();
+      console.log("⚠️ EMERGENCY LOGIN RESPONSE:", result);
+      
+      if (result.success) {
+        console.log("✅ EMERGENCY LOGIN: Success!");
+        setStatusMessage({
+          text: "Emergency login successful! Session restored.",
+          type: 'success'
+        });
+        setIsAdmin(true);
+        
+        // Load emergency data after successful login
+        loadEmergencyData();
+      } else {
+        console.error("❌ EMERGENCY LOGIN: Failed", result);
+        setStatusMessage({
+          text: `Emergency login failed: ${result.message || "Unknown error"}`,
+          type: 'error'
+        });
+      }
+    } catch (error: any) {
+      console.error("❌ EMERGENCY LOGIN ERROR:", error);
+      setStatusMessage({
+        text: `Emergency login error: ${error.message || "Unknown error"}`,
+        type: 'error'
+      });
+    }
+  };
+  
   const loadEmergencyData = async () => {
     try {
       console.log("EMERGENCY: Loading diagnostic data");
