@@ -26,31 +26,107 @@ export default function EmergencyAdmin() {
 
   const checkAdminSession = async () => {
     try {
-      console.log("EMERGENCY: Checking admin session");
-      const timestamp = Date.now();
-      const response = await fetch(`/api/admin/session?t=${timestamp}`, {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          "Accept": "application/json",
-          "Cache-Control": "no-cache, no-store, must-revalidate, private",
-          "Pragma": "no-cache",
-          "Expires": "0"
+      console.log("EMERGENCY: Checking admin session via multiple methods");
+      setErrorMessage(null);
+      
+      // Try multiple authentication methods, starting with the most reliable
+      
+      // 1. Try the direct status check first (most reliable)
+      try {
+        console.log("EMERGENCY: Trying direct-status endpoint");
+        const timestamp = Date.now();
+        const directResponse = await fetch(`/api/admin/direct-status?t=${timestamp}`, {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Accept": "application/json",
+            "Cache-Control": "no-cache, no-store, must-revalidate, private, max-age=0",
+            "Pragma": "no-cache",
+            "Expires": "0",
+            "X-Emergency-Request": "true"
+          }
+        });
+        
+        if (directResponse.ok) {
+          const directData = await directResponse.json();
+          console.log("EMERGENCY: Direct status response:", directData);
+          
+          if (directData.isAdmin) {
+            console.log("EMERGENCY: Admin authenticated via direct status check");
+            setIsAdmin(true);
+            loadEmergencyData();
+            return;
+          } else {
+            console.log("EMERGENCY: Not admin via direct status check, trying other methods");
+          }
         }
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error ${response.status}`);
+      } catch (directError) {
+        console.error("EMERGENCY: Direct status check error:", directError);
       }
-
-      const data = await response.json();
-      console.log("EMERGENCY: Admin session response:", data);
-
-      if (data.isAdmin) {
-        setIsAdmin(true);
-        loadEmergencyData();
-      } else {
-        setIsAdmin(false);
+      
+      // 2. Fall back to the regular session check
+      try {
+        console.log("EMERGENCY: Trying regular session endpoint");
+        const timestamp = Date.now();
+        const sessionResponse = await fetch(`/api/admin/session?t=${timestamp}`, {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Accept": "application/json",
+            "Cache-Control": "no-cache, no-store, must-revalidate, private",
+            "Pragma": "no-cache",
+            "Expires": "0"
+          }
+        });
+        
+        if (sessionResponse.ok) {
+          const sessionData = await sessionResponse.json();
+          console.log("EMERGENCY: Regular session response:", sessionData);
+          
+          if (sessionData.isAdmin) {
+            console.log("EMERGENCY: Admin authenticated via regular session check");
+            setIsAdmin(true);
+            loadEmergencyData();
+            return;
+          } else {
+            console.log("EMERGENCY: Not admin via regular session, falling back to emergency db check");
+            setIsAdmin(false);
+          }
+        }
+      } catch (sessionError) {
+        console.error("EMERGENCY: Regular session check error:", sessionError);
+      }
+      
+      // 3. Try the emergency database check as a last resort
+      try {
+        console.log("EMERGENCY: Trying emergency-db-check endpoint (direct DB access)");
+        const timestamp = Date.now();
+        const emergencyResponse = await fetch(`/api/admin/emergency-db-check?t=${timestamp}`, {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Accept": "application/json",
+            "Cache-Control": "no-cache, no-store, must-revalidate, private, max-age=0",
+            "Pragma": "no-cache",
+            "Expires": "0"
+          }
+        });
+        
+        if (emergencyResponse.ok) {
+          const emergencyData = await emergencyResponse.json();
+          console.log("EMERGENCY: Emergency DB check response:", emergencyData);
+          
+          // Useful diagnostic info but not auth - we're now in emergency data access mode
+          if (emergencyData.dbConnectionOk) {
+            setDebugInfo(emergencyData);
+            if (emergencyData.fullData && Array.isArray(emergencyData.fullData)) {
+              setUserData(emergencyData.fullData);
+              console.log("EMERGENCY: Got data from emergency DB check");
+            }
+          }
+        }
+      } catch (emergencyError) {
+        console.error("EMERGENCY: Emergency DB check error:", emergencyError);
       }
     } catch (error) {
       console.error("EMERGENCY: Session check error:", error);
@@ -447,10 +523,25 @@ export default function EmergencyAdmin() {
             padding: "5px 10px",
             border: "none",
             borderRadius: "4px",
-            cursor: "pointer"
+            cursor: "pointer",
+            marginRight: "10px"
           }}
         >
           Force Refresh Data
+        </button>
+        
+        <button
+          onClick={checkAdminSession}
+          style={{ 
+            backgroundColor: "#4285F4",
+            color: "white",
+            padding: "5px 10px",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer"
+          }}
+        >
+          Check Auth Status
         </button>
       </div>
       

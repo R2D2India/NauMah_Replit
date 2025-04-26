@@ -663,38 +663,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin routes
-  // Admin session check middleware
+  // Enhanced admin session check middleware with multiple auth methods
   const adminAuth = (req: Request, res: Response, next: NextFunction) => {
-    console.log("Admin auth middleware - Session ID:", req.sessionID);
-    console.log("Admin auth middleware - Session data:", req.session);
+    console.log("🔄 Admin auth middleware - Session ID:", req.sessionID);
+    console.log("🔄 Admin auth middleware - Session data:", req.session);
     
-    // Check if admin session exists
+    // Method 1: Check if admin session exists (fastest path)
     if (req.session && req.session.isAdmin) {
-      console.log("Admin auth passed - Valid admin session found");
+      console.log("✅ Admin auth passed - Valid admin session found");
       return next();
     }
     
-    // If no session, check for API key (for backward compatibility)
+    // Method 2: Check for API key in Bearer token (for backward compatibility)
     const adminKey = process.env.ADMIN_KEY;
     const authHeader = req.headers.authorization;
 
-    if (adminKey && authHeader === `Bearer ${adminKey}`) {
-      console.log("Admin auth passed - Valid API key provided");
-      // If using API key, let's also set the session for future requests
+    if (adminKey && authHeader) {
+      // Check Bearer token
+      if (authHeader.startsWith('Bearer ')) {
+        const token = authHeader.split(' ')[1];
+        if (token === adminKey) {
+          console.log("✅ Admin auth passed - Valid Bearer token provided");
+          // If using API key, let's also set the session for future requests
+          if (req.session) {
+            req.session.isAdmin = true;
+            req.session.adminEmail = "sandeep@fastest.health";
+            
+            req.session.save(err => {
+              if (err) {
+                console.error("❌ Error saving admin session from API key:", err);
+              } else {
+                console.log("✅ Admin session saved from Bearer token");
+              }
+            });
+          }
+          return next();
+        }
+      }
+      
+      // Method 3: Check Basic Auth
+      if (authHeader.startsWith('Basic ')) {
+        try {
+          // Extract and decode credentials
+          const base64Credentials = authHeader.split(' ')[1];
+          const credentials = Buffer.from(base64Credentials, 'base64').toString('utf-8');
+          const [username, password] = credentials.split(':');
+          
+          // Fixed admin credentials
+          const adminEmail = "sandeep@fastest.health";
+          const adminPassword = "Fastest@2004";
+          
+          if (username === adminEmail && password === adminPassword) {
+            console.log("✅ Admin auth passed - Valid Basic Auth credentials");
+            
+            // Set session data for future requests
+            if (req.session) {
+              req.session.isAdmin = true;
+              req.session.adminEmail = adminEmail;
+              
+              // Save session
+              req.session.save((err) => {
+                if (err) {
+                  console.error("❌ Error saving admin session from Basic Auth:", err);
+                } else {
+                  console.log("✅ Admin session saved from Basic Auth");
+                }
+              });
+            }
+            
+            return next();
+          }
+        } catch (authError) {
+          console.error("❌ Basic Auth parsing error:", authError);
+        }
+      }
+    }
+    
+    // Method 4: Check query parameters for emergency access
+    const emergencyKey = req.query.emergency_key;
+    if (emergencyKey === process.env.ADMIN_KEY) {
+      console.log("✅ Admin auth passed - Valid emergency key in query params");
+      
+      // Set session data for future requests
       if (req.session) {
         req.session.isAdmin = true;
         req.session.adminEmail = "sandeep@fastest.health";
         
-        req.session.save(err => {
+        // Save session
+        req.session.save((err) => {
           if (err) {
-            console.error("Error saving admin session from API key:", err);
+            console.error("❌ Error saving admin session from emergency key:", err);
+          } else {
+            console.log("✅ Admin session saved from emergency key");
           }
         });
       }
+      
       return next();
     }
     
-    console.log("Admin auth failed - No valid session or API key");
+    console.log("❌ Admin auth failed - No valid authentication method found");
     return res.status(401).json({ message: "Unauthorized" });
   };
   
@@ -1028,7 +1096,122 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin session check
+  // Direct database check for admin status - useful for emergency admin page
+  app.get("/api/admin/direct-status", async (req: Request, res: Response) => {
+    console.log("🔴 DIRECT ADMIN STATUS CHECK - Session ID:", req.sessionID);
+    
+    // Set aggressive anti-caching headers
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, private, max-age=0');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '-1');
+    res.setHeader('Vary', '*');
+    res.setHeader('ETag', Date.now().toString());
+    res.setHeader('X-Direct-Check', 'true');
+    
+    try {
+      // First, check session data (fastest path)
+      if (req.session && req.session.isAdmin) {
+        console.log("🔴 DIRECT ADMIN CHECK: Found isAdmin flag in session");
+        return res.status(200).json({
+          isAdmin: true,
+          email: req.session.adminEmail || null,
+          method: "session",
+          timestamp: new Date().toISOString(),
+          sessionId: req.sessionID
+        });
+      }
+      
+      // If authentication headers are provided, try direct credential check
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith('Basic ')) {
+        try {
+          // Extract and decode credentials
+          const base64Credentials = authHeader.split(' ')[1];
+          const credentials = Buffer.from(base64Credentials, 'base64').toString('utf-8');
+          const [username, password] = credentials.split(':');
+          
+          // Fixed admin credentials
+          const adminEmail = "sandeep@fastest.health";
+          const adminPassword = "Fastest@2004";
+          
+          if (username === adminEmail && password === adminPassword) {
+            console.log("🔴 DIRECT ADMIN CHECK: Valid Basic Auth credentials");
+            
+            // Set session data for future requests
+            if (req.session) {
+              req.session.isAdmin = true;
+              req.session.adminEmail = adminEmail;
+              
+              // Save session
+              req.session.save((err) => {
+                if (err) {
+                  console.error("Error saving admin session from Basic Auth:", err);
+                } else {
+                  console.log("Admin session saved from Basic Auth");
+                }
+              });
+            }
+            
+            return res.status(200).json({
+              isAdmin: true,
+              email: adminEmail,
+              method: "basicAuth",
+              timestamp: new Date().toISOString(),
+              sessionId: req.sessionID
+            });
+          }
+        } catch (authError) {
+          console.error("🔴 DIRECT ADMIN CHECK: Basic Auth parsing error:", authError);
+        }
+      }
+      
+      // Last resort - check query parameters for emergency access
+      const emergencyKey = req.query.emergency_key;
+      if (emergencyKey === process.env.ADMIN_KEY) {
+        console.log("🔴 DIRECT ADMIN CHECK: Valid emergency key in query params");
+        
+        // Set session data for future requests
+        if (req.session) {
+          req.session.isAdmin = true;
+          req.session.adminEmail = "sandeep@fastest.health";
+          
+          // Save session
+          req.session.save((err) => {
+            if (err) {
+              console.error("Error saving admin session from emergency key:", err);
+            } else {
+              console.log("Admin session saved from emergency key");
+            }
+          });
+        }
+        
+        return res.status(200).json({
+          isAdmin: true,
+          email: "sandeep@fastest.health",
+          method: "emergencyKey",
+          timestamp: new Date().toISOString(),
+          sessionId: req.sessionID
+        });
+      }
+      
+      console.log("🔴 DIRECT ADMIN CHECK: No valid auth method found");
+      return res.status(200).json({
+        isAdmin: false,
+        method: "none",
+        timestamp: new Date().toISOString(),
+        sessionId: req.sessionID
+      });
+    } catch (error) {
+      console.error("🔴 DIRECT ADMIN CHECK ERROR:", error);
+      return res.status(500).json({
+        isAdmin: false,
+        error: String(error),
+        timestamp: new Date().toISOString()
+      });
+    }
+  });
+
+  // Regular admin session check
   app.get("/api/admin/session", (req: Request, res: Response) => {
     console.log("Admin session check - Session ID:", req.sessionID);
     console.log("Admin session check - Session data:", req.session);

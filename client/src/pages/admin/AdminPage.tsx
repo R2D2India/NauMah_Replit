@@ -121,6 +121,40 @@ export default function AdminPage() {
     const checkSession = async () => {
       try {
         console.log("Checking admin session...");
+        
+        // Try the direct status check first for more reliable authentication
+        try {
+          console.log("Trying direct admin status check first");
+          const timestamp = Date.now();
+          const directResponse = await fetch(`/api/admin/direct-status?t=${timestamp}`, {
+            method: "GET",
+            credentials: "include",
+            headers: {
+              "Accept": "application/json",
+              "Cache-Control": "no-cache, no-store, must-revalidate, private, max-age=0",
+              "Pragma": "no-cache",
+              "Expires": "0"
+            }
+          });
+          
+          if (directResponse.ok) {
+            const directData = await directResponse.json();
+            console.log("Direct admin status response:", directData);
+            
+            if (directData.isAdmin) {
+              console.log("Valid admin session found via direct status check");
+              setIsAdmin(true);
+              setAdminEmail(directData.email || null);
+              return; // Skip the regular session check
+            } else {
+              console.log("Not admin via direct status check, falling back to regular session check");
+            }
+          }
+        } catch (directError) {
+          console.error("Error checking direct admin status:", directError);
+        }
+        
+        // Fall back to regular session check
         const response = await fetch("/api/admin/session", {
           method: "GET", 
           credentials: "include",
@@ -139,7 +173,7 @@ export default function AdminPage() {
         console.log("Admin session check response:", data);
         
         if (data.isAdmin) {
-          console.log("Valid admin session found");
+          console.log("Valid admin session found via regular check");
           setIsAdmin(true);
           if (data.email) {
             setAdminEmail(data.email);
