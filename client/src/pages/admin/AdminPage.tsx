@@ -202,18 +202,21 @@ export default function AdminPage() {
       try {
         console.log("Checking admin session...");
         
-        // Try the direct status check first for more reliable authentication
+        // Try the direct status check first for more reliable authentication 
+        // but WITHOUT adding Basic Auth credentials yet - we want to ensure a login screen
+        // is shown first for security
         try {
-          console.log("Trying direct admin status check first");
+          console.log("Trying direct admin status check first (without Basic Auth)");
           const timestamp = Date.now();
           const directResponse = await fetch(`/api/admin/direct-status?t=${timestamp}`, {
             method: "GET",
-            credentials: "include",
+            credentials: "include", 
             headers: {
               "Accept": "application/json",
               "Cache-Control": "no-cache, no-store, must-revalidate, private, max-age=0",
               "Pragma": "no-cache",
               "Expires": "0"
+              // No Authorization header yet - we require explicit login first
             }
           });
           

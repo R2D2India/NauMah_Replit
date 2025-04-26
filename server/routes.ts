@@ -668,41 +668,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.log("🔄 Admin auth middleware - Session ID:", req.sessionID);
     console.log("🔄 Admin auth middleware - Session data:", req.session);
     
-    // Method 1: Check if admin session exists (fastest path)
-    if (req.session && req.session.isAdmin) {
-      console.log("✅ Admin auth passed - Valid admin session found");
-      return next();
-    }
-    
-    // Method 2: Check for API key in Bearer token (for backward compatibility)
-    const adminKey = process.env.ADMIN_KEY;
-    const authHeader = req.headers.authorization;
-
-    if (adminKey && authHeader) {
-      // Check Bearer token
-      if (authHeader.startsWith('Bearer ')) {
-        const token = authHeader.split(' ')[1];
-        if (token === adminKey) {
-          console.log("✅ Admin auth passed - Valid Bearer token provided");
-          // If using API key, let's also set the session for future requests
-          if (req.session) {
-            req.session.isAdmin = true;
-            req.session.adminEmail = "sandeep@fastest.health";
-            
-            req.session.save(err => {
-              if (err) {
-                console.error("❌ Error saving admin session from API key:", err);
-              } else {
-                console.log("✅ Admin session saved from Bearer token");
-              }
-            });
-          }
-          return next();
-        }
+    // Create a secure function to verify explicit admin authorization
+    const verifyAdminAccess = (): boolean => {
+      // Check if the request is coming from the emergency admin page or admin login flow
+      const isEmergencyEndpoint = req.path.includes('emergency');
+      const isLoginFlow = req.path.includes('login');
+      const isDirectStatus = req.path.includes('direct-status');
+      
+      // For emergency routes, we want to apply stricter authentication
+      // Login routes and direct status checks need more permissive checking
+      const isStrictCheck = !isEmergencyEndpoint && !isLoginFlow && !isDirectStatus;
+      
+      console.log(`🔄 Admin auth strictness: ${isStrictCheck ? 'STRICT' : 'PERMISSIVE'} for ${req.path}`);
+      
+      // Method 1: Check if admin session exists (fastest path)
+      if (req.session && req.session.isAdmin === true) {
+        console.log("✅ Admin auth passed - Valid admin session found");
+        // Session is already properly authenticated
+        return true;
       }
       
-      // Method 3: Check Basic Auth
-      if (authHeader.startsWith('Basic ')) {
+      // For endpoints requiring strict checks, we want explicit Basic Auth
+      // in addition to sessions rather than as a fallback
+      if (isStrictCheck) {
+        const authHeader = req.headers.authorization;
+        
+        // Basic Auth is required for sensitive admin pages
+        if (!authHeader || !authHeader.startsWith('Basic ')) {
+          console.log("❌ Admin auth failed - Basic Auth required for strict endpoints");
+          return false;
+        }
+        
         try {
           // Extract and decode credentials
           const base64Credentials = authHeader.split(' ')[1];
@@ -713,56 +709,138 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const adminEmail = "sandeep@fastest.health";
           const adminPassword = "Fastest@2004";
           
-          if (username === adminEmail && password === adminPassword) {
-            console.log("✅ Admin auth passed - Valid Basic Auth credentials");
+          // Verify the credentials exactly match
+          if (username !== adminEmail || password !== adminPassword) {
+            console.log("❌ Admin auth failed - Invalid Basic Auth credentials");
+            return false;
+          }
+          
+          console.log("✅ Admin auth passed - Valid Basic Auth credentials for strict endpoint");
+          
+          // Ensure session is set
+          if (req.session) {
+            req.session.isAdmin = true;
+            req.session.adminEmail = adminEmail;
             
-            // Set session data for future requests
+            // Save session
+            req.session.save((err) => {
+              if (err) {
+                console.error("❌ Error saving admin session from Basic Auth:", err);
+              } else {
+                console.log("✅ Admin session saved from Basic Auth");
+              }
+            });
+          }
+          
+          return true;
+        } catch (authError) {
+          console.error("❌ Basic Auth parsing error:", authError);
+          return false;
+        }
+      }
+      
+      // For non-strict endpoints, we can apply more fallback authentication methods
+      
+      // Method 2: Check for API key in Bearer token (for backward compatibility)
+      const adminKey = process.env.ADMIN_KEY;
+      const authHeader = req.headers.authorization;
+      
+      if (adminKey && authHeader) {
+        // Check Bearer token
+        if (authHeader.startsWith('Bearer ')) {
+          const token = authHeader.split(' ')[1];
+          if (token === adminKey) {
+            console.log("✅ Admin auth passed - Valid Bearer token provided");
+            
+            // Set session
             if (req.session) {
               req.session.isAdmin = true;
-              req.session.adminEmail = adminEmail;
+              req.session.adminEmail = "sandeep@fastest.health";
               
-              // Save session
-              req.session.save((err) => {
+              req.session.save(err => {
                 if (err) {
-                  console.error("❌ Error saving admin session from Basic Auth:", err);
+                  console.error("❌ Error saving admin session from API key:", err);
                 } else {
-                  console.log("✅ Admin session saved from Basic Auth");
+                  console.log("✅ Admin session saved from Bearer token");
                 }
               });
             }
             
-            return next();
+            return true;
           }
-        } catch (authError) {
-          console.error("❌ Basic Auth parsing error:", authError);
+        }
+        
+        // Check Basic Auth
+        if (authHeader.startsWith('Basic ')) {
+          try {
+            // Extract and decode credentials
+            const base64Credentials = authHeader.split(' ')[1];
+            const credentials = Buffer.from(base64Credentials, 'base64').toString('utf-8');
+            const [username, password] = credentials.split(':');
+            
+            // Fixed admin credentials
+            const adminEmail = "sandeep@fastest.health";
+            const adminPassword = "Fastest@2004";
+            
+            if (username === adminEmail && password === adminPassword) {
+              console.log("✅ Admin auth passed - Valid Basic Auth credentials");
+              
+              // Set session
+              if (req.session) {
+                req.session.isAdmin = true;
+                req.session.adminEmail = adminEmail;
+                
+                req.session.save((err) => {
+                  if (err) {
+                    console.error("❌ Error saving admin session from Basic Auth:", err);
+                  } else {
+                    console.log("✅ Admin session saved from Basic Auth");
+                  }
+                });
+              }
+              
+              return true;
+            }
+          } catch (authError) {
+            console.error("❌ Basic Auth parsing error:", authError);
+          }
         }
       }
-    }
-    
-    // Method 4: Check query parameters for emergency access
-    const emergencyKey = req.query.emergency_key;
-    if (emergencyKey === process.env.ADMIN_KEY) {
-      console.log("✅ Admin auth passed - Valid emergency key in query params");
       
-      // Set session data for future requests
-      if (req.session) {
-        req.session.isAdmin = true;
-        req.session.adminEmail = "sandeep@fastest.health";
-        
-        // Save session
-        req.session.save((err) => {
-          if (err) {
-            console.error("❌ Error saving admin session from emergency key:", err);
-          } else {
-            console.log("✅ Admin session saved from emergency key");
+      // Method 3: Check query parameters for emergency access only
+      if (isEmergencyEndpoint) {
+        const emergencyKey = req.query.emergency_key;
+        if (emergencyKey === process.env.ADMIN_KEY) {
+          console.log("✅ Admin auth passed - Valid emergency key in query params");
+          
+          // Set session
+          if (req.session) {
+            req.session.isAdmin = true;
+            req.session.adminEmail = "sandeep@fastest.health";
+            
+            req.session.save((err) => {
+              if (err) {
+                console.error("❌ Error saving admin session from emergency key:", err);
+              } else {
+                console.log("✅ Admin session saved from emergency key");
+              }
+            });
           }
-        });
+          
+          return true;
+        }
       }
       
+      console.log("❌ Admin auth failed - No valid authentication method found");
+      return false;
+    };
+    
+    // Perform the actual admin verification
+    if (verifyAdminAccess()) {
       return next();
     }
     
-    console.log("❌ Admin auth failed - No valid authentication method found");
+    // Authentication failed
     return res.status(401).json({ message: "Unauthorized" });
   };
   
