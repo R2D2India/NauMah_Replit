@@ -12,6 +12,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { apiRequest } from "@/lib/queryClient";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { EmailTracking } from "@/components/admin/EmailTracking";
 
 // Login schema
 const loginSchema = z.object({
@@ -728,12 +729,13 @@ export default function AdminPage() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="mb-6 grid grid-cols-6 w-full">
+          <TabsList className="mb-6 grid grid-cols-7 w-full">
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="pregnancy">Pregnancy</TabsTrigger>
             <TabsTrigger value="mood">Mood</TabsTrigger>
             <TabsTrigger value="medication">Medication</TabsTrigger>
             <TabsTrigger value="support">Support</TabsTrigger>
+            <TabsTrigger value="emails">Emails</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
 
@@ -1233,6 +1235,10 @@ export default function AdminPage() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+          
+          <TabsContent value="emails" className="space-y-4">
+            <EmailTracking />
           </TabsContent>
 
           <TabsContent value="settings" className="space-y-4">
