@@ -182,28 +182,41 @@ export default function AdminPage() {
   const fetchData = async (endpoint: string, setterFunction: React.Dispatch<React.SetStateAction<any[]>>) => {
     try {
       setDataLoading(true);
-      console.log(`Fetching data from: ${endpoint}`);
       
-      const response = await fetch(endpoint, {
+      // Add cache busting parameter with timestamp
+      const cacheBuster = `t=${Date.now()}`;
+      const url = endpoint.includes('?') ? `${endpoint}&${cacheBuster}` : `${endpoint}?${cacheBuster}`;
+      
+      console.log(`Fetching data from: ${url}`);
+      
+      const response = await fetch(url, {
         method: "GET",
         credentials: "include",
         headers: {
           "Accept": "application/json",
           "Cache-Control": "no-cache, no-store, must-revalidate",
-          "Pragma": "no-cache"
+          "Pragma": "no-cache",
+          "Expires": "0"
         }
       });
       
       if (!response.ok) {
-        throw new Error(`HTTP error ${response.status}`);
+        throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
       }
       
       const data = await response.json();
-      console.log(`Data received from ${endpoint}:`, data);
-      setterFunction(data);
-      setDataLoading(false);
+      console.log(`Data received from ${endpoint}: ${Array.isArray(data) ? data.length : 0} items`);
+      
+      if (Array.isArray(data)) {
+        setterFunction(data);
+      } else {
+        console.error(`Expected array but received: ${typeof data}`);
+        setterFunction([]);
+      }
     } catch (error) {
       console.error(`Error fetching data from ${endpoint}:`, error);
+      // Don't reset the existing data on error to avoid flickering empty tables
+    } finally {
       setDataLoading(false);
     }
   };
@@ -237,7 +250,11 @@ export default function AdminPage() {
   // Load data when tab changes
   useEffect(() => {
     if (isAdmin) {
-      loadTabData(activeTab);
+      console.log(`Admin authenticated, loading initial data for tab: ${activeTab}`);
+      // Small delay to ensure everything is initialized
+      setTimeout(() => {
+        loadTabData(activeTab);
+      }, 500);
     }
   }, [isAdmin, activeTab]);
   
