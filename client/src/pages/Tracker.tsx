@@ -10,8 +10,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { MoodTrackerSection } from "@/components/pregnancy/MoodTrackerSection";
+import { useTranslation } from "react-i18next";
 
 export default function Tracker() {
+  const { t } = useTranslation();
   const [date, setDate] = useState<Date>(new Date());
   const [newWeight, setNewWeight] = useState("");
   const [newSymptom, setNewSymptom] = useState({ type: "", severity: 1, notes: "" });
@@ -101,20 +103,20 @@ export default function Tracker() {
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <h1 className="text-3xl font-bold mb-6">Pregnancy Tracker</h1>
+      <h1 className="text-3xl font-bold mb-6">{t('tracker.title', 'Pregnancy Tracker')}</h1>
       
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="weight">Weight</TabsTrigger>
-          <TabsTrigger value="symptoms">Symptoms</TabsTrigger>
-          <TabsTrigger value="appointments">Appointments</TabsTrigger>
+          <TabsTrigger value="overview">{t('tracker.tabs.overview', 'Overview')}</TabsTrigger>
+          <TabsTrigger value="weight">{t('tracker.tabs.weight', 'Weight')}</TabsTrigger>
+          <TabsTrigger value="symptoms">{t('tracker.tabs.symptoms', 'Symptoms')}</TabsTrigger>
+          <TabsTrigger value="appointments">{t('tracker.tabs.appointments', 'Appointments')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Pregnancy Calendar</CardTitle>
+              <CardTitle>{t('tracker.overview.calendar', 'Pregnancy Calendar')}</CardTitle>
             </CardHeader>
             <CardContent>
               <Calendar
@@ -124,7 +126,7 @@ export default function Tracker() {
                 className="rounded-md border"
               />
               <div className="mt-4">
-                <h3 className="font-semibold mb-2">Today's Summary</h3>
+                <h3 className="font-semibold mb-2">{t('tracker.overview.todaySummary', 'Today\'s Summary')}</h3>
                 <ul className="space-y-2">
                   {appointments.filter(apt => 
                     new Date(apt.date).toDateString() === date.toDateString()
@@ -142,18 +144,18 @@ export default function Tracker() {
         <TabsContent value="weight" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Weight Tracking</CardTitle>
+              <CardTitle>{t('tracker.weight.title', 'Weight Tracking')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex gap-4 mb-4">
                 <Input
                   type="number"
-                  placeholder="Enter weight"
+                  placeholder={t('tracker.weight.enterWeight', 'Enter weight')}
                   value={newWeight}
                   onChange={(e) => setNewWeight(e.target.value)}
                 />
                 <Button onClick={() => newWeight && addWeightMutation.mutate(parseFloat(newWeight))}>
-                  Add Entry
+                  {t('tracker.weight.addEntry', 'Add Entry')}
                 </Button>
               </div>
               <LineChart data={weightData} />
