@@ -24,28 +24,46 @@
     "subtitle": "Have questions about your pregnancy? Our AI assistant is here to help.",
     "placeholder": "Ask me anything about your pregnancy...",
     "button": "Ask",
-    "voice": "Voice Mode",
+    "voice": "Voice Assistant",
     "loading": "Thinking...",
     "error": "Sorry, I couldn't process that. Please try again."
   },
-  "safety": {
-    "title": "Medication & Food Safety Checker",
-    "subtitle": "Not sure if something is safe during pregnancy? Upload an image or enter the name.",
-    "placeholder": "Enter medication or food name...",
-    "button": "Check Safety",
-    "upload": "Upload Image",
-    "loading": "Analyzing...",
-    "safe": "Safe",
-    "unsafe": "Not Recommended",
-    "caution": "Use with Caution"
+  "chat": {
+    "title": "Chat with NauMah",
+    "subtitle": "Your AI companion for this beautiful 9-month journey",
+    "input_placeholder": "Type your message..."
   },
-  "comingSoon": {
-    "title": "Coming Soon",
-    "nutrition": "Nutrition Planning",
-    "partner": "Partner Involvement",
-    "postpartum": "Postpartum Planning",
-    "babyShower": "Virtual Baby Shower",
-    "community": "Community Forums"
+  "safety": {
+    "title": "Food & Medication Safety",
+    "subtitle": "Easily check if food or medication is safe during your pregnancy journey",
+    "checker_title": "Food & Medication Safety Checker",
+    "checker_description": "Verify if food or medication is safe to use during your pregnancy journey.",
+    "input_placeholder": "Enter food or medication name...",
+    "check_button": "Check Safety",
+    "checking": "Checking...",
+    "analyze_label": "Analyze a product label:",
+    "take_photo": "Take Photo",
+    "camera_description": "Use your camera to scan a label",
+    "upload_image": "Upload Image",
+    "upload_description": "Choose a photo from your device",
+    "product_analysis": "Product Analysis",
+    "input_required": "Input required",
+    "enter_medication": "Please enter a medication name"
+  },
+  "coming_soon": {
+    "ecommerce_title": "NauMah E-commerce Coming Soon",
+    "consultation_title": "Doctor Consultation",
+    "expert_consultation": "Expert Medical Consultations",
+    "consultation_description": "Connect with experienced gynecologists and pregnancy specialists. Coming soon!"
+  },
+  "products": {
+    "maternity_dresses": "Maternity Dresses",
+    "healthy_snacks": "Healthy Snacks",
+    "prenatal_vitamins": "Prenatal Vitamins"
+  },
+  "common": {
+    "or": "OR",
+    "coming_soon": "Coming Soon"
   },
   "footer": {
     "rights": "All Rights Reserved",
