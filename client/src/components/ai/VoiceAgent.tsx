@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { Mic, Square, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -8,18 +8,19 @@ import { Label } from '@/components/ui/label';
 import { useTranslation } from 'react-i18next';
 
 export function VoiceAgent() {
-  // Initialize from localStorage, defaulting to 'english' if not set
+  const { t, i18n } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState<'english' | 'hindi'>(
-    () => (localStorage.getItem('voicePreference') as 'english' | 'hindi') || 'english'
+    () => i18n.language === 'hi' ? 'hindi' : 'english'
   );
   const [showWidget, setShowWidget] = useState(false);
   const { toast } = useToast();
-  const { t } = useTranslation();
   
-  // Save voice language preference to localStorage when it changes
+  // Update voice preference when UI language changes
   useEffect(() => {
-    localStorage.setItem('voicePreference', selectedLanguage);
-  }, [selectedLanguage]);
+    const newVoiceLanguage = i18n.language === 'hi' ? 'hindi' : 'english';
+    setSelectedLanguage(newVoiceLanguage);
+    localStorage.setItem('voicePreference', newVoiceLanguage);
+  }, [i18n.language]);
 
   // Cleanup function to remove any existing widgets when component unmounts
   useEffect(() => {
