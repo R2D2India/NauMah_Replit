@@ -20,12 +20,8 @@ const LanguageSelector = () => {
     i18n.changeLanguage(lang);
     localStorage.setItem('preferredLanguage', lang);
     
-    // Set voice assistant preference when language changes
-    if (lang === 'hi') {
-      localStorage.setItem('voicePreference', 'hindi');
-    } else {
-      localStorage.setItem('voicePreference', 'english');
-    }
+    // Don't automatically change voice preference when language changes
+    // Keep the user's voice assistant preference independent of UI language
     
     changeLanguage(lang);
   };

@@ -8,10 +8,18 @@ import { Label } from '@/components/ui/label';
 import { useTranslation } from 'react-i18next';
 
 export function VoiceAgent() {
-  const [selectedLanguage, setSelectedLanguage] = useState<'english' | 'hindi'>('english');
+  // Initialize from localStorage, defaulting to 'english' if not set
+  const [selectedLanguage, setSelectedLanguage] = useState<'english' | 'hindi'>(
+    () => (localStorage.getItem('voicePreference') as 'english' | 'hindi') || 'english'
+  );
   const [showWidget, setShowWidget] = useState(false);
   const { toast } = useToast();
   const { t } = useTranslation();
+  
+  // Save voice language preference to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem('voicePreference', selectedLanguage);
+  }, [selectedLanguage]);
 
   // Cleanup function to remove any existing widgets when component unmounts
   useEffect(() => {
