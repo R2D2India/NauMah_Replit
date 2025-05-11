@@ -74,6 +74,27 @@
     "or": "OR",
     "coming_soon": "Coming Soon"
   },
+  "dashboard": {
+    "title": "Baby & Me",
+    "subtitle": "Track your pregnancy journey and follow your baby's development week by week",
+    "deployedMode": "Deployed Mode",
+    "updatePregnancyStage": "Update Pregnancy Stage",
+    "updatedSuccessfully": "Updated successfully",
+    "selectType": "Select type",
+    "week": "Week",
+    "month": "Month",
+    "trimester": "Trimester",
+    "selectValue": "Select value",
+    "updating": "Updating...",
+    "update": "Update",
+    "selectionRequired": "Selection Required",
+    "selectValueFirst": "Please select a week, month, or trimester value first.",
+    "stageUpdated": "Pregnancy stage updated",
+    "infoUpdatedSuccess": "Your pregnancy information has been updated successfully.",
+    "localUpdateSuccessful": "Local Update Successful",
+    "infoUpdatedTo": "Pregnancy information updated to {{stageType}} {{stageValue}} (Week {{week}}).",
+    "loadingData": "Loading your pregnancy data..."
+  },
   "footer": {
     "rights": "All Rights Reserved",
     "terms": "Terms of Service",

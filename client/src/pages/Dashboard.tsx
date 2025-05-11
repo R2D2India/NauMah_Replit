@@ -129,8 +129,8 @@ const Dashboard = () => {
       
       // Show success toast
       toast({
-        title: "Pregnancy stage updated",
-        description: `Your pregnancy information has been updated successfully.`,
+        title: t('dashboard.stageUpdated', 'Pregnancy stage updated'),
+        description: t('dashboard.infoUpdatedSuccess', 'Your pregnancy information has been updated successfully.'),
         variant: "default"
       });
       
@@ -206,8 +206,8 @@ const Dashboard = () => {
   const handleManualFallback = () => {
     if (!stageValue) {
       toast({
-        title: "Selection Required",
-        description: "Please select a week, month, or trimester value first.",
+        title: t('dashboard.selectionRequired', 'Selection Required'),
+        description: t('dashboard.selectValueFirst', 'Please select a week, month, or trimester value first.'),
         variant: "destructive"
       });
       return;
@@ -263,8 +263,8 @@ const Dashboard = () => {
     
     // Show success notification
     toast({
-      title: "Local Update Successful",
-      description: `Pregnancy information updated to ${stageType} ${stageValue} (Week ${week}).`,
+      title: t('dashboard.localUpdateSuccessful', 'Local Update Successful'),
+      description: t('dashboard.infoUpdatedTo', 'Pregnancy information updated to {{stageType}} {{stageValue}} (Week {{week}}).', { stageType, stageValue, week }),
       variant: "default"
     });
     
@@ -311,7 +311,7 @@ const Dashboard = () => {
       <div className="flex justify-center items-center min-h-[300px]">
         <div className="text-primary">
           <i className="fas fa-spinner fa-spin text-4xl"></i>
-          <p className="mt-2">Loading your pregnancy data...</p>
+          <p className="mt-2">{t('dashboard.loadingData', 'Loading your pregnancy data...')}</p>
         </div>
       </div>
     );
@@ -405,12 +405,12 @@ const Dashboard = () => {
               {updateStageMutation.isPending ? (
                 <>
                   <i className="fas fa-spinner fa-spin mr-2"></i>
-                  Updating...
+                  {t('dashboard.updating', 'Updating...')}
                 </>
               ) : (
                 <>
                   <i className="fas fa-sync-alt mr-2"></i>
-                  Update
+                  {t('dashboard.update', 'Update')}
                 </>
               )}
             </Button>

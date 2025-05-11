@@ -74,6 +74,27 @@
     "or": "या",
     "coming_soon": "जल्द आ रहा है"
   },
+  "dashboard": {
+    "title": "बेबी और मैं",
+    "subtitle": "अपनी गर्भावस्था यात्रा को ट्रैक करें और हफ्ते-दर-हफ्ते अपने बच्चे के विकास का पालन करें",
+    "deployedMode": "डिप्लॉय मोड",
+    "updatePregnancyStage": "गर्भावस्था चरण अपडेट करें",
+    "updatedSuccessfully": "सफलतापूर्वक अपडेट किया गया",
+    "selectType": "प्रकार चुनें",
+    "week": "सप्ताह",
+    "month": "महीना",
+    "trimester": "त्रैमासिक",
+    "selectValue": "मान चुनें",
+    "updating": "अपडेट हो रहा है...",
+    "update": "अपडेट करें",
+    "selectionRequired": "चयन आवश्यक",
+    "selectValueFirst": "कृपया पहले सप्ताह, महीने या त्रैमासिक मान का चयन करें।",
+    "stageUpdated": "गर्भावस्था चरण अपडेट किया गया",
+    "infoUpdatedSuccess": "आपकी गर्भावस्था जानकारी सफलतापूर्वक अपडेट कर दी गई है।",
+    "localUpdateSuccessful": "स्थानीय अपडेट सफल",
+    "infoUpdatedTo": "गर्भावस्था जानकारी {{stageType}} {{stageValue}} (सप्ताह {{week}}) में अपडेट की गई।",
+    "loadingData": "आपका गर्भावस्था डेटा लोड हो रहा है..."
+  },
   "footer": {
     "rights": "सर्वाधिकार सुरक्षित",
     "terms": "सेवा की शर्तें",
