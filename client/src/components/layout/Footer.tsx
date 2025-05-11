@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { useTranslation } from "react-i18next";
 
 const Footer = () => {
+  const { t } = useTranslation();
   return (
     <footer className="bg-white border-t border-gray-200 py-6">
       <div className="container mx-auto px-4">
@@ -12,21 +13,21 @@ const Footer = () => {
                 <i className="fas fa-baby text-white text-sm"></i>
               </div>
               <span className="text-primary font-montserrat font-semibold">
-                NauMah<span className="text-xs align-top -ml-0.5 leading-none">™</span>
+                {t('app.title')}<span className="text-xs align-top -ml-0.5 leading-none">™</span>
               </span>
             </div>
-            <p className="text-sm text-neutral-dark mt-2 text-center md:text-left">Your AI Pregnancy Companion</p>
+            <p className="text-sm text-neutral-dark mt-2 text-center md:text-left">{t('app.slogan')}</p>
           </div>
 
           <div className="flex flex-wrap justify-end gap-x-8 gap-y-2 md:mr-8">
             <Link href="/privacy">
-              <span className="text-sm text-neutral-dark hover:text-primary transition cursor-pointer">Privacy Policy</span>
+              <span className="text-sm text-neutral-dark hover:text-primary transition cursor-pointer">{t('footer.privacy')}</span>
             </Link>
             <Link href="/terms">
-              <span className="text-sm text-neutral-dark hover:text-primary transition cursor-pointer">Terms of Service</span>
+              <span className="text-sm text-neutral-dark hover:text-primary transition cursor-pointer">{t('footer.terms')}</span>
             </Link>
             <Link href="/disclaimer">
-              <span className="text-sm text-neutral-dark hover:text-primary transition cursor-pointer">Medical Disclaimer</span>
+              <span className="text-sm text-neutral-dark hover:text-primary transition cursor-pointer">{t('footer.disclaimer')}</span>
             </Link>
           </div>
         </div>
@@ -119,7 +120,7 @@ const Footer = () => {
           </div>
           <div className="text-center text-sm text-neutral-dark border-t border-gray-200 pt-4">
             <p>NauMah does not provide medical advice. Always consult with healthcare professionals for medical decisions.</p>
-            <p className="mt-2">© {new Date().getFullYear()} NauMah AI Technologies Pvt. Ltd. All rights reserved.</p>
+            <p className="mt-2">© {new Date().getFullYear()} NauMah AI Technologies Pvt. Ltd. {t('footer.rights')}</p>
           </div>
         </div>
       </div>
