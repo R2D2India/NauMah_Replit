@@ -4,6 +4,15 @@
     "slogan": "Your Intelligent Companion for Every Stage of Pregnancy",
     "companion": "AI-Powered Pregnancy Companion"
   },
+  "pregnancy": {
+    "journey": "Your Pregnancy Journey",
+    "currentlyInWeek": "Currently in Week {{week}}",
+    "trimester": {
+      "first": "1st Trimester",
+      "second": "2nd Trimester",
+      "third": "3rd Trimester"
+    }
+  },
   "navigation": {
     "home": "Home",
     "dashboard": "Baby & Me",
