@@ -43,8 +43,8 @@ const Header = () => {
             <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center shadow-sm">
               <i className="fas fa-baby text-white"></i>
             </div>
-            <span className="text-xl md:text-2xl font-montserrat font-semibold text-primary group translatable">
-              {language === 'hi' ? 'नौमा' : 'NauMah'}<span className="text-xs align-top -ml-0.5 leading-none">™</span>
+            <span className="text-xl md:text-2xl font-montserrat font-semibold text-primary group">
+              {t('app.title')}<span className="text-xs align-top -ml-0.5 leading-none">™</span>
             </span>
           </Link>
         </div>
@@ -52,22 +52,22 @@ const Header = () => {
         <nav className="hidden md:flex space-x-6">
           <Link href="/dashboard">
             <span className={`font-medium ${isActive("/dashboard") ? "text-primary" : "text-neutral-dark hover:text-primary"} transition cursor-pointer`}>
-              Baby & Me
+              {t('navigation.dashboard')}
             </span>
           </Link>
           <Link href="/diet-exercise">
             <span className={`font-medium ${isActive("/diet-exercise") ? "text-primary" : "text-neutral-dark hover:text-primary"} transition cursor-pointer`}>
-              Diet & Exercise
+              {t('navigation.diet')}
             </span>
           </Link>
           <Link href="/tracker">
             <span className={`font-medium ${isActive("/tracker") ? "text-primary" : "text-neutral-dark hover:text-primary"} transition cursor-pointer`}>
-              Tracker
+              {t('navigation.tracker')}
             </span>
           </Link>
           <Link href="/resources">
             <span className={`font-medium ${isActive("/resources") ? "text-primary" : "text-neutral-dark hover:text-primary"} transition cursor-pointer`}>
-              Resources
+              {t('navigation.resources')}
             </span>
           </Link>
         </nav>
@@ -75,9 +75,6 @@ const Header = () => {
         <div className="flex items-center space-x-3">
           <div className="flex items-center">
             <LanguageSelector />
-            {language === 'hi' && (
-              <span className="language-indicator ml-1">हिन्दी</span>
-            )}
           </div>
           <div className="hidden md:block">
             <AuthButton />
@@ -97,34 +94,31 @@ const Header = () => {
           <nav className="flex flex-col space-y-3">
             <Link href="/dashboard">
               <span className={`font-medium ${isActive("/dashboard") ? "text-primary" : "text-neutral-dark"} py-2 block cursor-pointer`}>
-                Baby & Me
+                {t('navigation.dashboard')}
               </span>
             </Link>
             <Link href="/diet-exercise">
               <span className={`font-medium ${isActive("/diet-exercise") ? "text-primary" : "text-neutral-dark"} py-2 block cursor-pointer`}>
-                Diet & Exercise
+                {t('navigation.diet')}
               </span>
             </Link>
             <Link href="/tracker">
               <span className={`font-medium ${isActive("/tracker") ? "text-primary" : "text-neutral-dark"} py-2 block cursor-pointer`}>
-                Tracker
+                {t('navigation.tracker')}
               </span>
             </Link>
             <Link href="/resources">
               <span className={`font-medium ${isActive("/resources") ? "text-primary" : "text-neutral-dark"} py-2 block cursor-pointer`}>
-                Resources
+                {t('navigation.resources')}
               </span>
             </Link>
             <div className="py-2">
               <AuthButton />
             </div>
             <div className="py-2 flex items-center">
-              <span className="mr-2">Language:</span>
+              <span className="mr-2">{t('language.select')}:</span>
               <div className="flex items-center">
                 <LanguageSelector />
-                {language === 'hi' && (
-                  <span className="language-indicator ml-1">हिन्दी</span>
-                )}
               </div>
             </div>
           </nav>

@@ -14,23 +14,12 @@ const LanguageSelector = () => {
   const { t, i18n } = useTranslation();
   const { language, changeLanguage } = useLanguage();
   
-  // Direct language change handlers to avoid any closure issues
-  const handleChangeToEnglish = () => {
-    console.log('Direct change to English');
-    i18n.changeLanguage('en');
-    document.documentElement.classList.remove('lang-hi');
-    document.documentElement.classList.add('lang-en');
-    // Also store in localStorage for persistence
-    localStorage.setItem('preferredLanguage', 'en');
-  };
-  
-  const handleChangeToHindi = () => {
-    console.log('Direct change to Hindi');
-    i18n.changeLanguage('hi');
-    document.documentElement.classList.remove('lang-en');
-    document.documentElement.classList.add('lang-hi');
-    // Also store in localStorage for persistence
-    localStorage.setItem('preferredLanguage', 'hi');
+  // Use a single handler for language change
+  const handleLanguageChange = (lang: string) => {
+    console.log(`Changing language to: ${lang}`);
+    i18n.changeLanguage(lang);
+    localStorage.setItem('preferredLanguage', lang);
+    changeLanguage(lang);
   };
   
   return (
@@ -38,24 +27,24 @@ const LanguageSelector = () => {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="sm" className="h-8 w-8 px-0 data-[state=open]:bg-muted">
           <Globe className="h-4 w-4" />
-          <span className="sr-only">Language</span>
+          <span className="sr-only">{t('language.select')}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem 
-          onClick={handleChangeToEnglish}
+          onClick={() => handleLanguageChange('en')}
           className={i18n.language === 'en' ? 'bg-muted font-medium' : ''}
         >
           <div className="flex items-center">
-            <span className="mr-2">🇬🇧</span> English
+            <span className="mr-2">🇬🇧</span> {t('language.en')}
           </div>
         </DropdownMenuItem>
         <DropdownMenuItem 
-          onClick={handleChangeToHindi}
+          onClick={() => handleLanguageChange('hi')}
           className={i18n.language === 'hi' ? 'bg-muted font-medium' : ''}
         >
           <div className="flex items-center">
-            <span className="mr-2">🇮🇳</span> हिन्दी
+            <span className="mr-2">🇮🇳</span> {t('language.hi')}
           </div>
         </DropdownMenuItem>
       </DropdownMenuContent>
