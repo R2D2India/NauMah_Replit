@@ -58,7 +58,15 @@ export function SafetyChecker() {
     },
   });
 
-  const handleMedicationCheck = () => {
+  // Function to handle checking a saved medication by name
+  const checkSavedMedication = (name: string) => {
+    setMedicationName(name);
+    setMedicationResult(null);
+    checkMedicationMutation.mutate({ medicationName: name });
+  };
+  
+  // Function to handle the primary medication check button
+  const handleMedicationCheck = () => {    
     if (!medicationName.trim()) {
       toast({
         title: t('safety.input_required'),
@@ -67,6 +75,9 @@ export function SafetyChecker() {
       });
       return;
     }
+    
+    // Clear previous result before checking
+    setMedicationResult(null);
     
     checkMedicationMutation.mutate({ medicationName });
   };
@@ -262,7 +273,7 @@ export function SafetyChecker() {
         </div>
         <button 
           className="bg-primary hover:bg-primary-dark text-white py-3 px-6 rounded-lg font-montserrat font-medium transition duration-300 shadow-sm hover:shadow flex items-center justify-center"
-          onClick={handleMedicationCheck}
+          onClick={() => handleMedicationCheck()}
           disabled={checkMedicationMutation.isPending}
         >
           {checkMedicationMutation.isPending ? (
@@ -278,6 +289,77 @@ export function SafetyChecker() {
           )}
         </button>
       </div>
+      
+      {/* Medication check results */}
+      {medicationResult && (
+        <div className="mt-4 mb-5 border border-primary/10 rounded-lg overflow-hidden bg-white shadow-md">
+          <div className="bg-primary/5 px-4 py-3 border-b border-primary/10 flex justify-between items-center">
+            <h4 className="font-medium text-primary flex items-center">
+              <i className="fas fa-pills mr-2"></i>
+              <span>{t('safety.medication_result')}</span>
+            </h4>
+            <button
+              className="text-sm text-gray-500 hover:text-red-500 bg-white hover:bg-red-50 rounded-full p-1 transition-colors"
+              onClick={clearMedicationResult}
+              title="Clear result"
+            >
+              <i className="fas fa-times"></i>
+            </button>
+          </div>
+          
+          <div className="p-4">
+            <div className="space-y-3">
+              <div className="flex flex-col">
+                <span className="text-xs uppercase text-gray-500">{t('safety.medication_name')}</span>
+                <span className="font-medium text-lg">{medicationResult.medicationName}</span>
+              </div>
+              
+              <div className="flex flex-col">
+                <span className="text-xs uppercase text-gray-500">{t('safety.safety_status')}</span>
+                <div className="mt-1">
+                  {medicationResult.isSafe === true ? (
+                    <div className="flex items-center text-green-600 bg-green-50 px-3 py-2 rounded-md">
+                      <CheckCircle2 className="h-5 w-5 mr-2" />
+                      <span className="font-medium">{t('safety.safe_for_pregnancy')}</span>
+                    </div>
+                  ) : medicationResult.isSafe === false ? (
+                    <div className="flex items-center text-red-600 bg-red-50 px-3 py-2 rounded-md">
+                      <AlertTriangle className="h-5 w-5 mr-2" />
+                      <span className="font-medium">{t('safety.not_recommended')}</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center text-yellow-600 bg-yellow-50 px-3 py-2 rounded-md">
+                      <Info className="h-5 w-5 mr-2" />
+                      <span className="font-medium">{t('safety.insufficient_data')}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              {medicationResult.notes && (
+                <div className="flex flex-col">
+                  <span className="text-xs uppercase text-gray-500">{t('safety.notes')}</span>
+                  <p className="mt-1 p-3 bg-gray-50 rounded-md text-gray-700 leading-relaxed">{medicationResult.notes}</p>
+                </div>
+              )}
+              
+              {medicationResult.alternatives && medicationResult.alternatives.length > 0 && (
+                <div className="flex flex-col">
+                  <span className="text-xs uppercase text-gray-500">{t('safety.alternatives')}</span>
+                  <ul className="mt-1 space-y-1">
+                    {medicationResult.alternatives.map((alt: string, index: number) => (
+                      <li key={index} className="flex items-start">
+                        <i className="fas fa-circle-check text-primary mt-1 mr-2"></i>
+                        <span>{alt}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Camera UI when active */}
       {showCamera && (
@@ -317,6 +399,28 @@ export function SafetyChecker() {
                 Take Photo
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Recently checked items */}
+      {recentlyChecked.length > 0 && !medicationResult && (
+        <div className="mb-5">
+          <div className="flex items-center text-sm text-neutral-dark mb-2">
+            <i className="fas fa-history mr-2"></i>
+            <span>{t('safety.recently_checked')}</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {recentlyChecked.map((item, index) => (
+              <button
+                key={index}
+                className="inline-flex items-center px-3 py-1.5 bg-gray-50 hover:bg-gray-100 rounded-full text-sm border border-gray-200 transition-colors"
+                onClick={() => checkSavedMedication(item)}
+              >
+                <i className="fas fa-redo-alt text-primary mr-1.5 text-xs"></i>
+                {item}
+              </button>
+            ))}
           </div>
         </div>
       )}
