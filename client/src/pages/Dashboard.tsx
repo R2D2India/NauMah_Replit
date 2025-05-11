@@ -318,10 +318,10 @@ const Dashboard = () => {
   const currentWeek = pregnancyData?.currentWeek || 1;
 
   return (
-    <div id="dashboard-section" className="pt-4">
+    <div id="baby-and-me-section" className="pt-4">
       {/* Page Title */}
       <div className="mb-8 text-center">
-        <h1 className="text-3xl md:text-4xl font-montserrat font-bold text-primary mb-2">Dashboard</h1>
+        <h1 className="text-3xl md:text-4xl font-montserrat font-bold text-primary mb-2">Baby & Me</h1>
         <p className="text-neutral-dark max-w-2xl mx-auto">Track your pregnancy journey and follow your baby's development week by week</p>
         
         {/* Production mode indicator */}
