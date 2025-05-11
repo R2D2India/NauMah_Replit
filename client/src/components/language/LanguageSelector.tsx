@@ -11,32 +11,43 @@ import {
 import { Button } from '@/components/ui/button';
 
 const LanguageSelector = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { language, changeLanguage } = useLanguage();
+  
+  // Direct language change handlers to avoid any closure issues
+  const handleChangeToEnglish = () => {
+    console.log('Direct change to English');
+    i18n.changeLanguage('en');
+  };
+  
+  const handleChangeToHindi = () => {
+    console.log('Direct change to Hindi');
+    i18n.changeLanguage('hi');
+  };
   
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="sm" className="h-8 w-8 px-0 data-[state=open]:bg-muted">
           <Globe className="h-4 w-4" />
-          <span className="sr-only">{t('language.select')}</span>
+          <span className="sr-only">Language</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem 
-          onClick={() => changeLanguage('en')}
-          className={language === 'en' ? 'bg-muted font-medium' : ''}
+          onClick={handleChangeToEnglish}
+          className={i18n.language === 'en' ? 'bg-muted font-medium' : ''}
         >
           <div className="flex items-center">
-            <span className="mr-2">🇬🇧</span> {t('language.en')}
+            <span className="mr-2">🇬🇧</span> English
           </div>
         </DropdownMenuItem>
         <DropdownMenuItem 
-          onClick={() => changeLanguage('hi')}
-          className={language === 'hi' ? 'bg-muted font-medium' : ''}
+          onClick={handleChangeToHindi}
+          className={i18n.language === 'hi' ? 'bg-muted font-medium' : ''}
         >
           <div className="flex items-center">
-            <span className="mr-2">🇮🇳</span> {t('language.hi')}
+            <span className="mr-2">🇮🇳</span> हिन्दी
           </div>
         </DropdownMenuItem>
       </DropdownMenuContent>
