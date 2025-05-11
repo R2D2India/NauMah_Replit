@@ -19,6 +19,14 @@ const LanguageSelector = () => {
     console.log(`Changing language to: ${lang}`);
     i18n.changeLanguage(lang);
     localStorage.setItem('preferredLanguage', lang);
+    
+    // Set voice assistant preference when language changes
+    if (lang === 'hi') {
+      localStorage.setItem('voicePreference', 'hindi');
+    } else {
+      localStorage.setItem('voicePreference', 'english');
+    }
+    
     changeLanguage(lang);
   };
   

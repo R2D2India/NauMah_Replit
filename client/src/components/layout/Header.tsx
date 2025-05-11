@@ -52,22 +52,22 @@ const Header = () => {
         <nav className="hidden md:flex space-x-6">
           <Link href="/dashboard">
             <span className={`font-medium ${isActive("/dashboard") ? "text-primary" : "text-neutral-dark hover:text-primary"} transition cursor-pointer`}>
-              Baby & Me
+              {t('navigation.dashboard')}
             </span>
           </Link>
           <Link href="/diet-exercise">
             <span className={`font-medium ${isActive("/diet-exercise") ? "text-primary" : "text-neutral-dark hover:text-primary"} transition cursor-pointer`}>
-              Diet & Exercise
+              {t('navigation.diet')}
             </span>
           </Link>
           <Link href="/tracker">
             <span className={`font-medium ${isActive("/tracker") ? "text-primary" : "text-neutral-dark hover:text-primary"} transition cursor-pointer`}>
-              Tracker
+              {t('navigation.tracker')}
             </span>
           </Link>
           <Link href="/resources">
             <span className={`font-medium ${isActive("/resources") ? "text-primary" : "text-neutral-dark hover:text-primary"} transition cursor-pointer`}>
-              Resources
+              {t('navigation.resources')}
             </span>
           </Link>
         </nav>
@@ -94,22 +94,22 @@ const Header = () => {
           <nav className="flex flex-col space-y-3">
             <Link href="/dashboard">
               <span className={`font-medium ${isActive("/dashboard") ? "text-primary" : "text-neutral-dark"} py-2 block cursor-pointer`}>
-                Baby & Me
+                {t('navigation.dashboard')}
               </span>
             </Link>
             <Link href="/diet-exercise">
               <span className={`font-medium ${isActive("/diet-exercise") ? "text-primary" : "text-neutral-dark"} py-2 block cursor-pointer`}>
-                Diet & Exercise
+                {t('navigation.diet')}
               </span>
             </Link>
             <Link href="/tracker">
               <span className={`font-medium ${isActive("/tracker") ? "text-primary" : "text-neutral-dark"} py-2 block cursor-pointer`}>
-                Tracker
+                {t('navigation.tracker')}
               </span>
             </Link>
             <Link href="/resources">
               <span className={`font-medium ${isActive("/resources") ? "text-primary" : "text-neutral-dark"} py-2 block cursor-pointer`}>
-                Resources
+                {t('navigation.resources')}
               </span>
             </Link>
             <div className="py-2">

@@ -18,7 +18,7 @@ const Footer = () => {
                 {language === 'hi' ? 'नौमा' : 'NauMah'}<span className="text-xs align-top -ml-0.5 leading-none">™</span>
               </span>
             </div>
-            <p className="text-sm text-neutral-dark mt-2 text-center md:text-left">Your AI Pregnancy Companion</p>
+            <p className="text-sm text-neutral-dark mt-2 text-center md:text-left">{t('app.companion')}</p>
           </div>
 
           <div className="flex flex-wrap justify-end gap-x-8 gap-y-2 md:mr-8">
@@ -42,31 +42,31 @@ const Footer = () => {
                 <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center mr-3 shadow-md">
                   <i className="fas fa-heartbeat text-white"></i>
                 </div>
-                <h3 className="text-xl font-semibold text-primary">Our Mission</h3>
+                <h3 className="text-xl font-semibold text-primary">{t('mission.title')}</h3>
               </div>
               
               <div className="space-y-3">
                 <p className="text-neutral-dark leading-relaxed">
-                  At NauMah AI Technologies, we're dedicated to revolutionizing pregnancy care through innovative AI solutions.
+                  {t('mission.description')}
                 </p>
                 <div className="flex items-start">
                   <i className="fas fa-check-circle text-primary mt-1 mr-2"></i>
-                  <p className="text-neutral-dark">Empower expectant mothers with personalized guidance</p>
+                  <p className="text-neutral-dark">{t('mission.point1')}</p>
                 </div>
                 <div className="flex items-start">
                   <i className="fas fa-check-circle text-primary mt-1 mr-2"></i>
-                  <p className="text-neutral-dark">Make pregnancy journeys safer and more informed</p>
+                  <p className="text-neutral-dark">{t('mission.point2')}</p>
                 </div>
                 <div className="flex items-start">
                   <i className="fas fa-check-circle text-primary mt-1 mr-2"></i>
-                  <p className="text-neutral-dark">Provide 24/7 AI-powered pregnancy support</p>
+                  <p className="text-neutral-dark">{t('mission.point3')}</p>
                 </div>
               </div>
               
               <div className="mt-4 text-sm bg-white p-3 rounded-lg border border-primary/20">
                 <div className="flex items-center">
                   <i className="fas fa-quote-left text-primary/50 mr-2"></i>
-                  <p className="italic">Supporting every mother through the beautiful journey of pregnancy</p>
+                  <p className="italic">{t('mission.quote')}</p>
                 </div>
               </div>
             </div>
@@ -77,7 +77,7 @@ const Footer = () => {
                 <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center mr-3 shadow-md">
                   <i className="fas fa-envelope text-white"></i>
                 </div>
-                <h3 className="text-xl font-semibold text-primary">Contact Us</h3>
+                <h3 className="text-xl font-semibold text-primary">{t('contact.title')}</h3>
               </div>
               
               <div className="space-y-5">
@@ -86,8 +86,8 @@ const Footer = () => {
                     <i className="fas fa-map-marker-alt"></i>
                   </div>
                   <div>
-                    <p className="font-medium text-primary-dark">India Headquarters:</p>
-                    <p className="text-neutral-dark">NauMah AI Technologies Pvt. Ltd.<br />OneBKC, BKC<br />Mumbai - 400053, India</p>
+                    <p className="font-medium text-primary-dark">{t('contact.india')}</p>
+                    <p className="text-neutral-dark" dangerouslySetInnerHTML={{ __html: t('contact.indiaAddress') }}></p>
                   </div>
                 </div>
                 
@@ -96,8 +96,8 @@ const Footer = () => {
                     <i className="fas fa-building"></i>
                   </div>
                   <div>
-                    <p className="font-medium text-primary-dark">USA Office:</p>
-                    <p className="text-neutral-dark">Woodbridge Park<br />Virginia, USA 22192</p>
+                    <p className="font-medium text-primary-dark">{t('contact.usa')}</p>
+                    <p className="text-neutral-dark" dangerouslySetInnerHTML={{ __html: t('contact.usaAddress') }}></p>
                   </div>
                 </div>
                 
@@ -106,13 +106,13 @@ const Footer = () => {
                     <i className="fas fa-envelope"></i>
                   </div>
                   <div>
-                    <p className="font-medium text-primary-dark">Email Us:</p>
+                    <p className="font-medium text-primary-dark">{t('contact.email')}</p>
                     <p className="text-neutral-dark">
                       <a href="mailto:support@naumah.com" className="text-primary hover:underline flex items-center">
-                        <i className="fas fa-headset mr-1"></i> support@naumah.com
+                        <i className="fas fa-headset mr-1"></i> {t('contact.support')}
                       </a>
                       <a href="mailto:hypeme@naumah.com" className="text-primary hover:underline flex items-center mt-1">
-                        <i className="fas fa-briefcase mr-1"></i> hypeme@naumah.com
+                        <i className="fas fa-briefcase mr-1"></i> {t('contact.business')}
                       </a>
                     </p>
                   </div>
@@ -121,7 +121,7 @@ const Footer = () => {
             </div>
           </div>
           <div className="text-center text-sm text-neutral-dark border-t border-gray-200 pt-4">
-            <p>NauMah does not provide medical advice. Always consult with healthcare professionals for medical decisions.</p>
+            <p>{t('footer.medical')}</p>
             <p className="mt-2">© {new Date().getFullYear()} {language === 'hi' ? 'नौमा' : 'NauMah'} AI Technologies Pvt. Ltd. {t('footer.rights')}</p>
           </div>
         </div>
