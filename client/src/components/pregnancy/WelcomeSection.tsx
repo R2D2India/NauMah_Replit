@@ -6,8 +6,9 @@ export default function WelcomeSection() {
       <div className="container mx-auto px-4">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div>
-            <h1 className="text-4xl md:text-5xl font-montserrat font-bold text-pink-600 mb-6"> {/* Changed text color */}
-              Your Intelligent Companion for Every Stage of Pregnancy
+            <h1 className="text-3xl md:text-[2.75rem] font-montserrat font-bold text-pink-600 mb-6 leading-tight tracking-tight"> {/* Refined styling */}
+              Your Intelligent Companion 
+              <span className="block mt-1">for Every Stage of Pregnancy</span>
             </h1>
             <p className="text-lg text-gray-600 mb-8">
               Navigate your pregnancy journey with personalized AI guidance, tracking tools, and expert insights.
