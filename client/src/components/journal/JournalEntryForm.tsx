@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 // Form schema with validation
 const formSchema = z.object({
@@ -25,6 +26,7 @@ interface JournalEntryFormProps {
 }
 
 export function JournalEntryForm({ onSubmit, isSubmitting, defaultValues }: JournalEntryFormProps) {
+  const { t } = useTranslation();
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -72,10 +74,10 @@ export function JournalEntryForm({ onSubmit, isSubmitting, defaultValues }: Jour
           name="title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Title</FormLabel>
+              <FormLabel>{t('journal.journalEntryTitle')}</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Give your entry a title"
+                  placeholder={t('journal.journalEntryTitle')}
                   {...field}
                   disabled={isSubmitting}
                 />
@@ -90,7 +92,7 @@ export function JournalEntryForm({ onSubmit, isSubmitting, defaultValues }: Jour
           name="mood"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>How are you feeling today?</FormLabel>
+              <FormLabel>{t('journal.mood')}</FormLabel>
               <Select
                 onValueChange={field.onChange}
                 defaultValue={field.value}
@@ -98,7 +100,7 @@ export function JournalEntryForm({ onSubmit, isSubmitting, defaultValues }: Jour
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select your mood" />
+                    <SelectValue placeholder={t('journal.mood')} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -122,10 +124,10 @@ export function JournalEntryForm({ onSubmit, isSubmitting, defaultValues }: Jour
           name="content"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Journal Entry</FormLabel>
+              <FormLabel>{t('journal.journalEntryContent')}</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Write about your day, feelings, or anything you want to remember about your pregnancy journey..."
+                  placeholder={t('journal.placeholder')}
                   className="min-h-[200px]"
                   {...field}
                   disabled={isSubmitting}

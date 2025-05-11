@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Clock, Calendar as CalendarIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface JournalEntryProps {
   entry: {
@@ -20,6 +21,7 @@ interface JournalEntryProps {
 export function JournalEntry({ entry, onBack }: JournalEntryProps) {
   const date = new Date(entry.date);
   const createdAt = new Date(entry.createdAt);
+  const { t } = useTranslation();
   
   // Convert content with line breaks to paragraphs
   const contentParagraphs = entry.content.split('\n').filter(line => line.trim() !== '');
@@ -48,7 +50,7 @@ export function JournalEntry({ entry, onBack }: JournalEntryProps) {
         <div className="flex justify-between items-center">
           <Button variant="ghost" size="sm" onClick={(e) => onBack(e)}>
             <ArrowLeft className="h-4 w-4 mr-1" />
-            Back
+            {t('journal.back')}
           </Button>
           {entry.mood && (
             <Badge variant={getMoodBadgeColor(entry.mood)}>{entry.mood}</Badge>
