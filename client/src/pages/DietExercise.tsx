@@ -433,16 +433,16 @@ export default function DietExercise() {
                   onClick={handleGenerateMealPlan}
                   disabled={isGeneratingMealPlan}
                 >
-                  {isGeneratingMealPlan ? "Generating..." : "Generate Complete Meal Plan"}
+                  {isGeneratingMealPlan ? t('dietExercise.diet.generating', 'Generating...') : t('dietExercise.diet.generateCompleteMealPlan', 'Generate Complete Meal Plan')}
                 </button>
                 {mealPlan && (
                   <div className="mt-6 text-left max-w-3xl mx-auto bg-neutral-light rounded-lg p-6 shadow-md">
-                    <h3 className="text-xl font-bold text-primary mb-4 text-center">Your Personalized Meal Plan</h3>
+                    <h3 className="text-xl font-bold text-primary mb-4 text-center">{t('dietExercise.diet.yourPersonalizedMealPlan', 'Your Personalized Meal Plan')}</h3>
                     
                     <div className="mb-4">
                       <h4 className="font-semibold text-lg text-primary-dark mb-2 border-b border-primary-light pb-1 flex items-center">
                         <Coffee className="h-5 w-5 mr-2" />
-                        Breakfast
+                        {t('dietExercise.diet.breakfast', 'Breakfast')}
                       </h4>
                       <ul className="ml-6">
                         <li className="flex items-start mb-1">
@@ -455,7 +455,7 @@ export default function DietExercise() {
                     <div className="mb-4">
                       <h4 className="font-semibold text-lg text-primary-dark mb-2 border-b border-primary-light pb-1 flex items-center">
                         <Utensils className="h-5 w-5 mr-2" />
-                        Lunch
+                        {t('dietExercise.diet.lunch', 'Lunch')}
                       </h4>
                       <ul className="ml-6">
                         <li className="flex items-start mb-1">
@@ -468,7 +468,7 @@ export default function DietExercise() {
                     <div className="mb-4">
                       <h4 className="font-semibold text-lg text-primary-dark mb-2 border-b border-primary-light pb-1 flex items-center">
                         <Moon className="h-5 w-5 mr-2" />
-                        Dinner
+                        {t('dietExercise.diet.dinner', 'Dinner')}
                       </h4>
                       <ul className="ml-6">
                         <li className="flex items-start mb-1">
@@ -481,7 +481,7 @@ export default function DietExercise() {
                     <div>
                       <h4 className="font-semibold text-lg text-primary-dark mb-2 border-b border-primary-light pb-1 flex items-center">
                         <Cherry className="h-5 w-5 mr-2" />
-                        Snacks
+                        {t('dietExercise.diet.snacks', 'Snacks')}
                       </h4>
                       <ul className="ml-6">
                         {mealPlan.snacks.map((snack, index) => (
@@ -495,7 +495,7 @@ export default function DietExercise() {
                     
                     <div className="mt-4 text-center text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
                       <AlertCircle className="h-4 w-4 inline-block mr-1" />
-                      This meal plan is tailored for week {currentWeek} of your pregnancy to provide optimal nutrition.
+                      {t('dietExercise.diet.mealPlanOptimalNutrition', 'This meal plan is tailored for week {{week}} of your pregnancy to provide optimal nutrition.', { week: currentWeek })}
                     </div>
                   </div>
                 )}
@@ -514,8 +514,8 @@ export default function DietExercise() {
                     <div className="h-12 w-12 rounded-full bg-primary-light mx-auto mb-3 flex items-center justify-center">
                       <i className={`fas fa-${exercise.icon} text-white text-xl`}></i>
                     </div>
-                    <h4 className="font-medium">{exercise.name}</h4>
-                    <p className="text-sm text-neutral-dark">{exercise.duration}</p>
+                    <h4 className="font-medium">{t(`dietExercise.exercises.${exercise.name.toLowerCase()}`, exercise.name)}</h4>
+                    <p className="text-sm text-neutral-dark">{t(`dietExercise.exercises.${exercise.name.toLowerCase()}Duration${trimester === 'third' ? '3' : '1'}`, exercise.duration)}</p>
                   </div>
                 ))}
               </div>
