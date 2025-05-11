@@ -406,11 +406,11 @@ export default function DietExercise() {
                       <p className="text-sm">{dietRecs.sampleMealPlan.lunch}</p>
                     </div>
                     <div>
-                      <div className="font-medium text-primary-dark">Dinner</div>
+                      <div className="font-medium text-primary-dark">{t('dietExercise.diet.dinner', 'Dinner')}</div>
                       <p className="text-sm">{dietRecs.sampleMealPlan.dinner}</p>
                     </div>
                     <div>
-                      <div className="font-medium text-primary-dark">Snacks</div>
+                      <div className="font-medium text-primary-dark">{t('dietExercise.diet.snacks', 'Snacks')}</div>
                       <p className="text-sm">{dietRecs.sampleMealPlan.snacks}</p>
                     </div>
                   </div>
@@ -504,7 +504,9 @@ export default function DietExercise() {
 
             {/* Exercise Tab Content */}
             <TabsContent value="exercise" className="mt-0">
-              <h3 className="text-xl font-bold text-primary mb-4">Safe Exercises for Week {currentWeek}</h3>
+              <h3 className="text-xl font-bold text-primary mb-4">
+                {t('dietExercise.exercise.heading', 'Exercise for Week {{week}}', { week: currentWeek })}
+              </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 {exerciseRecs.map((exercise: { name: string; duration: string; icon: string }, index: number) => (
@@ -519,7 +521,7 @@ export default function DietExercise() {
               </div>
 
               <div className="bg-neutral-light rounded-lg p-4 mb-6">
-                <h4 className="font-medium text-lg mb-3">Exercise Guidelines</h4>
+                <h4 className="font-medium text-lg mb-3">{t('dietExercise.exercise.tips', 'Exercise Tips')}</h4>
                 <ul className="space-y-2">
                   <li className="flex items-start">
                     <i className="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
