@@ -1,7 +1,9 @@
 import { SafetyChecker } from "./SafetyChecker";
 import { ShieldCheck, Pill, Apple } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export function SafetyCheckerSection() {
+  const { t } = useTranslation();
   return (
     <div className="w-full max-w-4xl mx-auto mb-12">
       <div className="relative text-center mb-8">
@@ -10,11 +12,11 @@ export function SafetyCheckerSection() {
           <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mr-3">
             <ShieldCheck className="h-6 w-6 text-primary" />
           </div>
-          <h2 className="text-3xl font-bold">Food & Medication Safety</h2>
+          <h2 className="text-3xl font-bold">{t('safety.title')}</h2>
         </div>
         
         <p className="text-muted-foreground max-w-2xl mx-auto">
-          Easily check if food or medication is safe during your pregnancy journey
+          {t('safety.subtitle')}
         </p>
         
         {/* Decorative elements */}

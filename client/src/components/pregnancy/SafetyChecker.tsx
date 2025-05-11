@@ -3,8 +3,10 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Camera, FilePlus, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export function SafetyChecker() {
+  const { t } = useTranslation();
   const [medicationName, setMedicationName] = useState("");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [productAnalysisResult, setProductAnalysisResult] = useState<any>(null);
@@ -205,7 +207,7 @@ export function SafetyChecker() {
       <div className="relative pb-3 mb-5">
         <h3 className="text-xl font-montserrat font-bold text-primary flex items-center">
           <i className="fas fa-pills mr-3 p-2 bg-primary/10 rounded-full"></i>
-          <span>Food & Medication Safety Checker</span>
+          <span>{t('safety.checker_title')}</span>
         </h3>
         <div className="absolute bottom-0 left-0 w-24 h-1 bg-gradient-to-r from-primary to-primary/30 rounded-full"></div>
       </div>
