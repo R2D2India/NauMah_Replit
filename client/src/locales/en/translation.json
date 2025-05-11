@@ -1,0 +1,112 @@
+{
+  "app": {
+    "title": "NauMah",
+    "slogan": "Your Intelligent Companion for Every Stage of Pregnancy"
+  },
+  "navigation": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "tracker": "Tracker",
+    "journal": "Journal",
+    "diet": "Diet & Exercise",
+    "resources": "Resources",
+    "support": "Support",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "profile": "Profile"
+  },
+  "hero": {
+    "subtitle": "Navigate your pregnancy journey with personalized AI guidance, tracking tools, and expert insights."
+  },
+  "ai": {
+    "title": "AI Pregnancy Assistant",
+    "subtitle": "Have questions about your pregnancy? Our AI assistant is here to help.",
+    "placeholder": "Ask me anything about your pregnancy...",
+    "button": "Ask",
+    "voice": "Voice Assistant",
+    "loading": "Thinking...",
+    "error": "Sorry, I couldn't process that. Please try again."
+  },
+  "chat": {
+    "title": "Chat with NauMah",
+    "subtitle": "Your AI companion for this beautiful 9-month journey",
+    "input_placeholder": "Type your message..."
+  },
+  "safety": {
+    "title": "Food & Medication Safety",
+    "subtitle": "Easily check if food or medication is safe during your pregnancy journey",
+    "checker_title": "Food & Medication Safety Checker",
+    "checker_description": "Verify if food or medication is safe to use during your pregnancy journey.",
+    "input_placeholder": "Enter food or medication name...",
+    "check_button": "Check Safety",
+    "checking": "Checking...",
+    "analyze_label": "Analyze a product label:",
+    "take_photo": "Take Photo",
+    "camera_description": "Use your camera to scan a label",
+    "upload_image": "Upload Image",
+    "upload_description": "Choose a photo from your device",
+    "product_analysis": "Product Analysis",
+    "input_required": "Input required",
+    "enter_medication": "Please enter a medication name"
+  },
+  "comingSoon": {
+    "title": "Coming Soon",
+    "nutrition": "Nutrition Planning",
+    "partner": "Partner Involvement",
+    "postpartum": "Postpartum Planning",
+    "babyShower": "Virtual Baby Shower",
+    "community": "Community Forums"
+  },
+  "coming_soon": {
+    "ecommerce_title": "NauMah E-commerce Coming Soon",
+    "consultation_title": "Doctor Consultation",
+    "expert_consultation": "Expert Medical Consultations",
+    "consultation_description": "Connect with experienced gynecologists and pregnancy specialists. Coming soon!"
+  },
+  "products": {
+    "maternity_dresses": "Maternity Dresses",
+    "healthy_snacks": "Healthy Snacks",
+    "prenatal_vitamins": "Prenatal Vitamins"
+  },
+  "common": {
+    "or": "OR",
+    "coming_soon": "Coming Soon"
+  },
+  "footer": {
+    "rights": "All Rights Reserved",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "disclaimer": "Medical Disclaimer"
+  },
+  "language": {
+    "select": "Language",
+    "en": "English",
+    "hi": "हिन्दी"
+  },
+  "voice": {
+    "english": "English Voice",
+    "hindi": "Hindi Voice"
+  },
+  "mission": {
+    "title": "Our Mission",
+    "description": "At NauMah AI Technologies, we're dedicated to revolutionizing pregnancy care through innovative AI solutions.",
+    "point1": "Empower expectant mothers with personalized guidance",
+    "point2": "Make pregnancy journeys safer and more informed",
+    "point3": "Provide 24/7 AI-powered pregnancy support",
+    "quote": "Supporting every mother through the beautiful journey of pregnancy"
+  },
+  "contact": {
+    "title": "Contact Us", 
+    "india": "India Headquarters:",
+    "indiaAddress": "NauMah AI Technologies Pvt. Ltd.<br />OneBKC, BKC<br />Mumbai - 400053, India",
+    "usa": "USA Office:",
+    "usaAddress": "Woodbridge Park<br />Virginia, USA 22192",
+    "email": "Email Us:",
+    "support": "support@naumah.com",
+    "business": "hypeme@naumah.com"
+  },
+  "footer": {
+    "medical": "NauMah does not provide medical advice. Always consult with healthcare professionals for medical decisions."
+  }
+}
