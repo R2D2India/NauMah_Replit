@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { 
   DIET_RECOMMENDATIONS, 
@@ -26,6 +27,7 @@ import {
 } from "lucide-react";
 
 export default function DietExercise() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("diet");
   const [isGeneratingMealPlan, setIsGeneratingMealPlan] = useState(false);
   const [isSynchronizing, setIsSynchronizing] = useState(false);
@@ -283,9 +285,9 @@ export default function DietExercise() {
   return (
     <div className="container mx-auto px-4 py-6">
       <div className="flex justify-between items-center mb-2">
-        <h1 className="text-3xl font-bold">Diet & Exercise</h1>
+        <h1 className="text-3xl font-bold">{t('dietExercise.title', 'Diet & Exercise')}</h1>
         <div className="text-sm text-gray-500 flex items-center">
-          <span className="mr-2">Week {currentWeek}</span>
+          <span className="mr-2">{t('dietExercise.week', 'Week')} {currentWeek}</span>
           <div className="relative flex h-3 w-3">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-20"></span>
             <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
@@ -294,7 +296,7 @@ export default function DietExercise() {
       </div>
       <div className="flex justify-between items-center mb-6">
         <p className="text-muted-foreground">
-          Nutrition and activity recommendations for week {currentWeek} of your pregnancy
+          {t('dietExercise.subtitle', 'Nutrition and activity recommendations for week {{week}} of your pregnancy', { week: currentWeek })}
         </p>
         <div className="flex items-center gap-3">
           {isSynchronizing ? (
@@ -303,7 +305,7 @@ export default function DietExercise() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
               </div>
-              Syncing data...
+              {t('dietExercise.syncingData', 'Syncing data...')}
             </div>
           ) : (
             <button 
@@ -313,12 +315,12 @@ export default function DietExercise() {
                 appEvents.forceSyncAll();
               }}
               className="text-xs text-primary hover:text-primary-dark flex items-center"
-              title="Sync data with other pages"
+              title={t('dietExercise.syncTooltip', 'Sync data with other pages')}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38" />
               </svg>
-              Sync
+              {t('dietExercise.sync', 'Sync')}
             </button>
           )}
         </div>
