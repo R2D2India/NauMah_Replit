@@ -75,7 +75,11 @@ export async function getAssistantResponse(message: string): Promise<string> {
   }
 }
 
-export async function generateBabyNames(origin: string, gender: string): Promise<{
+export async function generateBabyNames(
+  origin: string, 
+  gender: string,
+  language: string = 'en'
+): Promise<{
   names: string[];
   meanings: Record<string, string>;
 }> {
@@ -83,16 +87,35 @@ export async function generateBabyNames(origin: string, gender: string): Promise
     if (!openai) {
       throw new Error("OpenAI client not initialized");
     }
+    
+    // Determine language instruction
+    let languageInstruction = "";
+    if (language === 'hi') {
+      languageInstruction = "Provide the names in their original form but translate all meanings into Hindi language.";
+    } else if (language !== 'en') {
+      languageInstruction = `Provide the names in their original form but translate all meanings into ${language} language.`;
+    }
+    
     const prompt = `Generate 10 unique baby names with their meanings. Origin: ${origin}, Gender: ${gender}. 
                    Make names culturally authentic and meaningful. 
-                   Return response as JSON with format: { "names": ["name1", "name2", ...], "meanings": { "name1": "meaning1", "name2": "meaning2", ... } }`;
+                   Return response as JSON with format: { "names": ["name1", "name2", ...], "meanings": { "name1": "meaning1", "name2": "meaning2", ... } }
+                   ${languageInstruction}`;
 
+    // Modify system prompt for language
+    let systemContent = "You are a cultural expert specializing in traditional and meaningful baby names. You always respond with JSON format.";
+    
+    if (language === 'hi') {
+      systemContent += " You are fluent in Hindi and can provide accurate translations.";
+    } else if (language !== 'en') {
+      systemContent += ` You are fluent in ${language} and can provide accurate translations.`;
+    }
+    
     const completion = await openai.chat.completions.create({
       model: MODEL,
       messages: [
         {
           role: "system",
-          content: "You are a cultural expert specializing in traditional and meaningful baby names. You always respond with JSON format."
+          content: systemContent
         },
         {
           role: "user",

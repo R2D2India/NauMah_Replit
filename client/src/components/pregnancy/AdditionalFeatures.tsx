@@ -19,10 +19,15 @@ const AdditionalFeatures = ({ currentWeek }: AdditionalFeaturesProps) => {
   const handleExploreNames = async () => {
     try {
       setIsLoadingNames(true);
-      const response = await fetch('/api/baby-names', {
+      // Get current language from i18n
+      const currentLanguage = i18n.language || 'en';
+      
+      // Add language parameter to URL
+      const response = await fetch(`/api/baby-names?lang=${currentLanguage}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept-Language': currentLanguage
         },
         body: JSON.stringify({
           origin: selectedOrigin,

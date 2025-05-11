@@ -393,7 +393,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/baby-names", validateRequest(babyNamesSchema), async (req: Request, res: Response) => {
     try {
       const { origin, gender } = req.validatedData;
-      const names = await generateBabyNames(origin, gender);
+      // Get language from query parameter or header
+      const language = req.query.lang as string || req.headers['accept-language']?.split(',')[0] || 'en';
+      
+      console.log(`Generating baby names with origin: ${origin}, gender: ${gender}, language: ${language}`);
+      const names = await generateBabyNames(origin, gender, language);
       res.json(names);
     } catch (error) {
       console.error("Error generating baby names:", error);

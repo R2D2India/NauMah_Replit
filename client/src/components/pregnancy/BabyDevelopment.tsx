@@ -27,7 +27,7 @@ const BabyDevelopment = ({ currentWeek, developmentData: preloadedData, isLocalD
   const [isProductionMode, setIsProductionMode] = useState(false);
   
   // Get translation hooks
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   
   // Check if OpenAI is available
   const { isAvailable: isAIAvailable } = useOpenAIStatus();
@@ -81,12 +81,12 @@ const BabyDevelopment = ({ currentWeek, developmentData: preloadedData, isLocalD
     isLoading, 
     isError 
   } = useQuery<BabyDevelopmentData>({
-    queryKey: [`/api/baby-development/${currentWeek}`],
+    queryKey: [`/api/baby-development/${currentWeek}`, i18n.language],
     enabled: currentWeek > 0 && !babyData && !loadingFromLocal,
     staleTime: 1000 * 60 * 60 * 24, // 1 day
     queryFn: async () => {
-      console.log(`Fetching baby development data for week ${currentWeek}`);
-      const response = await fetch(`/api/baby-development/${currentWeek}`);
+      console.log(`Fetching baby development data for week ${currentWeek} in language ${i18n.language}`);
+      const response = await fetch(`/api/baby-development/${currentWeek}?lang=${i18n.language}`);
       if (!response.ok) {
         throw new Error('Failed to fetch baby development data');
       }
@@ -107,7 +107,7 @@ const BabyDevelopment = ({ currentWeek, developmentData: preloadedData, isLocalD
     }
   }, [apiData, babyData, currentWeek, isProductionMode]);
   
-  // If preloaded data doesn't match current week, get data for current week from API or localStorage
+  // If preloaded data doesn't match current week or language changes, get data for current week from API or localStorage
   useEffect(() => {
     // If we have preloaded data that matches our current week, use it
     if (preloadedData && preloadedData.week === currentWeek) {
@@ -119,6 +119,18 @@ const BabyDevelopment = ({ currentWeek, developmentData: preloadedData, isLocalD
     // If no preloaded data or it doesn't match current week
     if (!preloadedData || preloadedData.week !== currentWeek) {
       console.log(`BabyDevelopment: Preloaded data week ${preloadedData?.week} doesn't match current week ${currentWeek}`);
+      
+      // In development mode or when language changes, skip localStorage and request fresh data
+      const isLanguageChanged = localStorage.getItem('lastLanguage') !== i18n.language;
+      if (isLanguageChanged) {
+        localStorage.setItem('lastLanguage', i18n.language);
+        console.log(`Language changed to ${i18n.language}, fetching fresh baby development data`);
+        
+        // Reset data to trigger a new query with the current language
+        setBabyData(null);
+        setLoadingFromLocal(false);
+        return;
+      }
       
       // Try localStorage first
       const localData = getLocalBabyDevelopmentData(currentWeek);
@@ -136,7 +148,7 @@ const BabyDevelopment = ({ currentWeek, developmentData: preloadedData, isLocalD
         setLoadingFromLocal(false);
       }
     }
-  }, [currentWeek, preloadedData]);
+  }, [currentWeek, preloadedData, i18n.language]);
   
   // If we're still loading or have an error without backup data
   if ((isLoading || isError) && !babyData) {
