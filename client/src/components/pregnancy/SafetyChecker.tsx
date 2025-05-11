@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Camera, FilePlus, Loader2 } from "lucide-react";
+import { Camera, FilePlus, Loader2, AlertTriangle, CheckCircle2, Info, AlertCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 export function SafetyChecker() {
@@ -10,6 +10,8 @@ export function SafetyChecker() {
   const [medicationName, setMedicationName] = useState("");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [productAnalysisResult, setProductAnalysisResult] = useState<any>(null);
+  const [medicationResult, setMedicationResult] = useState<any>(null);
+  const [recentlyChecked, setRecentlyChecked] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -23,18 +25,31 @@ export function SafetyChecker() {
       });
     },
     onSuccess: (data) => {
+      // Store the result in our state
+      setMedicationResult(data);
+      
+      // Add to recently checked list if not already present
+      setRecentlyChecked(prev => {
+        if (!prev.includes(data.medicationName)) {
+          // Add at the beginning and limit to 5 items
+          return [data.medicationName, ...prev].slice(0, 5);
+        }
+        return prev;
+      });
+      
+      // Still show a minimal toast for feedback
       const variant = data.isSafe === true ? "default" : 
                     data.isSafe === false ? "destructive" : "default";
       
       toast({
-        title: data.isSafe === true ? "Safe for pregnancy" : 
-              data.isSafe === false ? "Not recommended during pregnancy" : 
-              "Safety information unavailable",
-        description: data.notes,
+        title: data.isSafe === true ? "Safety check complete" : 
+              data.isSafe === false ? "Safety check complete" : 
+              "Safety check complete",
         variant,
       });
     },
     onError: (error) => {
+      setMedicationResult(null);
       toast({
         title: "Error checking medication",
         description: `Failed to check medication: ${error.message}`,
@@ -68,19 +83,29 @@ export function SafetyChecker() {
     onSuccess: (data) => {
       setProductAnalysisResult(data);
       
+      // Add to recently checked list if not already present
+      if (data.productName) {
+        setRecentlyChecked(prev => {
+          if (!prev.includes(data.productName)) {
+            // Add at the beginning and limit to 5 items
+            return [data.productName, ...prev].slice(0, 5);
+          }
+          return prev;
+        });
+      }
+      
+      // Minimal toast for feedback
       const variant = data.isSafe === true ? "default" : 
                     data.isSafe === false ? "destructive" : "default";
       
       toast({
-        title: data.isSafe === true ? `${data.productName} is safe for pregnancy` : 
-              data.isSafe === false ? `${data.productName} is not recommended during pregnancy` : 
-              `Safety information for ${data.productName} is unavailable`,
-        description: data.notes,
+        title: "Image analysis complete",
         variant,
       });
     },
     onError: (error) => {
       setImagePreview(null);
+      setProductAnalysisResult(null);
       toast({
         title: "Error analyzing product",
         description: `Failed to analyze the product image: ${error.message}`,
@@ -199,6 +224,11 @@ export function SafetyChecker() {
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+  };
+  
+  const clearMedicationResult = () => {
+    setMedicationResult(null);
+    setMedicationName("");
   };
 
   return (
