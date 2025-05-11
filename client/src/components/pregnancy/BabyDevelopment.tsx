@@ -77,9 +77,17 @@ const BabyDevelopment = ({ currentWeek, developmentData: preloadedData, isLocalD
     isLoading, 
     isError 
   } = useQuery<BabyDevelopmentData>({
-    queryKey: ["/api/baby-development", currentWeek.toString()],
-    enabled: !babyData && isAIAvailable && !loadingFromLocal,
+    queryKey: [`/api/baby-development/${currentWeek}`],
+    enabled: currentWeek > 0 && !babyData && !loadingFromLocal,
     staleTime: 1000 * 60 * 60 * 24, // 1 day
+    queryFn: async () => {
+      console.log(`Fetching baby development data for week ${currentWeek}`);
+      const response = await fetch(`/api/baby-development/${currentWeek}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch baby development data');
+      }
+      return response.json();
+    }
   });
   
   // Update local state when API data is received
@@ -97,7 +105,15 @@ const BabyDevelopment = ({ currentWeek, developmentData: preloadedData, isLocalD
   
   // If preloaded data doesn't match current week, get data for current week from API or localStorage
   useEffect(() => {
-    if (preloadedData?.week !== currentWeek) {
+    // If we have preloaded data that matches our current week, use it
+    if (preloadedData && preloadedData.week === currentWeek) {
+      console.log(`BabyDevelopment: Using preloaded data for week ${currentWeek}`);
+      setBabyData(preloadedData);
+      return;
+    }
+    
+    // If no preloaded data or it doesn't match current week
+    if (!preloadedData || preloadedData.week !== currentWeek) {
       console.log(`BabyDevelopment: Preloaded data week ${preloadedData?.week} doesn't match current week ${currentWeek}`);
       
       // Try localStorage first
@@ -106,17 +122,17 @@ const BabyDevelopment = ({ currentWeek, developmentData: preloadedData, isLocalD
         console.log(`Using local storage baby development data for week ${currentWeek}`);
         setBabyData(localData);
         setLoadingFromLocal(true);
-      } else if (isAIAvailable) {
+      } else {
         // If no local data, make direct API call
-        console.log("BabyDevelopment: Requesting AI data for week", currentWeek);
-        console.log("Making direct API call to baby-development endpoint for week", currentWeek);
+        console.log("BabyDevelopment: Requesting data for week", currentWeek);
+        console.log("Will make direct API call to baby-development endpoint for week", currentWeek);
         
         // Reset data to trigger a new query
         setBabyData(null);
         setLoadingFromLocal(false);
       }
     }
-  }, [currentWeek, preloadedData, isAIAvailable]);
+  }, [currentWeek, preloadedData]);
   
   // If we're still loading or have an error without backup data
   if ((isLoading || isError) && !babyData) {
