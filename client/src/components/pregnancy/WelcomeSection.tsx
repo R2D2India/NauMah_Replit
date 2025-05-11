@@ -1,17 +1,20 @@
 import React from 'react';
 
+import { useTranslation } from "react-i18next";
+
 export default function WelcomeSection() {
+  const { t } = useTranslation();
+
   return (
     <section className="bg-gradient-to-b from-pink-50 to-white py-16"> {/* Changed background colors */}
       <div className="container mx-auto px-4">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div>
             <h1 className="text-3xl md:text-[2.75rem] font-montserrat font-bold text-pink-600 mb-6 leading-tight tracking-tight"> {/* Refined styling */}
-              Your Intelligent Companion 
-              <span className="block mt-1">for Every Stage of Pregnancy</span>
+              {t('app.slogan')}
             </h1>
             <p className="text-lg text-gray-600 mb-8">
-              Navigate your pregnancy journey with personalized AI guidance, tracking tools, and expert insights.
+              {t('hero.subtitle')}
             </p>
             <div className="grid grid-cols-2 gap-4 mt-8">
               <img 

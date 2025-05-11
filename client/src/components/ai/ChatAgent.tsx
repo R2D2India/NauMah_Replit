@@ -6,6 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
+import { useTranslation } from 'react-i18next';
+import { useLanguage } from '@/hooks/use-language';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -14,9 +16,14 @@ interface Message {
 }
 
 export function ChatAgent() {
+  const { t } = useTranslation();
+  const { language } = useLanguage();
+  
   const [messages, setMessages] = useState<Message[]>([{
     role: 'assistant',
-    content: "Welcome! I'm NauMah, your pregnancy companion. How can I help you today?",
+    content: language === 'hi' ? 
+      "नमस्ते! मैं नौमा हूँ, आपका गर्भावस्था साथी। आज मैं आपकी कैसे मदद कर सकता हूँ?" : 
+      "Welcome! I'm NauMah, your pregnancy companion. How can I help you today?",
     timestamp: new Date()
   }]);
   const [inputValue, setInputValue] = useState('');
@@ -99,7 +106,9 @@ export function ChatAgent() {
       // Add a fallback message
       const errorMessage: Message = {
         role: 'assistant',
-        content: "I'm sorry, I'm having trouble connecting to the server right now. Please try again in a moment.",
+        content: language === 'hi' 
+          ? "मुझे खेद है, मुझे अभी सर्वर से कनेक्ट करने में परेशानी हो रही है। कृपया एक क्षण बाद फिर से प्रयास करें।"
+          : "I'm sorry, I'm having trouble connecting to the server right now. Please try again in a moment.",
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMessage]);
@@ -131,8 +140,8 @@ export function ChatAgent() {
   return (
     <Card className="w-full h-[600px] flex flex-col bg-background rounded-xl shadow-[0_20px_50px_rgba(8,_112,_184,_0.7)] transform-gpu hover:scale-[1.02] transition-all duration-300">
       <CardHeader className="shrink-0">
-        <CardTitle className="text-primary">Chat with NauMah</CardTitle>
-        <CardDescription className="mt-1.5 text-foreground/80">Your AI companion for this beautiful 9-month journey</CardDescription>
+        <CardTitle className="text-primary">{t('chat.title')}</CardTitle>
+        <CardDescription className="mt-1.5 text-foreground/80">{t('chat.subtitle')}</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 overflow-hidden p-0">
         <ScrollArea className="h-[calc(600px-10rem)] px-6">
@@ -204,7 +213,7 @@ export function ChatAgent() {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Type your message..."
+            placeholder={t('chat.input_placeholder')}
             className="min-h-[60px] flex-1"
             disabled={isLoading}
           />
