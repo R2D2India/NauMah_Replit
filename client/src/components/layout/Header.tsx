@@ -105,7 +105,7 @@ const Header = () => {
               <AuthButton />
             </div>
             <div className="py-2 flex items-center">
-              <span className="mr-2">{t('language.select')}:</span>
+              <span className="mr-2">Language:</span>
               <LanguageSelector />
             </div>
           </nav>
