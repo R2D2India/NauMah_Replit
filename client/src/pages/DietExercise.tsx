@@ -525,19 +525,19 @@ export default function DietExercise() {
                 <ul className="space-y-2">
                   <li className="flex items-start">
                     <i className="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
-                    <span>Stay hydrated before, during, and after exercise</span>
+                    <span>{t('dietExercise.exerciseTips.stayHydrated', 'Stay hydrated before, during, and after exercise')}</span>
                   </li>
                   <li className="flex items-start">
                     <i className="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
-                    <span>Wear comfortable, supportive shoes and clothing</span>
+                    <span>{t('dietExercise.exerciseTips.wearComfortable', 'Wear comfortable, supportive shoes and clothing')}</span>
                   </li>
                   <li className="flex items-start">
                     <i className="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
-                    <span>Avoid exercises that require lying flat on your back</span>
+                    <span>{t('dietExercise.exerciseTips.avoidExercises', 'Avoid exercises that require lying flat on your back')}</span>
                   </li>
                   <li className="flex items-start">
                     <i className="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
-                    <span>Listen to your body and stop if you feel discomfort</span>
+                    <span>{t('dietExercise.exerciseTips.listenToBody', 'Listen to your body and stop if you feel discomfort')}</span>
                   </li>
                 </ul>
               </div>
@@ -546,25 +546,27 @@ export default function DietExercise() {
                 <div className="flex items-start">
                   <AlertCircle className="h-5 w-5 text-yellow-500 mt-1 mr-3" />
                   <div>
-                    <h4 className="font-medium">Important Note</h4>
-                    <p className="text-sm">Always consult with your healthcare provider before starting or modifying any exercise routine during pregnancy.</p>
+                    <h4 className="font-medium">{t('dietExercise.importantNote', 'Important Note')}</h4>
+                    <p className="text-sm">{t('dietExercise.consultHealthcare', 'Always consult with your healthcare provider before starting or modifying any exercise routine during pregnancy.')}</p>
                   </div>
                 </div>
               </div>
 
               <div className="text-center">
                 <button className="bg-primary hover:bg-primary-dark text-white py-2 px-6 rounded-lg font-medium transition duration-300">
-                  View Exercise Videos
+                  {t('dietExercise.viewExerciseVideos', 'View Exercise Videos')}
                 </button>
               </div>
             </TabsContent>
 
             {/* Tests Tab Content */}
             <TabsContent value="tests" className="mt-0">
-              <h3 className="text-xl font-bold text-primary mb-4">Recommended Tests for Week {currentWeek}</h3>
+              <h3 className="text-xl font-bold text-primary mb-4">
+                {t('dietExercise.tests.heading', 'Recommended Tests for Week {{week}}', { week: currentWeek })}
+              </h3>
 
               <div className="mb-6 bg-neutral-light rounded-lg p-4">
-                <h4 className="font-medium text-lg mb-3">Key Tests This Period</h4>
+                <h4 className="font-medium text-lg mb-3">{t('dietExercise.tests.upcoming', 'Key Tests This Period')}</h4>
                 <div className="space-y-4">
                   {testRecs.map((test: { name: string; description: string; icon: string }, index: number) => (
                     <div key={index} className="flex items-start">
@@ -572,8 +574,8 @@ export default function DietExercise() {
                         <i className={`fas fa-${test.icon}`}></i>
                       </div>
                       <div>
-                        <h5 className="font-medium">{test.name}</h5>
-                        <p className="text-sm text-neutral-dark">{test.description}</p>
+                        <h5 className="font-medium">{t(`dietExercise.tests.${test.name.toLowerCase().replace(/[() ]/g, '').replace(/['-]/g, '')}`, test.name)}</h5>
+                        <p className="text-sm text-neutral-dark">{t(`dietExercise.tests.${test.name.toLowerCase().replace(/[() ]/g, '').replace(/['-]/g, '')}Desc`, test.description)}</p>
                       </div>
                     </div>
                   ))}
