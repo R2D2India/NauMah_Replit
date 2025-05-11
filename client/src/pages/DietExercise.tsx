@@ -386,8 +386,8 @@ export default function DietExercise() {
                       <li key={index} className="flex">
                         <div className="h-6 w-6 rounded-full bg-primary-light flex-shrink-0 flex items-center justify-center text-white text-xs font-bold mr-3">{index + 1}</div>
                         <div>
-                          <span className="font-medium">{nutrient.name}</span>
-                          <p className="text-sm text-neutral-dark">{nutrient.description}</p>
+                          <span className="font-medium">{t(`dietExercise.nutrients.${nutrient.name.toLowerCase().replace(/[- ]/g, '').replace(/[0-9]/g, '')}`, nutrient.name)}</span>
+                          <p className="text-sm text-neutral-dark">{t(`dietExercise.nutrients.${nutrient.name.toLowerCase().replace(/[- ]/g, '').replace(/[0-9]/g, '')}Desc`, nutrient.description)}</p>
                         </div>
                       </li>
                     ))}
@@ -399,19 +399,19 @@ export default function DietExercise() {
                   <div className="space-y-3">
                     <div>
                       <div className="font-medium text-primary-dark">{t('dietExercise.diet.breakfast', 'Breakfast')}</div>
-                      <p className="text-sm">{dietRecs.sampleMealPlan.breakfast}</p>
+                      <p className="text-sm">{t(`dietExercise.meals.${trimester}.breakfast`, dietRecs.sampleMealPlan.breakfast)}</p>
                     </div>
                     <div>
                       <div className="font-medium text-primary-dark">{t('dietExercise.diet.lunch', 'Lunch')}</div>
-                      <p className="text-sm">{dietRecs.sampleMealPlan.lunch}</p>
+                      <p className="text-sm">{t(`dietExercise.meals.${trimester}.lunch`, dietRecs.sampleMealPlan.lunch)}</p>
                     </div>
                     <div>
                       <div className="font-medium text-primary-dark">{t('dietExercise.diet.dinner', 'Dinner')}</div>
-                      <p className="text-sm">{dietRecs.sampleMealPlan.dinner}</p>
+                      <p className="text-sm">{t(`dietExercise.meals.${trimester}.dinner`, dietRecs.sampleMealPlan.dinner)}</p>
                     </div>
                     <div>
                       <div className="font-medium text-primary-dark">{t('dietExercise.diet.snacks', 'Snacks')}</div>
-                      <p className="text-sm">{dietRecs.sampleMealPlan.snacks}</p>
+                      <p className="text-sm">{t(`dietExercise.meals.${trimester}.snacks`, dietRecs.sampleMealPlan.snacks)}</p>
                     </div>
                   </div>
                 </div>
@@ -421,8 +421,8 @@ export default function DietExercise() {
                 <div className="flex items-start">
                   <AlertCircle className="h-5 w-5 text-primary mt-1 mr-3" />
                   <div>
-                    <h4 className="font-medium">Personalized Tip</h4>
-                    <p className="text-sm">At {currentWeek} weeks, your baby is developing rapidly. Try adding an extra serving of leafy greens daily to boost your iron intake naturally. Iron is crucial during this period of your pregnancy.</p>
+                    <h4 className="font-medium">{t('dietExercise.diet.personalizedTip', 'Personalized Tip')}</h4>
+                    <p className="text-sm">{t('dietExercise.personalizedTipWeek', 'At {{week}} weeks, your baby is developing rapidly. Try adding an extra serving of leafy greens daily to boost your iron intake naturally. Iron is crucial during this period of your pregnancy.', { week: currentWeek })}</p>
                   </div>
                 </div>
               </div>
