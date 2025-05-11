@@ -2,10 +2,13 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { AuthButton } from "@/components/auth/AuthButton";
 import { scrollToTop } from "@/lib/scrollUtils";
+import { useTranslation } from "react-i18next";
+import LanguageSelector from "@/components/language/LanguageSelector";
 
 const Header = () => {
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { t } = useTranslation();
 
   const isActive = (path: string) => location === path;
 
@@ -32,7 +35,7 @@ const Header = () => {
               <i className="fas fa-baby text-white"></i>
             </div>
             <span className="text-xl md:text-2xl font-montserrat font-semibold text-primary group">
-              NauMah<span className="text-xs align-top -ml-0.5 leading-none">™</span>
+              {t('app.title')}<span className="text-xs align-top -ml-0.5 leading-none">™</span>
             </span>
           </Link>
         </div>
@@ -40,7 +43,7 @@ const Header = () => {
         <nav className="hidden md:flex space-x-6">
           <Link href="/dashboard">
             <span className={`font-medium ${isActive("/dashboard") ? "text-primary" : "text-neutral-dark hover:text-primary"} transition cursor-pointer`}>
-              Baby & Me
+              {t('navigation.dashboard')}
             </span>
           </Link>
           <Link href="/diet-exercise">
@@ -61,6 +64,7 @@ const Header = () => {
         </nav>
         
         <div className="flex items-center space-x-3">
+          <LanguageSelector />
           <div className="hidden md:block">
             <AuthButton />
           </div>
@@ -99,6 +103,10 @@ const Header = () => {
             </Link>
             <div className="py-2">
               <AuthButton />
+            </div>
+            <div className="py-2 flex items-center">
+              <span className="mr-2">{t('language.select')}:</span>
+              <LanguageSelector />
             </div>
           </nav>
         </div>
