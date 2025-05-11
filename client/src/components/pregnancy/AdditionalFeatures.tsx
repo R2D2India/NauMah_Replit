@@ -11,7 +11,7 @@ const AdditionalFeatures = ({ currentWeek }: AdditionalFeaturesProps) => {
   const [selectedOrigin, setSelectedOrigin] = useState("All Origins");
   const [selectedGender, setSelectedGender] = useState("All Genders");
   const { toast } = useToast();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const [names, setNames] = useState<{ name: string; meaning: string }[]>([]);
   const [isLoadingNames, setIsLoadingNames] = useState(false);
