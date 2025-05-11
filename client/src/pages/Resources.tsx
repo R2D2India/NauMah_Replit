@@ -442,7 +442,7 @@ export default function Resources() {
                 className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium shadow-sm hover:shadow-md transition-all duration-300"
                 onClick={() => setContactFormOpen(true)}
               >
-                Contact Support
+                {t('resources.faq.contactSupport', 'Contact Support')}
               </button>
             </div>
           </div>
