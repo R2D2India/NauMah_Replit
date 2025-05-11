@@ -46,8 +46,8 @@ export function SafetyChecker() {
   const handleMedicationCheck = () => {
     if (!medicationName.trim()) {
       toast({
-        title: "Input required",
-        description: "Please enter a medication name",
+        title: t('safety.input_required'),
+        description: t('safety.enter_medication'),
         variant: "destructive",
       });
       return;
@@ -213,7 +213,7 @@ export function SafetyChecker() {
       </div>
       
       <p className="mb-5 text-neutral-dark leading-relaxed">
-        Verify if food or medication is safe to use during your pregnancy journey.
+        {t('safety.checker_description')}
       </p>
       
       {/* Enhanced text input for medication names */}
@@ -225,7 +225,7 @@ export function SafetyChecker() {
           <input 
             type="text" 
             className="w-full pl-10 p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary/50 outline-none shadow-sm transition-all duration-200" 
-            placeholder="Enter food or medication name..."
+            placeholder={t('safety.input_placeholder')}
             value={medicationName}
             onChange={(e) => setMedicationName(e.target.value)}
           />
@@ -238,12 +238,12 @@ export function SafetyChecker() {
           {checkMedicationMutation.isPending ? (
             <>
               <i className="fas fa-spinner fa-spin mr-2"></i>
-              <span>Checking...</span>
+              <span>{t('safety.checking')}</span>
             </>
           ) : (
             <>
               <i className="fas fa-check-circle mr-2"></i>
-              <span>Check Safety</span>
+              <span>{t('safety.check_button')}</span>
             </>
           )}
         </button>
@@ -297,7 +297,7 @@ export function SafetyChecker() {
           <div className="w-full border-t border-gray-200"></div>
         </div>
         <div className="relative flex justify-center">
-          <span className="bg-white px-4 text-sm text-neutral-dark">OR</span>
+          <span className="bg-white px-4 text-sm text-neutral-dark">{t('common.or')}</span>
         </div>
       </div>
 
@@ -305,7 +305,7 @@ export function SafetyChecker() {
       <div className="mb-5">
         <p className="mb-3 font-medium flex items-center">
           <i className="fas fa-camera text-primary mr-2"></i>
-          <span>Analyze a product label:</span>
+          <span>{t('safety.analyze_label')}</span>
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <button
@@ -317,8 +317,8 @@ export function SafetyChecker() {
               <Camera className="h-5 w-5 text-primary" />
             </div>
             <div className="text-left">
-              <p className="font-medium">Take Photo</p>
-              <p className="text-xs text-gray-500">Use your camera to scan a label</p>
+              <p className="font-medium">{t('safety.take_photo')}</p>
+              <p className="text-xs text-gray-500">{t('safety.camera_description')}</p>
             </div>
           </button>
           
@@ -331,8 +331,8 @@ export function SafetyChecker() {
               <FilePlus className="h-5 w-5 text-primary" />
             </div>
             <div className="text-left">
-              <p className="font-medium">Upload Image</p>
-              <p className="text-xs text-gray-500">Choose a photo from your device</p>
+              <p className="font-medium">{t('safety.upload_image')}</p>
+              <p className="text-xs text-gray-500">{t('safety.upload_description')}</p>
             </div>
           </button>
           
@@ -352,7 +352,7 @@ export function SafetyChecker() {
           <div className="bg-primary/5 px-4 py-3 border-b border-primary/10 flex justify-between items-center">
             <h4 className="font-medium text-primary flex items-center">
               <i className="fas fa-image mr-2"></i>
-              <span>Product Analysis</span>
+              <span>{t('safety.product_analysis')}</span>
             </h4>
             <button
               className="text-sm text-gray-500 hover:text-red-500 bg-white hover:bg-red-50 rounded-full p-1 transition-colors"
