@@ -339,46 +339,48 @@ export default function DietExercise() {
                 className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm rounded-t-lg rounded-b-none py-3 flex gap-2"
               >
                 <Apple className="w-4 h-4" />
-                <span>Diet</span>
+                <span>{t('dietExercise.tabLabel.diet', 'Diet')}</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="exercise" 
                 className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm rounded-t-lg rounded-b-none py-3 flex gap-2"
               >
                 <Dumbbell className="w-4 h-4" />
-                <span>Exercise</span>
+                <span>{t('dietExercise.tabLabel.exercise', 'Exercise')}</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="tests" 
                 className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm rounded-t-lg rounded-b-none py-3 flex gap-2"
               >
                 <TestTube className="w-4 h-4" />
-                <span>Tests</span>
+                <span>{t('dietExercise.tabLabel.tests', 'Tests')}</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="symptoms" 
                 className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm rounded-t-lg rounded-b-none py-3 flex gap-2"
               >
                 <Activity className="w-4 h-4" />
-                <span>Symptoms</span>
+                <span>{t('dietExercise.tabLabel.symptoms', 'Symptoms')}</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="resources" 
                 className="data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm rounded-t-lg rounded-b-none py-3 flex gap-2"
               >
                 <BookOpen className="w-4 h-4" />
-                <span>Resources</span>
+                <span>{t('dietExercise.tabLabel.resources', 'Resources')}</span>
               </TabsTrigger>
             </TabsList>
           </CardHeader>
           <CardContent className="p-6">
             {/* Diet Tab Content */}
             <TabsContent value="diet" className="mt-0">
-              <h3 className="text-xl font-bold text-primary mb-4">Recommended Diet for Week {currentWeek}</h3>
+              <h3 className="text-xl font-bold text-primary mb-4">
+                {t('dietExercise.diet.heading', 'Recommended Diet for Week {{week}}', { week: currentWeek })}
+              </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-neutral-light rounded-lg p-4">
-                  <h4 className="font-medium text-lg mb-3">Focus Nutrients</h4>
+                  <h4 className="font-medium text-lg mb-3">{t('dietExercise.diet.focusNutrients', 'Focus Nutrients')}</h4>
                   <ul className="space-y-3">
                     {dietRecs.focusNutrients.map((nutrient: { name: string; description: string }, index: number) => (
                       <li key={index} className="flex">
