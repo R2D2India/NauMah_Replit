@@ -520,13 +520,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     try {
       const week = parseInt(req.params.week);
+      // Get requested language, default to English
+      const language = req.query.lang as string || 'en';
+      
       if (isNaN(week) || week < 1 || week > 42) {
         return res.status(400).json({ 
           message: "Invalid pregnancy week. Must be between 1 and 42."
         });
       }
       
-      console.log(`Generating baby development information for week ${week}`);
+      console.log(`Generating baby development information for week ${week} in language ${language}`);
       
       // Set a timeout for the API call to prevent server hanging
       const timeoutPromise = new Promise((_, reject) => {
@@ -535,7 +538,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Race the API call against the timeout
       const developmentInfo = await Promise.race([
-        generateBabyDevelopment(week),
+        generateBabyDevelopment(week, language),
         timeoutPromise
       ]) as ReturnType<typeof generateBabyDevelopment>;
       
@@ -544,18 +547,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         throw new Error("Failed to retrieve baby development information");
       }
       
-      console.log(`Successfully generated baby development info for week ${week}`);
+      console.log(`Successfully generated baby development info for week ${week} in language ${language}`);
       res.json(developmentInfo);
     } catch (error) {
       console.error("Error handling baby development request:", error);
       
       // Always return a 200 with backup data rather than error to ensure UI works
       const week = parseInt(req.params.week) || 1;
+      // Get language from query parameter, default to English
+      const language = req.query.lang as string || 'en';
       
       // Import getBackupBabyDevelopmentData directly from openai.ts to use backup data
       const { getBackupBabyDevelopmentData } = await import('./openai');
       
-      res.json(getBackupBabyDevelopmentData(week));
+      res.json(getBackupBabyDevelopmentData(week, language));
     }
   });
 

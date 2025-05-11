@@ -147,8 +147,13 @@ export async function generateMealPlan(week: number): Promise<{
 
 /**
  * Generate baby development information for a specific pregnancy week
+ * @param week The pregnancy week number
+ * @param language The language code, defaults to 'en' for English
  */
-export async function generateBabyDevelopment(week: number): Promise<{
+export async function generateBabyDevelopment(
+  week: number, 
+  language: string = 'en'
+): Promise<{
   description: string;
   keyDevelopments: string[];
   funFact: string;
@@ -159,11 +164,19 @@ export async function generateBabyDevelopment(week: number): Promise<{
     if (!openai) {
       console.error("DEPLOYMENT ERROR: OpenAI client not initialized when generating baby development for week", week);
       // Return predefined data for common weeks to ensure functionality in production
-      return getBackupBabyDevelopmentData(week);
+      return getBackupBabyDevelopmentData(week, language);
     }
     
-    console.log(`Starting OpenAI API call for baby development week ${week}`);
+    console.log(`Starting OpenAI API call for baby development week ${week} in language ${language}`);
     const startTime = Date.now();
+    
+    // Determine language instruction
+    let languageInstruction = "";
+    if (language === 'hi') {
+      languageInstruction = "Generate the content in Hindi language.";
+    } else if (language !== 'en') {
+      languageInstruction = `Generate the content in ${language} language.`;
+    }
     
     const prompt = `Generate detailed and accurate baby development information for pregnancy week ${week}.
                    Return response as JSON with format: { 
@@ -172,19 +185,29 @@ export async function generateBabyDevelopment(week: number): Promise<{
                      "funFact": "An interesting fact about the baby at this stage",
                      "size": "Approximate size comparison to a fruit or object",
                      "imageDescription": "Brief description of what the baby looks like at this stage for visualization"
-                   }`;
+                   }
+                   ${languageInstruction}`;
 
     try {
       // For better reliability in production, use a shorter system request
       const abortController = new AbortController();
       const timeoutId = setTimeout(() => abortController.abort('Request timeout after 15 seconds'), 15000);
       
+      // Modify system prompt for language
+      let systemContent = "You are an obstetrician specializing in fetal development. Provide accurate, concise information about baby development during pregnancy. Always respond with JSON format.";
+      
+      if (language === 'hi') {
+        systemContent += " When requested, generate content in Hindi with accurate terminology.";
+      } else if (language !== 'en') {
+        systemContent += ` When requested, generate content in ${language} with accurate terminology.`;
+      }
+      
       const completion = await openai.chat.completions.create({
         model: MODEL,
         messages: [
           {
             role: "system",
-            content: "You are an obstetrician specializing in fetal development. Provide accurate, concise information about baby development during pregnancy. Always respond with JSON format."
+            content: systemContent
           },
           {
             role: "user",
@@ -207,25 +230,30 @@ export async function generateBabyDevelopment(week: number): Promise<{
     } catch (apiError) {
       console.error(`OpenAI API error for baby development week ${week}:`, apiError);
       // If OpenAI call fails, return backup data
-      return getBackupBabyDevelopmentData(week);
+      return getBackupBabyDevelopmentData(week, language);
     }
   } catch (error) {
     console.error("Error generating baby development info:", error);
-    return getBackupBabyDevelopmentData(week);
+    return getBackupBabyDevelopmentData(week, language);
   }
 }
 
 /**
  * Backup data for baby development in case OpenAI is unavailable in production
+ * @param week The pregnancy week
+ * @param language The language code (en or hi)
  */
-export function getBackupBabyDevelopmentData(week: number): {
+export function getBackupBabyDevelopmentData(
+  week: number,
+  language: string = 'en'
+): {
   description: string;
   keyDevelopments: string[];
   funFact: string;
   size: string;
   imageDescription: string;
 } {
-  console.log(`Using backup data for baby development week ${week}`);
+  console.log(`Using backup data for baby development week ${week} in language ${language}`);
   
   // Simple mapping function to ensure we have reasonable data for any week
   const getWeekData = (week: number) => {
