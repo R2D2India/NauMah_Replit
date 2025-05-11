@@ -11,7 +11,12 @@
       "first": "पहली तिमाही",
       "second": "दूसरी तिमाही",
       "third": "तीसरी तिमाही"
-    }
+    },
+    "currentWeek": "वर्तमान सप्ताह",
+    "trimesterLabel": "तिमाही",
+    "weeksLeft": "शेष सप्ताह",
+    "completed": "पूरा हुआ",
+    "dueDate": "नियत तारीख"
   },
   "navigation": {
     "home": "होम",

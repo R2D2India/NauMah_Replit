@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { 
   calculateDueDate, 
   calculateCompletion, 
@@ -11,10 +12,16 @@ interface PregnancyProgressProps {
 }
 
 const PregnancyProgress = ({ currentWeek, isLocalData }: PregnancyProgressProps) => {
+  const { t } = useTranslation();
+
   // Calculate pregnancy metrics
   const dueDate = calculateDueDate(currentWeek);
   const completionPercentage = calculateCompletion(currentWeek);
-  const trimester = getTrimeasterLabel(currentWeek);
+  
+  // Use the raw trimester value (first, second, third) to get translated text
+  const rawTrimester = currentWeek <= 13 ? "first" : currentWeek <= 26 ? "second" : "third";
+  const trimester = t(`pregnancy.trimester.${rawTrimester}`);
+  
   const weeksLeft = 40 - currentWeek;
   
   // Calculate the visual position for the timeline marker (in percentage)
@@ -43,17 +50,17 @@ const PregnancyProgress = ({ currentWeek, isLocalData }: PregnancyProgressProps)
                 <span className="bg-primary/10 p-2 rounded-full mr-3 hidden md:flex">
                   <i className="fas fa-heartbeat text-primary"></i>
                 </span>
-                Your Pregnancy Journey
+                {t('pregnancy.journey')}
               </h2>
               <span className="ml-3 bg-primary/10 text-primary text-sm py-1 px-3 rounded-full font-semibold">{trimester}</span>
             </div>
-            <p className="text-neutral-dark mt-2 ml-0 md:ml-11">Currently in Week {currentWeek}</p>
+            <p className="text-neutral-dark mt-2 ml-0 md:ml-11">{t('pregnancy.currentlyInWeek', { week: currentWeek })}</p>
           </div>
           <div className="mt-4 md:mt-0 flex items-center bg-white px-4 py-2 rounded-lg border border-primary/20 shadow-sm">
             <svg className="h-5 w-5 text-primary" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20a2 2 0 002 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zm-7 5h5v5h-5v-5z" fill="currentColor"/>
             </svg>
-            <span className="font-montserrat font-medium ml-2">Due Date:</span>
+            <span className="font-montserrat font-medium ml-2">{t('pregnancy.dueDate')}:</span>
             <span className="font-montserrat text-primary font-bold ml-2">{dueDate}</span>
           </div>
         </div>
@@ -86,21 +93,21 @@ const PregnancyProgress = ({ currentWeek, isLocalData }: PregnancyProgressProps)
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
           <div className="bg-neutral-light rounded-lg p-4 shadow-sm transform transition-transform hover:scale-105 hover:shadow-md">
-            <div className="text-sm text-neutral-dark font-medium">Current Week</div>
+            <div className="text-sm text-neutral-dark font-medium">{t('pregnancy.currentWeek')}</div>
             <div className="text-xl font-montserrat font-bold text-primary-dark">{currentWeek}</div>
           </div>
           <div className="bg-neutral-light rounded-lg p-4 shadow-sm transform transition-transform hover:scale-105 hover:shadow-md">
-            <div className="text-sm text-neutral-dark font-medium">Trimester</div>
+            <div className="text-sm text-neutral-dark font-medium">{t('pregnancy.trimesterLabel')}</div>
             <div className="text-xl font-montserrat font-bold text-primary-dark">
-              {currentWeek <= 13 ? "1st" : currentWeek <= 26 ? "2nd" : "3rd"}
+              {t(`pregnancy.trimester.${rawTrimester}`).split(' ')[0]}
             </div>
           </div>
           <div className="bg-neutral-light rounded-lg p-4 shadow-sm transform transition-transform hover:scale-105 hover:shadow-md">
-            <div className="text-sm text-neutral-dark font-medium">Weeks Left</div>
+            <div className="text-sm text-neutral-dark font-medium">{t('pregnancy.weeksLeft')}</div>
             <div className="text-xl font-montserrat font-bold text-primary-dark">{weeksLeft}</div>
           </div>
           <div className="bg-neutral-light rounded-lg p-4 shadow-sm transform transition-transform hover:scale-105 hover:shadow-md">
-            <div className="text-sm text-neutral-dark font-medium">Completed</div>
+            <div className="text-sm text-neutral-dark font-medium">{t('pregnancy.completed')}</div>
             <div className="text-xl font-montserrat font-bold text-primary-dark">{completionPercentage}%</div>
           </div>
         </div>

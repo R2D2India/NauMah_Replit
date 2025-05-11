@@ -11,7 +11,12 @@
       "first": "1st Trimester",
       "second": "2nd Trimester",
       "third": "3rd Trimester"
-    }
+    },
+    "currentWeek": "Current Week",
+    "trimesterLabel": "Trimester",
+    "weeksLeft": "Weeks Left",
+    "completed": "Completed",
+    "dueDate": "Due Date"
   },
   "navigation": {
     "home": "Home",
