@@ -186,10 +186,13 @@ const BabyDevelopment = ({ currentWeek, developmentData: preloadedData, isLocalD
   
   return (
     <div className="mb-8" id="baby-development-section">
-      <div className="flex flex-wrap justify-between items-center mb-4">
-        <h2 className="text-2xl font-montserrat font-bold text-primary flex items-center">
-          <span className="bg-primary/10 p-2 rounded-full mr-3">
+      <div className="flex flex-wrap justify-between items-start md:items-center mb-4">
+        <h2 className="text-xl md:text-2xl font-montserrat font-bold text-primary flex items-center mb-2 md:mb-0">
+          <span className="bg-primary/10 p-1 md:p-2 rounded-full mr-2 md:mr-3 hidden md:flex">
             <i className="fas fa-baby text-primary"></i>
+          </span>
+          <span className="bg-primary/10 p-1 rounded-full mr-2 flex md:hidden">
+            <i className="fas fa-baby text-primary text-sm"></i>
           </span>
           {t('babyDevelopment.title', 'Baby Development - Week {{week}}', { week: currentWeek })}
         </h2>

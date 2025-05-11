@@ -45,16 +45,19 @@ const PregnancyProgress = ({ currentWeek, isLocalData }: PregnancyProgressProps)
         {/* Section Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 relative z-10">
           <div>
-            <div className="flex items-center">
-              <h2 className="text-2xl font-montserrat font-bold text-primary flex items-center">
-                <span className="bg-primary/10 p-2 rounded-full mr-3 hidden md:flex">
+            <div className="flex flex-wrap items-center">
+              <h2 className="text-xl md:text-2xl font-montserrat font-bold text-primary flex items-center">
+                <span className="bg-primary/10 p-1 md:p-2 rounded-full mr-2 md:mr-3 hidden md:flex">
                   <i className="fas fa-heartbeat text-primary"></i>
+                </span>
+                <span className="bg-primary/10 p-1 rounded-full mr-2 flex md:hidden">
+                  <i className="fas fa-heartbeat text-primary text-sm"></i>
                 </span>
                 {t('pregnancy.journey')}
               </h2>
-              <span className="ml-3 bg-primary/10 text-primary text-sm py-1 px-3 rounded-full font-semibold">{trimester}</span>
+              <span className="ml-2 md:ml-3 bg-primary/10 text-primary text-xs md:text-sm py-1 px-2 md:px-3 rounded-full font-semibold">{trimester}</span>
             </div>
-            <p className="text-neutral-dark mt-2 ml-0 md:ml-11">{t('pregnancy.currentlyInWeek', { week: currentWeek })}</p>
+            <p className="text-neutral-dark text-sm md:text-base mt-2 ml-0 md:ml-11">{t('pregnancy.currentlyInWeek', { week: currentWeek })}</p>
           </div>
           <div className="mt-4 md:mt-0 flex items-center bg-white px-4 py-2 rounded-lg border border-primary/20 shadow-sm">
             <svg className="h-5 w-5 text-primary" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
