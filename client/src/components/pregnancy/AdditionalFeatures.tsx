@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { NAME_ORIGINS, NAME_GENDERS } from "@/lib/constants";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 interface AdditionalFeaturesProps {
   currentWeek: number;
@@ -10,6 +11,7 @@ const AdditionalFeatures = ({ currentWeek }: AdditionalFeaturesProps) => {
   const [selectedOrigin, setSelectedOrigin] = useState("All Origins");
   const [selectedGender, setSelectedGender] = useState("All Genders");
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const [names, setNames] = useState<{ name: string; meaning: string }[]>([]);
   const [isLoadingNames, setIsLoadingNames] = useState(false);
@@ -47,8 +49,8 @@ const AdditionalFeatures = ({ currentWeek }: AdditionalFeaturesProps) => {
     } catch (error) {
       console.error('Error fetching names:', error);
       toast({
-        title: "Error",
-        description: "Failed to generate names. Please try again.",
+        title: t('babyNames.error', 'Error'),
+        description: t('babyNames.errorFetch', 'Failed to generate names. Please try again.'),
         variant: "destructive",
       });
     } finally {
@@ -66,9 +68,9 @@ const AdditionalFeatures = ({ currentWeek }: AdditionalFeaturesProps) => {
             <span className="bg-primary/10 p-2 rounded-full mr-3">
               <i className="fas fa-baby-carriage text-primary"></i>
             </span>
-            Baby Name Explorer
+            {t('babyNames.title', 'Baby Name Explorer')}
           </h2>
-          <p className="text-neutral-dark mt-1 ml-11">Find the perfect name for your little one with our AI-powered name generator</p>
+          <p className="text-neutral-dark mt-1 ml-11">{t('babyNames.subtitle', 'Find the perfect name for your little one with our AI-powered name generator')}</p>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -78,14 +80,14 @@ const AdditionalFeatures = ({ currentWeek }: AdditionalFeaturesProps) => {
                 <i className="fas fa-globe text-primary"></i>
               </div>
               <div>
-                <h4 className="font-medium">Select Preferences</h4>
-                <p className="text-xs text-neutral-dark">Choose origin and gender preferences</p>
+                <h4 className="font-medium">{t('babyNames.selectPreferences', 'Select Preferences')}</h4>
+                <p className="text-xs text-neutral-dark">{t('babyNames.choosePreferences', 'Choose origin and gender preferences')}</p>
               </div>
             </div>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1 text-neutral-dark">Origin</label>
+                <label className="block text-sm font-medium mb-1 text-neutral-dark">{t('babyNames.origin', 'Origin')}</label>
                 <select 
                   className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary/50 outline-none shadow-sm"
                   value={selectedOrigin}
@@ -98,7 +100,7 @@ const AdditionalFeatures = ({ currentWeek }: AdditionalFeaturesProps) => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium mb-1 text-neutral-dark">Gender</label>
+                <label className="block text-sm font-medium mb-1 text-neutral-dark">{t('babyNames.gender', 'Gender')}</label>
                 <select 
                   className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary/50 outline-none shadow-sm"
                   value={selectedGender}
@@ -118,12 +120,12 @@ const AdditionalFeatures = ({ currentWeek }: AdditionalFeaturesProps) => {
                 {isLoadingNames ? (
                   <>
                     <i className="fas fa-spinner fa-spin mr-2"></i>
-                    <span>Generating Names...</span>
+                    <span>{t('babyNames.generating', 'Generating Names...')}</span>
                   </>
                 ) : (
                   <>
                     <i className="fas fa-magic mr-2"></i>
-                    <span>Generate Baby Names</span>
+                    <span>{t('babyNames.generateNames', 'Generate Baby Names')}</span>
                   </>
                 )}
               </button>
@@ -133,7 +135,7 @@ const AdditionalFeatures = ({ currentWeek }: AdditionalFeaturesProps) => {
           <div className={`bg-white rounded-lg border ${names.length > 0 ? 'border-primary/20' : 'border-gray-200'} p-5`}>
             <h4 className="font-medium text-lg mb-3 flex items-center">
               <i className="fas fa-star text-primary mr-2"></i>
-              <span>Generated Names</span>
+              <span>{t('babyNames.generatedNames', 'Generated Names')}</span>
             </h4>
             
             {names.length > 0 ? (
@@ -153,7 +155,7 @@ const AdditionalFeatures = ({ currentWeek }: AdditionalFeaturesProps) => {
             ) : (
               <div className="flex flex-col items-center justify-center h-48 text-center p-4 text-gray-500 bg-gray-50 rounded-lg border border-dashed border-gray-200">
                 <i className="fas fa-baby text-primary/30 text-5xl mb-3"></i>
-                <p>Select preferences and click generate to discover beautiful baby names</p>
+                <p>{t('babyNames.selectText', 'Select preferences and click generate to discover beautiful baby names')}</p>
               </div>
             )}
           </div>
