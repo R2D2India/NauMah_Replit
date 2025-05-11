@@ -166,7 +166,7 @@ export default function Tracker() {
         <TabsContent value="symptoms" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Symptom Log</CardTitle>
+              <CardTitle>{t('tracker.symptoms.title', 'Symptom Log')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid gap-4">
@@ -175,15 +175,15 @@ export default function Tracker() {
                     <span>{symptom}</span>
                     <Dialog>
                       <DialogTrigger asChild>
-                        <Button variant="outline" size="sm">Log</Button>
+                        <Button variant="outline" size="sm">{t('tracker.symptoms.logButton', 'Log')}</Button>
                       </DialogTrigger>
                       <DialogContent>
                         <DialogHeader>
-                          <DialogTitle>Log {symptom}</DialogTitle>
+                          <DialogTitle>{t('tracker.symptoms.logDialogTitle', 'Log {{symptom}}', { symptom })}</DialogTitle>
                         </DialogHeader>
                         <div className="space-y-4 mt-4">
                           <div>
-                            <label className="text-sm font-medium">Severity (1-5)</label>
+                            <label className="text-sm font-medium">{t('tracker.symptoms.severity', 'Severity (1-5)')}</label>
                             <Input
                               type="number"
                               min="1"
@@ -197,7 +197,7 @@ export default function Tracker() {
                             />
                           </div>
                           <div>
-                            <label className="text-sm font-medium">Notes</label>
+                            <label className="text-sm font-medium">{t('tracker.symptoms.notes', 'Notes')}</label>
                             <Input
                               value={newSymptom.notes}
                               onChange={(e) => setNewSymptom({
@@ -208,7 +208,7 @@ export default function Tracker() {
                             />
                           </div>
                           <Button onClick={() => addSymptomMutation.mutate(newSymptom)}>
-                            Save
+                            {t('tracker.symptoms.save', 'Save')}
                           </Button>
                         </div>
                       </DialogContent>
@@ -223,20 +223,20 @@ export default function Tracker() {
         <TabsContent value="appointments" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Appointments</CardTitle>
+              <CardTitle>{t('tracker.appointments.title', 'Appointments')}</CardTitle>
             </CardHeader>
             <CardContent>
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button className="mb-4">Schedule New Appointment</Button>
+                  <Button className="mb-4">{t('tracker.appointments.scheduleNew', 'Schedule New Appointment')}</Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>New Appointment</DialogTitle>
+                    <DialogTitle>{t('tracker.appointments.newAppointment', 'New Appointment')}</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4 mt-4">
                     <Input
-                      placeholder="Title"
+                      placeholder={t('tracker.appointments.title', 'Title')}
                       value={newAppointment.title}
                       onChange={(e) => setNewAppointment({
                         ...newAppointment,
