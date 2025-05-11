@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import { useTranslation } from 'react-i18next';
 
 export function VoiceAgent() {
   const [selectedLanguage, setSelectedLanguage] = useState<'english' | 'hindi'>('english');
