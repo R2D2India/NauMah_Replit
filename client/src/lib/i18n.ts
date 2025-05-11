@@ -31,10 +31,33 @@ i18n
             title: "NauMah",
             slogan: "Your Intelligent Companion for Every Stage of Pregnancy"
           },
+          navigation: {
+            home: "Home",
+            dashboard: "Baby & Me",
+            tracker: "Tracker",
+            journal: "Journal",
+            diet: "Diet & Exercise",
+            resources: "Resources",
+            support: "Support",
+            login: "Login",
+            register: "Register",
+            logout: "Logout",
+            profile: "Profile"
+          },
           language: {
             select: "Language",
             en: "English",
             hi: "हिन्दी"
+          },
+          voice: {
+            english: "English Voice",
+            hindi: "Hindi Voice"
+          },
+          footer: {
+            rights: "All Rights Reserved",
+            terms: "Terms of Service",
+            privacy: "Privacy Policy",
+            disclaimer: "Medical Disclaimer"
           }
         }
       },
@@ -44,10 +67,33 @@ i18n
             title: "नौमा",
             slogan: "गर्भावस्था के हर चरण के लिए आपका बुद्धिमान साथी"
           },
+          navigation: {
+            home: "होम",
+            dashboard: "शिशु और मैं",
+            tracker: "ट्रैकर",
+            journal: "डायरी",
+            diet: "आहार और व्यायाम",
+            resources: "संसाधन",
+            support: "सहायता",
+            login: "लॉगिन",
+            register: "रजिस्टर",
+            logout: "लॉगआउट",
+            profile: "प्रोफाइल"
+          },
           language: {
             select: "भाषा",
             en: "English",
             hi: "हिन्दी"
+          },
+          voice: {
+            english: "अंग्रेजी आवाज़",
+            hindi: "हिंदी आवाज़"
+          },
+          footer: {
+            rights: "सर्वाधिकार सुरक्षित",
+            terms: "सेवा की शर्तें",
+            privacy: "गोपनीयता नीति",
+            disclaimer: "चिकित्सा अस्वीकरण"
           }
         }
       }
