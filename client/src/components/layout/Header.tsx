@@ -35,7 +35,7 @@ const Header = () => {
               <i className="fas fa-baby text-white"></i>
             </div>
             <span className="text-xl md:text-2xl font-montserrat font-semibold text-primary group">
-              {t('app.title')}<span className="text-xs align-top -ml-0.5 leading-none">™</span>
+              NauMah<span className="text-xs align-top -ml-0.5 leading-none">™</span>
             </span>
           </Link>
         </div>
@@ -43,22 +43,22 @@ const Header = () => {
         <nav className="hidden md:flex space-x-6">
           <Link href="/dashboard">
             <span className={`font-medium ${isActive("/dashboard") ? "text-primary" : "text-neutral-dark hover:text-primary"} transition cursor-pointer`}>
-              {t('navigation.dashboard')}
+              Baby & Me
             </span>
           </Link>
           <Link href="/diet-exercise">
             <span className={`font-medium ${isActive("/diet-exercise") ? "text-primary" : "text-neutral-dark hover:text-primary"} transition cursor-pointer`}>
-              {t('navigation.diet')}
+              Diet & Exercise
             </span>
           </Link>
           <Link href="/tracker">
             <span className={`font-medium ${isActive("/tracker") ? "text-primary" : "text-neutral-dark hover:text-primary"} transition cursor-pointer`}>
-              {t('navigation.tracker')}
+              Tracker
             </span>
           </Link>
           <Link href="/resources">
             <span className={`font-medium ${isActive("/resources") ? "text-primary" : "text-neutral-dark hover:text-primary"} transition cursor-pointer`}>
-              {t('navigation.resources')}
+              Resources
             </span>
           </Link>
         </nav>
@@ -83,22 +83,22 @@ const Header = () => {
           <nav className="flex flex-col space-y-3">
             <Link href="/dashboard">
               <span className={`font-medium ${isActive("/dashboard") ? "text-primary" : "text-neutral-dark"} py-2 block cursor-pointer`}>
-                {t('navigation.dashboard')}
+                Baby & Me
               </span>
             </Link>
             <Link href="/diet-exercise">
               <span className={`font-medium ${isActive("/diet-exercise") ? "text-primary" : "text-neutral-dark"} py-2 block cursor-pointer`}>
-                {t('navigation.diet')}
+                Diet & Exercise
               </span>
             </Link>
             <Link href="/tracker">
               <span className={`font-medium ${isActive("/tracker") ? "text-primary" : "text-neutral-dark"} py-2 block cursor-pointer`}>
-                {t('navigation.tracker')}
+                Tracker
               </span>
             </Link>
             <Link href="/resources">
               <span className={`font-medium ${isActive("/resources") ? "text-primary" : "text-neutral-dark"} py-2 block cursor-pointer`}>
-                {t('navigation.resources')}
+                Resources
               </span>
             </Link>
             <div className="py-2">
