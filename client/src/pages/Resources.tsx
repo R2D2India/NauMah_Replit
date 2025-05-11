@@ -134,56 +134,56 @@ export default function Resources() {
       // Comprehensive FAQs
       {
         id: "comprehensive-1",
-        question: "When should I first see a doctor during pregnancy?",
-        answer: "You should schedule your first prenatal visit as soon as you know you're pregnant, ideally within the first 8 weeks. If you have a history of complications or medical conditions, you may need to see a doctor earlier. During this first visit, your doctor will confirm your pregnancy, estimate your due date, and begin monitoring your health.",
+        question: t('resources.faq.comprehensive1.question', "When should I first see a doctor during pregnancy?"),
+        answer: t('resources.faq.comprehensive1.answer', "You should schedule your first prenatal visit as soon as you know you're pregnant, ideally within the first 8 weeks. If you have a history of complications or medical conditions, you may need to see a doctor earlier. During this first visit, your doctor will confirm your pregnancy, estimate your due date, and begin monitoring your health."),
         category: "general"
       },
       {
         id: "comprehensive-2",
-        question: "How can I manage morning sickness?",
-        answer: "Morning sickness can be managed with several strategies: eat small frequent meals, avoid triggers like strong smells or spicy foods, try ginger tea or supplements, stay hydrated, and eat plain crackers before getting out of bed. If severe, consult your healthcare provider.",
+        question: t('resources.faq.comprehensive2.question', "How can I manage morning sickness?"),
+        answer: t('resources.faq.comprehensive2.answer', "Morning sickness can be managed with several strategies: eat small frequent meals, avoid triggers like strong smells or spicy foods, try ginger tea or supplements, stay hydrated, and eat plain crackers before getting out of bed. If severe, consult your healthcare provider."),
         category: "first-trimester"
       },
       {
         id: "comprehensive-3",
-        question: "Is it safe to exercise during pregnancy?",
-        answer: "Yes, exercise is generally safe and beneficial during pregnancy. The American College of Obstetricians and Gynecologists recommends 150 minutes of moderate-intensity aerobic activity per week. Safe exercises include walking, swimming, stationary cycling, low-impact aerobics, and prenatal yoga. Avoid high-impact activities and consult your healthcare provider.",
+        question: t('resources.faq.comprehensive3.question', "Is it safe to exercise during pregnancy?"),
+        answer: t('resources.faq.comprehensive3.answer', "Yes, exercise is generally safe and beneficial during pregnancy. The American College of Obstetricians and Gynecologists recommends 150 minutes of moderate-intensity aerobic activity per week. Safe exercises include walking, swimming, stationary cycling, low-impact aerobics, and prenatal yoga. Avoid high-impact activities and consult your healthcare provider."),
         category: "general"
       },
       {
         id: "comprehensive-4",
-        question: "How does the NauMah AI assistant work?",
-        answer: "The NauMah AI assistant uses advanced artificial intelligence to provide personalized pregnancy guidance by analyzing your stage and health information, drawing from medical research, providing stage-specific recommendations, and learning from your interactions to become more personalized over time.",
+        question: t('resources.faq.comprehensive4.question', "How does the NauMah AI assistant work?"),
+        answer: t('resources.faq.comprehensive4.answer', "The NauMah AI assistant uses advanced artificial intelligence to provide personalized pregnancy guidance by analyzing your stage and health information, drawing from medical research, providing stage-specific recommendations, and learning from your interactions to become more personalized over time."),
         category: "app-features"
       },
       {
         id: "first-trimester",
-        question: "What are the key changes during the first trimester?",
-        answer: "The first trimester (weeks 1-12) brings several significant changes: morning sickness and nausea (peaks around week 9), frequent urination, fatigue and mood changes, breast tenderness, and food aversions and cravings. This is also when major organ development occurs in your baby. Regular prenatal care is crucial during this period.",
+        question: t('resources.faq.firstTrimester.question', "What are the key changes during the first trimester?"),
+        answer: t('resources.faq.firstTrimester.answer', "The first trimester (weeks 1-12) brings several significant changes: morning sickness and nausea (peaks around week 9), frequent urination, fatigue and mood changes, breast tenderness, and food aversions and cravings. This is also when major organ development occurs in your baby. Regular prenatal care is crucial during this period."),
         category: "first-trimester"
       },
       {
         id: "second-trimester",
-        question: "What should I expect during the second trimester?",
-        answer: "The second trimester (weeks 13-26) is often considered the most comfortable. Your baby bump becomes visible, morning sickness typically subsides, energy levels increase, and you may feel baby movements. This is when most women have an anatomy scan ultrasound to check the baby's development and possibly learn the sex.",
+        question: t('resources.faq.secondTrimester.question', "What should I expect during the second trimester?"),
+        answer: t('resources.faq.secondTrimester.answer', "The second trimester (weeks 13-26) is often considered the most comfortable. Your baby bump becomes visible, morning sickness typically subsides, energy levels increase, and you may feel baby movements. This is when most women have an anatomy scan ultrasound to check the baby's development and possibly learn the sex."),
         category: "second-trimester"
       },
       {
         id: "third-trimester",
-        question: "What happens in the third trimester?",
-        answer: "The third trimester (weeks 27-40) is the final stretch before delivery. You'll experience more frequent prenatal visits, Braxton Hicks contractions, possible shortness of breath, back pain, trouble sleeping, and more frequent urination as the baby puts pressure on your bladder. Prepare for labor, birth, and bringing baby home during this period.",
+        question: t('resources.faq.thirdTrimester.question', "What happens in the third trimester?"),
+        answer: t('resources.faq.thirdTrimester.answer', "The third trimester (weeks 27-40) is the final stretch before delivery. You'll experience more frequent prenatal visits, Braxton Hicks contractions, possible shortness of breath, back pain, trouble sleeping, and more frequent urination as the baby puts pressure on your bladder. Prepare for labor, birth, and bringing baby home during this period."),
         category: "third-trimester"
       },
       {
         id: "nutrition",
-        question: "What are the most important nutrients during pregnancy?",
-        answer: "Key nutrients include: folic acid (prevents neural tube defects), iron (prevents anemia), calcium (builds baby's bones and teeth), vitamin D (promotes calcium absorption), omega-3 fatty acids (supports baby's brain development), protein (crucial for baby's growth), and fiber (prevents constipation). A prenatal vitamin can help supplement these essential nutrients.",
+        question: t('resources.faq.nutrition.question', "What are the most important nutrients during pregnancy?"),
+        answer: t('resources.faq.nutrition.answer', "Key nutrients include: folic acid (prevents neural tube defects), iron (prevents anemia), calcium (builds baby's bones and teeth), vitamin D (promotes calcium absorption), omega-3 fatty acids (supports baby's brain development), protein (crucial for baby's growth), and fiber (prevents constipation). A prenatal vitamin can help supplement these essential nutrients."),
         category: "nutrition"
       },
       {
         id: "comprehensive-5",
-        question: "When will I feel my baby move?",
-        answer: "Most first-time mothers feel movement (quickening) between weeks 18-25, while those who have been pregnant before may notice movement as early as week 16. Initially, movements feel like flutters, bubbles, or light taps. By the third trimester, movements become more pronounced and regular. Tracking kick counts is recommended after 28 weeks.",
+        question: t('resources.faq.comprehensive5.question', "When will I feel my baby move?"),
+        answer: t('resources.faq.comprehensive5.answer', "Most first-time mothers feel movement (quickening) between weeks 18-25, while those who have been pregnant before may notice movement as early as week 16. Initially, movements feel like flutters, bubbles, or light taps. By the third trimester, movements become more pronounced and regular. Tracking kick counts is recommended after 28 weeks."),
         category: "second-trimester"
       }
     ];
@@ -350,13 +350,13 @@ export default function Resources() {
                 className={`px-4 py-2 ${selectedCategory === "nutrition" ? "bg-primary text-white" : "bg-gray-100 text-gray-700"} rounded-full text-sm font-medium flex-shrink-0 hover:bg-gray-200 transition-all duration-300`}
                 onClick={() => handleCategoryClick("nutrition")}
               >
-                Nutrition
+                {t('resources.faq.categories.nutrition', 'Nutrition')}
               </button>
               <button 
                 className={`px-4 py-2 ${selectedCategory === "app-features" ? "bg-primary text-white" : "bg-gray-100 text-gray-700"} rounded-full text-sm font-medium flex-shrink-0 hover:bg-gray-200 transition-all duration-300`}
                 onClick={() => handleCategoryClick("app-features")}
               >
-                App Features
+                {t('resources.faq.categories.appFeatures', 'App Features')}
               </button>
             </div>
           </div>
@@ -365,7 +365,7 @@ export default function Resources() {
           <div className="relative mb-6">
             <input 
               type="text" 
-              placeholder="Search for questions..." 
+              placeholder={t('resources.faq.searchPlaceholder', 'Search for questions...')} 
               className="w-full py-3 px-5 pl-12 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               value={searchQuery}
               onChange={handleSearchChange}
@@ -377,8 +377,8 @@ export default function Resources() {
           
           {filteredFAQs.length === 0 ? (
             <div className="bg-neutral-light rounded-xl p-6 text-center">
-              <h3 className="text-lg font-medium text-primary mb-2">No questions found</h3>
-              <p className="text-neutral-dark">Try adjusting your search or category selection.</p>
+              <h3 className="text-lg font-medium text-primary mb-2">{t('resources.faq.noQuestionsFound', 'No questions found')}</h3>
+              <p className="text-neutral-dark">{t('resources.faq.tryAdjusting', 'Try adjusting your search or category selection.')}</p>
             </div>
           ) : (
             <>
@@ -386,10 +386,10 @@ export default function Resources() {
                 <div className="bg-primary/5 rounded-xl p-4 mb-6">
                   <h3 className="font-medium text-primary flex items-center mb-2">
                     <i className="fas fa-search mr-2"></i>
-                    Search Results
+                    {t('resources.faq.searchResults', 'Search Results')}
                   </h3>
                   <p className="text-sm text-gray-600">
-                    Found {filteredFAQs.length} question(s) matching "{searchQuery}"
+                    {t('resources.faq.foundQuestions', 'Found {{count}} question(s) matching "{{query}}"', { count: filteredFAQs.length, query: searchQuery })}
                   </p>
                 </div>
               )}
@@ -398,10 +398,10 @@ export default function Resources() {
                 <div className="bg-primary/5 rounded-xl p-4 mb-6">
                   <h3 className="font-medium text-primary flex items-center mb-2">
                     <i className="fas fa-lightbulb mr-2"></i>
-                    Featured Questions
+                    {t('resources.faq.featuredQuestions', 'Featured Questions')}
                   </h3>
                   <p className="text-sm text-gray-600">
-                    These are the most common questions from expecting mothers at various stages of pregnancy.
+                    {t('resources.faq.featuredQuestionsDescription', 'These are the most common questions from expecting mothers at various stages of pregnancy.')}
                   </p>
                 </div>
               )}
@@ -435,7 +435,7 @@ export default function Resources() {
           
           <div className="mt-8 flex justify-between items-center">
             <div className="text-sm text-neutral-dark">
-              <span>Can't find an answer to your question?</span>
+              <span>{t('resources.faq.cantFind', "Can't find an answer to your question?")}</span>
             </div>
             <div className="flex space-x-3">
               <button 
