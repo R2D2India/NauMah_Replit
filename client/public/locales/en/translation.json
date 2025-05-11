@@ -1,0 +1,65 @@
+{
+  "app": {
+    "title": "NauMah",
+    "slogan": "Your Intelligent Companion for Every Stage of Pregnancy"
+  },
+  "navigation": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "tracker": "Tracker",
+    "journal": "Journal",
+    "diet": "Diet & Exercise",
+    "resources": "Resources",
+    "support": "Support",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "profile": "Profile"
+  },
+  "hero": {
+    "subtitle": "Navigate your pregnancy journey with personalized AI guidance, tracking tools, and expert insights."
+  },
+  "ai": {
+    "title": "AI Pregnancy Assistant",
+    "subtitle": "Have questions about your pregnancy? Our AI assistant is here to help.",
+    "placeholder": "Ask me anything about your pregnancy...",
+    "button": "Ask",
+    "voice": "Voice Mode",
+    "loading": "Thinking...",
+    "error": "Sorry, I couldn't process that. Please try again."
+  },
+  "safety": {
+    "title": "Medication & Food Safety Checker",
+    "subtitle": "Not sure if something is safe during pregnancy? Upload an image or enter the name.",
+    "placeholder": "Enter medication or food name...",
+    "button": "Check Safety",
+    "upload": "Upload Image",
+    "loading": "Analyzing...",
+    "safe": "Safe",
+    "unsafe": "Not Recommended",
+    "caution": "Use with Caution"
+  },
+  "comingSoon": {
+    "title": "Coming Soon",
+    "nutrition": "Nutrition Planning",
+    "partner": "Partner Involvement",
+    "postpartum": "Postpartum Planning",
+    "babyShower": "Virtual Baby Shower",
+    "community": "Community Forums"
+  },
+  "footer": {
+    "rights": "All Rights Reserved",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "disclaimer": "Medical Disclaimer"
+  },
+  "language": {
+    "select": "Language",
+    "en": "English",
+    "hi": "हिन्दी"
+  },
+  "voice": {
+    "english": "English Voice",
+    "hindi": "Hindi Voice"
+  }
+}
