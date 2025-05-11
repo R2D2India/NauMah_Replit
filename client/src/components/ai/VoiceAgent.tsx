@@ -11,6 +11,7 @@ export function VoiceAgent() {
   const [selectedLanguage, setSelectedLanguage] = useState<'english' | 'hindi'>('english');
   const [showWidget, setShowWidget] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   // Cleanup function to remove any existing widgets when component unmounts
   useEffect(() => {
@@ -82,8 +83,8 @@ export function VoiceAgent() {
   return (
     <Card className="w-full h-[500px] flex flex-col bg-background rounded-xl shadow-[0_20px_50px_rgba(8,_112,_184,_0.7)] transform-gpu hover:scale-[1.02] transition-all duration-300">
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-bold text-primary">Voice Assistant</CardTitle>
-        <CardDescription className="max-w-md mx-auto">Speak with NauMah, your pregnancy AI companion. Select a language and tap the microphone to start.</CardDescription>
+        <CardTitle className="text-2xl font-bold text-primary">{t('ai.voice')}</CardTitle>
+        <CardDescription className="max-w-md mx-auto">{t('ai.subtitle')}</CardDescription>
       </CardHeader>
       <CardContent className="flex-grow flex flex-col items-center justify-center relative">
         <div className="mb-6 w-full max-w-xs">
@@ -94,11 +95,11 @@ export function VoiceAgent() {
           >
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="english" id="english" />
-              <Label htmlFor="english" className="cursor-pointer">English</Label>
+              <Label htmlFor="english" className="cursor-pointer">{t('language.en')}</Label>
             </div>
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="hindi" id="hindi" />
-              <Label htmlFor="hindi" className="cursor-pointer">हिंदी (Hindi)</Label>
+              <Label htmlFor="hindi" className="cursor-pointer">{t('language.hi')}</Label>
             </div>
           </RadioGroup>
         </div>

@@ -207,13 +207,13 @@ export function SafetyChecker() {
       <div className="relative pb-3 mb-5">
         <h3 className="text-xl font-montserrat font-bold text-primary flex items-center">
           <i className="fas fa-pills mr-3 p-2 bg-primary/10 rounded-full"></i>
-          <span>{t('safety.checker_title')}</span>
+          <span>{t('safety.title')}</span>
         </h3>
         <div className="absolute bottom-0 left-0 w-24 h-1 bg-gradient-to-r from-primary to-primary/30 rounded-full"></div>
       </div>
       
       <p className="mb-5 text-neutral-dark leading-relaxed">
-        {t('safety.checker_description')}
+        {t('safety.subtitle')}
       </p>
       
       {/* Enhanced text input for medication names */}
