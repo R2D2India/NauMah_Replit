@@ -50,6 +50,14 @@
     "input_required": "इनपुट आवश्यक है",
     "enter_medication": "कृपया दवा का नाम दर्ज करें"
   },
+  "comingSoon": {
+    "title": "जल्द आ रहा है",
+    "nutrition": "पोषण योजना",
+    "partner": "साथी की भागीदारी",
+    "postpartum": "प्रसवोत्तर योजना",
+    "babyShower": "वर्चुअल बेबी शॉवर",
+    "community": "समुदाय फोरम"
+  },
   "coming_soon": {
     "ecommerce_title": "नौमा ई-कॉमर्स जल्द आ रहा है",
     "consultation_title": "डॉक्टर परामर्श",

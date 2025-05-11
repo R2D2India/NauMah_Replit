@@ -50,6 +50,14 @@
     "input_required": "Input required",
     "enter_medication": "Please enter a medication name"
   },
+  "comingSoon": {
+    "title": "Coming Soon",
+    "nutrition": "Nutrition Planning",
+    "partner": "Partner Involvement",
+    "postpartum": "Postpartum Planning",
+    "babyShower": "Virtual Baby Shower",
+    "community": "Community Forums"
+  },
   "coming_soon": {
     "ecommerce_title": "NauMah E-commerce Coming Soon",
     "consultation_title": "Doctor Consultation",
