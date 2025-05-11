@@ -18,11 +18,19 @@ const LanguageSelector = () => {
   const handleChangeToEnglish = () => {
     console.log('Direct change to English');
     i18n.changeLanguage('en');
+    document.documentElement.classList.remove('lang-hi');
+    document.documentElement.classList.add('lang-en');
+    // Also store in localStorage for persistence
+    localStorage.setItem('preferredLanguage', 'en');
   };
   
   const handleChangeToHindi = () => {
     console.log('Direct change to Hindi');
     i18n.changeLanguage('hi');
+    document.documentElement.classList.remove('lang-en');
+    document.documentElement.classList.add('lang-hi');
+    // Also store in localStorage for persistence
+    localStorage.setItem('preferredLanguage', 'hi');
   };
   
   return (

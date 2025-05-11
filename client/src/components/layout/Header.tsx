@@ -1,14 +1,23 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { AuthButton } from "@/components/auth/AuthButton";
 import { scrollToTop } from "@/lib/scrollUtils";
 import { useTranslation } from "react-i18next";
 import LanguageSelector from "@/components/language/LanguageSelector";
+import { useLanguage } from "@/hooks/use-language";
 
 const Header = () => {
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { t } = useTranslation();
+  const { language, isHindi } = useLanguage();
+  
+  // Initialize language class on document based on stored preference
+  useEffect(() => {
+    const storedLang = localStorage.getItem('preferredLanguage') || 'en';
+    document.documentElement.classList.remove('lang-en', 'lang-hi');
+    document.documentElement.classList.add(`lang-${storedLang}`);
+  }, []);
 
   const isActive = (path: string) => location === path;
 
@@ -34,8 +43,8 @@ const Header = () => {
             <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center shadow-sm">
               <i className="fas fa-baby text-white"></i>
             </div>
-            <span className="text-xl md:text-2xl font-montserrat font-semibold text-primary group">
-              NauMah<span className="text-xs align-top -ml-0.5 leading-none">™</span>
+            <span className="text-xl md:text-2xl font-montserrat font-semibold text-primary group translatable">
+              {language === 'hi' ? 'नौमा' : 'NauMah'}<span className="text-xs align-top -ml-0.5 leading-none">™</span>
             </span>
           </Link>
         </div>
@@ -64,7 +73,12 @@ const Header = () => {
         </nav>
         
         <div className="flex items-center space-x-3">
-          <LanguageSelector />
+          <div className="flex items-center">
+            <LanguageSelector />
+            {language === 'hi' && (
+              <span className="language-indicator ml-1">हिन्दी</span>
+            )}
+          </div>
           <div className="hidden md:block">
             <AuthButton />
           </div>
@@ -106,7 +120,12 @@ const Header = () => {
             </div>
             <div className="py-2 flex items-center">
               <span className="mr-2">Language:</span>
-              <LanguageSelector />
+              <div className="flex items-center">
+                <LanguageSelector />
+                {language === 'hi' && (
+                  <span className="language-indicator ml-1">हिन्दी</span>
+                )}
+              </div>
             </div>
           </nav>
         </div>
