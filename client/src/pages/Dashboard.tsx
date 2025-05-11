@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
+import { useTranslation } from "react-i18next";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
@@ -18,6 +19,7 @@ import {
 } from "@/lib/localDataStore";
 
 const Dashboard = () => {
+  const { t } = useTranslation();
   const [, setLocation] = useLocation();
   const [stageType, setStageType] = useState("week");
   const [stageValue, setStageValue] = useState("");
@@ -321,8 +323,8 @@ const Dashboard = () => {
     <div id="baby-and-me-section" className="pt-4">
       {/* Page Title */}
       <div className="mb-8 text-center">
-        <h1 className="text-3xl md:text-4xl font-montserrat font-bold text-primary mb-2">Baby & Me</h1>
-        <p className="text-neutral-dark max-w-2xl mx-auto">Track your pregnancy journey and follow your baby's development week by week</p>
+        <h1 className="text-3xl md:text-4xl font-montserrat font-bold text-primary mb-2">{t('dashboard.title', 'Baby & Me')}</h1>
+        <p className="text-neutral-dark max-w-2xl mx-auto">{t('dashboard.subtitle', 'Track your pregnancy journey and follow your baby\'s development week by week')}</p>
         
         {/* Production mode indicator */}
         {isProductionMode && (
@@ -330,7 +332,7 @@ const Dashboard = () => {
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            Deployed Mode
+            {t('dashboard.deployedMode', 'Deployed Mode')}
           </div>
         )}
       </div>
@@ -344,14 +346,14 @@ const Dashboard = () => {
             <span className="bg-primary/10 p-2 rounded-full mr-3">
               <i className="fas fa-calendar-alt text-primary"></i>
             </span>
-            Update Pregnancy Stage
+            {t('dashboard.updatePregnancyStage', 'Update Pregnancy Stage')}
           </h2>
           {updateStageMutation.isSuccess && (
             <span className="text-sm text-green-600 flex items-center mb-4 bg-green-50 py-1 px-3 rounded-full">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
-              Updated successfully
+              {t('dashboard.updatedSuccessfully', 'Updated successfully')}
             </span>
           )}
         </div>
@@ -359,12 +361,12 @@ const Dashboard = () => {
           <div className="flex-grow min-w-[180px] max-w-xs">
             <Select value={stageType} onValueChange={setStageType}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select type" />
+                <SelectValue placeholder={t('dashboard.selectType', 'Select type')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="week">Week</SelectItem>
-                <SelectItem value="month">Month</SelectItem>
-                <SelectItem value="trimester">Trimester</SelectItem>
+                <SelectItem value="week">{t('dashboard.week', 'Week')}</SelectItem>
+                <SelectItem value="month">{t('dashboard.month', 'Month')}</SelectItem>
+                <SelectItem value="trimester">{t('dashboard.trimester', 'Trimester')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -372,7 +374,7 @@ const Dashboard = () => {
           <div className="flex-grow min-w-[180px] max-w-xs">
             <Select value={stageValue} onValueChange={setStageValue}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select value" />
+                <SelectValue placeholder={t('dashboard.selectValue', 'Select value')} />
               </SelectTrigger>
               <SelectContent>
                 {stageType === "week" && WEEKS_OPTIONS.map(option => (
