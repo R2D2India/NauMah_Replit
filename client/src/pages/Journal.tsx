@@ -8,6 +8,7 @@ import { Plus, PenLine, BookOpen, ArrowLeft, CalendarIcon } from 'lucide-react';
 import { queryClient, apiRequestLegacy } from '../lib/queryClient';
 import { JournalEntry } from '../components/journal/JournalEntry';
 import { JournalEntryForm } from '../components/journal/JournalEntryForm';
+import { useTranslation } from 'react-i18next';
 
 interface JournalEntryType {
   id: number;
@@ -23,6 +24,7 @@ export default function Journal() {
   const [selectedEntry, setSelectedEntry] = useState<JournalEntryType | null>(null);
   const [isCreateMode, setIsCreateMode] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   // Fetch journal entries
   const { data: entries = [], isLoading, isError } = useQuery({
@@ -50,16 +52,16 @@ export default function Journal() {
     },
     onSuccess: () => {
       toast({
-        title: 'Journal Entry Added',
-        description: 'Your journal entry has been saved successfully.',
+        title: t('journal.entryAdded'),
+        description: t('journal.entryAddedSuccess'),
       });
       setIsCreateMode(false);
       queryClient.invalidateQueries({ queryKey: ['/api/journal'] });
     },
     onError: (error: Error) => {
       toast({
-        title: 'Error',
-        description: `Failed to save journal entry: ${error.message}`,
+        title: t('journal.error'),
+        description: t('journal.saveError', { message: error.message }),
         variant: 'destructive',
       });
     },
@@ -146,9 +148,9 @@ export default function Journal() {
   return (
     <div className="container max-w-6xl mx-auto py-8">
       <div className="mb-8 text-center md:text-left">
-        <h1 className="text-3xl font-bold tracking-tight">Pregnancy Journal</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t('journal.title')}</h1>
         <p className="text-muted-foreground mt-2 max-w-3xl">
-          Capture your thoughts, feelings, and milestones throughout your pregnancy journey.
+          {t('journal.journalDescription')}
         </p>
       </div>
 
