@@ -158,15 +158,15 @@ export default function Journal() {
         // All Entries View
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-            <h2 className="text-2xl font-bold tracking-tight">My Journal Entries</h2>
+            <h2 className="text-2xl font-bold tracking-tight">{t('journal.myEntries')}</h2>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" className="gap-1" onClick={(e) => handleBack(e)}>
                 <ArrowLeft className="h-4 w-4" />
-                Back
+                {t('journal.back')}
               </Button>
               <Button className="gap-1" onClick={(e) => handleCreateEntry(e)}>
                 <Plus className="h-4 w-4" />
-                New Entry
+                {t('journal.newEntry')}
               </Button>
             </div>
           </div>
@@ -174,7 +174,7 @@ export default function Journal() {
           {isLoading ? (
             <div className="py-16 flex flex-col items-center justify-center">
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mb-4"></div>
-              <p className="text-muted-foreground">Loading journal entries...</p>
+              <p className="text-muted-foreground">{t('journal.loading')}</p>
             </div>
           ) : isError ? (
             <div className="py-16 text-center text-destructive">
@@ -183,13 +183,13 @@ export default function Journal() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
                 </svg>
               </div>
-              <p>Failed to load journal entries</p>
+              <p>{t('journal.failed')}</p>
             </div>
           ) : sortedEntries.length === 0 ? (
             <div className="py-16 text-center text-muted-foreground flex flex-col items-center">
               <BookOpen className="h-12 w-12 mb-4" />
-              <p className="mb-4">No journal entries yet.</p>
-              <Button onClick={(e) => handleCreateEntry(e)}>Create Your First Entry</Button>
+              <p className="mb-4">{t('journal.noEntries')}</p>
+              <Button onClick={(e) => handleCreateEntry(e)}>{t('journal.createFirst')}</Button>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -215,7 +215,7 @@ export default function Journal() {
                     </p>
                     {entry.mood && (
                       <div className="mt-auto pt-2 border-t border-border">
-                        <span className="text-xs font-medium text-muted-foreground">Mood: </span>
+                        <span className="text-xs font-medium text-muted-foreground">{t('journal.mood')}: </span>
                         <span className="text-sm">{entry.mood}</span>
                       </div>
                     )}
@@ -237,29 +237,29 @@ export default function Journal() {
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center gap-2">
                   <BookOpen className="h-5 w-5" />
-                  My Journal Entries
+                  {t('journal.myEntries')}
                 </CardTitle>
                 <CardDescription>
-                  Click to view all your journal entries
+                  {t('journal.viewAllEntries')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {isLoading ? (
                   <div className="py-8 flex flex-col items-center justify-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-3"></div>
-                    <p className="text-sm text-muted-foreground">Loading entries...</p>
+                    <p className="text-sm text-muted-foreground">{t('journal.loading')}</p>
                   </div>
                 ) : isError ? (
                   <div className="py-8 text-center text-destructive">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="mx-auto h-8 w-8 mb-2">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
                     </svg>
-                    <p className="text-sm">Failed to load journal entries</p>
+                    <p className="text-sm">{t('journal.failed')}</p>
                   </div>
                 ) : sortedEntries.length === 0 ? (
                   <div className="py-8 text-center text-muted-foreground">
-                    <p className="text-sm mb-2">No journal entries yet.</p>
-                    <p className="text-xs">Create your first entry to start your pregnancy journal</p>
+                    <p className="text-sm mb-2">{t('journal.noEntries')}</p>
+                    <p className="text-xs">{t('journal.createFirst')}</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -267,7 +267,7 @@ export default function Journal() {
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
                         <path fillRule="evenodd" d="M2.625 6.75a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0zm4.875 0A.75.75 0 018.25 6h12a.75.75 0 010 1.5h-12a.75.75 0 01-.75-.75zM2.625 12a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0zM7.5 12a.75.75 0 01.75-.75h12a.75.75 0 010 1.5h-12A.75.75 0 017.5 12zm-4.875 5.25a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0zm4.875 0a.75.75 0 01.75-.75h12a.75.75 0 010 1.5h-12a.75.75 0 01-.75-.75z" clipRule="evenodd" />
                       </svg>
-                      You have {sortedEntries.length} journal {sortedEntries.length === 1 ? 'entry' : 'entries'}
+                      {t('journal.viewAllEntries')} ({sortedEntries.length})
                     </div>
                     <div className="space-y-3">
                       {sortedEntries.slice(0, 3).map((entry) => (
@@ -307,14 +307,14 @@ export default function Journal() {
                 <>
                   <CardHeader className="pb-2 space-y-1">
                     <div className="flex justify-between items-center">
-                      <CardTitle className="text-xl font-semibold">New Journal Entry</CardTitle>
+                      <CardTitle className="text-xl font-semibold">{t('journal.newJournalEntry')}</CardTitle>
                       <Button variant="ghost" size="sm" className="gap-1" onClick={(e) => handleBack(e)}>
                         <ArrowLeft className="h-4 w-4" />
-                        Back
+                        {t('journal.back')}
                       </Button>
                     </div>
                     <CardDescription>
-                      Record your thoughts, feelings, and experiences during your pregnancy
+                      {t('journal.recordThoughts')}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -327,14 +327,13 @@ export default function Journal() {
                 <div className="flex flex-col items-center justify-center h-full py-16 px-6">
                   <div className="max-w-md text-center">
                     <BookOpen className="h-12 w-12 text-primary/80 mx-auto mb-6" />
-                    <h3 className="text-xl font-medium mb-3">Your Pregnancy Journal</h3>
+                    <h3 className="text-xl font-medium mb-3">{t('journal.yourPregnancyJournal')}</h3>
                     <p className="text-muted-foreground mb-8">
-                      Document your pregnancy journey with thoughts, feelings, and milestones. 
-                      Create new entries or browse your existing ones.
+                      {t('journal.journalDescription')}
                     </p>
                     <Button size="lg" onClick={(e) => handleCreateEntry(e)} className="gap-2">
                       <Plus className="h-4 w-4" />
-                      New Journal Entry
+                      {t('journal.newJournalEntry')}
                     </Button>
                   </div>
                 </div>
