@@ -5,22 +5,24 @@ import Backend from 'i18next-http-backend';
 import enTranslation from '../locales/en/translation.json';
 import hiTranslation from '../locales/hi/translation.json';
 
-// Add missing footer translations just to be sure
+// Add missing footer translations directly to the translation objects
 if (!enTranslation.footer) {
-  enTranslation.footer = {};
+  (enTranslation as any).footer = {};
 }
-enTranslation.footer.privacy = "Privacy Policy";
-enTranslation.footer.terms = "Terms of Service";
-enTranslation.footer.disclaimer = "Medical Disclaimer";
-enTranslation.footer.medical = "NauMah does not provide medical advice. Always consult with healthcare professionals for medical decisions.";
+(enTranslation as any).footer.privacy = "Privacy Policy";
+(enTranslation as any).footer.terms = "Terms of Service";
+(enTranslation as any).footer.disclaimer = "Medical Disclaimer";
+(enTranslation as any).footer.medical = "NauMah does not provide medical advice. Always consult with healthcare professionals for medical decisions.";
+(enTranslation as any).footer.rights = "All Rights Reserved";
 
 if (!hiTranslation.footer) {
-  hiTranslation.footer = {};
+  (hiTranslation as any).footer = {};
 }
-hiTranslation.footer.privacy = "गोपनीयता नीति";
-hiTranslation.footer.terms = "सेवा की शर्तें";
-hiTranslation.footer.disclaimer = "चिकित्सा अस्वीकरण";
-hiTranslation.footer.medical = "नौमा चिकित्सा सलाह प्रदान नहीं करता है। चिकित्सा निर्णयों के लिए हमेशा स्वास्थ्य देखभाल पेशेवरों से परामर्श करें।";
+(hiTranslation as any).footer.privacy = "गोपनीयता नीति";
+(hiTranslation as any).footer.terms = "सेवा की शर्तें";
+(hiTranslation as any).footer.disclaimer = "चिकित्सा अस्वीकरण";
+(hiTranslation as any).footer.medical = "नौमा चिकित्सा सलाह प्रदान नहीं करता है। चिकित्सा निर्णयों के लिए हमेशा स्वास्थ्य देखभाल पेशेवरों से परामर्श करें।";
+(hiTranslation as any).footer.rights = "सर्वाधिकार सुरक्षित";
 
 // Initialize i18next with all the options
 i18n

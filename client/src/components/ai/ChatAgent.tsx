@@ -19,13 +19,28 @@ export function ChatAgent() {
   const { t } = useTranslation();
   const { language } = useLanguage();
   
+  const getWelcomeMessage = () => {
+    return language === 'hi' ? 
+      "नमस्ते! मैं नौमा हूँ, आपका गर्भावस्था साथी। आज मैं आपकी कैसे मदद कर सकता हूँ?" : 
+      "Welcome! I'm NauMah, your pregnancy companion. How can I help you today?";
+  };
+
   const [messages, setMessages] = useState<Message[]>([{
     role: 'assistant',
-    content: language === 'hi' ? 
-      "नमस्ते! मैं नौमा हूँ, आपका गर्भावस्था साथी। आज मैं आपकी कैसे मदद कर सकता हूँ?" : 
-      "Welcome! I'm NauMah, your pregnancy companion. How can I help you today?",
+    content: getWelcomeMessage(),
     timestamp: new Date()
   }]);
+  
+  // Update welcome message when language changes
+  useEffect(() => {
+    if (messages.length === 1 && messages[0].role === 'assistant') {
+      setMessages([{
+        role: 'assistant',
+        content: getWelcomeMessage(),
+        timestamp: new Date()
+      }]);
+    }
+  }, [language]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
