@@ -131,5 +131,53 @@
   },
   "footer": {
     "medical": "NauMah does not provide medical advice. Always consult with healthcare professionals for medical decisions."
+  },
+  "dietExercise": {
+    "title": "Diet & Exercise",
+    "week": "Week",
+    "subtitle": "Nutrition and activity recommendations for week {{week}} of your pregnancy",
+    "syncingData": "Syncing data...",
+    "sync": "Sync",
+    "syncTooltip": "Sync data with other pages",
+    "tabLabel": {
+      "diet": "Diet",
+      "exercise": "Exercise",
+      "tests": "Tests",
+      "symptoms": "Symptoms",
+      "resources": "Resources"
+    },
+    "diet": {
+      "heading": "Recommended Diet for Week {{week}}",
+      "focusNutrients": "Focus Nutrients",
+      "foods": "Recommended Foods",
+      "avoid": "Foods to Avoid",
+      "mealPlanner": "Weekly Meal Planner",
+      "generate": "Generate Meal Plan",
+      "generating": "Generating...",
+      "breakfast": "Breakfast",
+      "lunch": "Lunch",
+      "dinner": "Dinner",
+      "snacks": "Snacks"
+    },
+    "exercise": {
+      "heading": "Exercise for Week {{week}}",
+      "safe": "Safe Exercises",
+      "avoid": "Exercises to Avoid",
+      "tips": "Exercise Tips"
+    },
+    "tests": {
+      "heading": "Recommended Tests for Week {{week}}",
+      "upcoming": "Upcoming Tests"
+    },
+    "symptoms": {
+      "heading": "Common Symptoms in Week {{week}}",
+      "manage": "Management Tips"
+    },
+    "resources": {
+      "heading": "Helpful Resources",
+      "books": "Books",
+      "websites": "Websites",
+      "apps": "Apps"
+    }
   }
 }

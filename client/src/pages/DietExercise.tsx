@@ -395,14 +395,14 @@ export default function DietExercise() {
                 </div>
 
                 <div className="bg-neutral-light rounded-lg p-4">
-                  <h4 className="font-medium text-lg mb-3">Sample Meal Plan</h4>
+                  <h4 className="font-medium text-lg mb-3">{t('dietExercise.diet.mealPlanner', 'Weekly Meal Planner')}</h4>
                   <div className="space-y-3">
                     <div>
-                      <div className="font-medium text-primary-dark">Breakfast</div>
+                      <div className="font-medium text-primary-dark">{t('dietExercise.diet.breakfast', 'Breakfast')}</div>
                       <p className="text-sm">{dietRecs.sampleMealPlan.breakfast}</p>
                     </div>
                     <div>
-                      <div className="font-medium text-primary-dark">Lunch</div>
+                      <div className="font-medium text-primary-dark">{t('dietExercise.diet.lunch', 'Lunch')}</div>
                       <p className="text-sm">{dietRecs.sampleMealPlan.lunch}</p>
                     </div>
                     <div>
