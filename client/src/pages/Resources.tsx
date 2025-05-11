@@ -10,6 +10,7 @@ import { queryClient, apiRequestLegacy } from "../lib/queryClient";
 import { JournalEntry } from "../components/journal/JournalEntry";
 import { JournalEntryForm } from "../components/journal/JournalEntryForm";
 import ContactForm from "@/components/support/ContactForm";
+import { useTranslation } from "react-i18next";
 
 interface JournalEntryType {
   id: number;
@@ -22,6 +23,7 @@ interface JournalEntryType {
 }
 
 export default function Resources() {
+  const { t } = useTranslation();
   // Add state for selected FAQ category
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -310,11 +312,11 @@ export default function Resources() {
               <i className="fas fa-question-circle text-white"></i>
             </div>
             <CardTitle className="text-2xl text-primary">
-              Frequently Asked Questions
+              {t('resources.faq.title', 'Frequently Asked Questions')}
             </CardTitle>
           </div>
           <CardDescription className="mt-2">
-            Find answers to common questions about pregnancy, our app features, and support.
+            {t('resources.faq.description', 'Find answers to common questions about pregnancy, our app features, and support.')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -324,25 +326,25 @@ export default function Resources() {
                 className={`px-4 py-2 ${selectedCategory === "all" ? "bg-primary text-white" : "bg-gray-100 text-gray-700"} rounded-full text-sm font-medium flex-shrink-0 shadow-sm hover:shadow-md transition-all duration-300`}
                 onClick={() => handleCategoryClick("all")}
               >
-                All Questions
+                {t('resources.faq.categories.all', 'All Questions')}
               </button>
               <button 
                 className={`px-4 py-2 ${selectedCategory === "first-trimester" ? "bg-primary text-white" : "bg-gray-100 text-gray-700"} rounded-full text-sm font-medium flex-shrink-0 hover:bg-gray-200 transition-all duration-300`}
                 onClick={() => handleCategoryClick("first-trimester")}
               >
-                First Trimester
+                {t('resources.faq.categories.firstTrimester', 'First Trimester')}
               </button>
               <button 
                 className={`px-4 py-2 ${selectedCategory === "second-trimester" ? "bg-primary text-white" : "bg-gray-100 text-gray-700"} rounded-full text-sm font-medium flex-shrink-0 hover:bg-gray-200 transition-all duration-300`}
                 onClick={() => handleCategoryClick("second-trimester")}
               >
-                Second Trimester
+                {t('resources.faq.categories.secondTrimester', 'Second Trimester')}
               </button>
               <button 
                 className={`px-4 py-2 ${selectedCategory === "third-trimester" ? "bg-primary text-white" : "bg-gray-100 text-gray-700"} rounded-full text-sm font-medium flex-shrink-0 hover:bg-gray-200 transition-all duration-300`}
                 onClick={() => handleCategoryClick("third-trimester")}
               >
-                Third Trimester
+                {t('resources.faq.categories.thirdTrimester', 'Third Trimester')}
               </button>
               <button 
                 className={`px-4 py-2 ${selectedCategory === "nutrition" ? "bg-primary text-white" : "bg-gray-100 text-gray-700"} rounded-full text-sm font-medium flex-shrink-0 hover:bg-gray-200 transition-all duration-300`}
