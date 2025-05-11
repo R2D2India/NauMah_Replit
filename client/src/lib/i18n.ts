@@ -5,6 +5,23 @@ import Backend from 'i18next-http-backend';
 import enTranslation from '../locales/en/translation.json';
 import hiTranslation from '../locales/hi/translation.json';
 
+// Add missing footer translations just to be sure
+if (!enTranslation.footer) {
+  enTranslation.footer = {};
+}
+enTranslation.footer.privacy = "Privacy Policy";
+enTranslation.footer.terms = "Terms of Service";
+enTranslation.footer.disclaimer = "Medical Disclaimer";
+enTranslation.footer.medical = "NauMah does not provide medical advice. Always consult with healthcare professionals for medical decisions.";
+
+if (!hiTranslation.footer) {
+  hiTranslation.footer = {};
+}
+hiTranslation.footer.privacy = "गोपनीयता नीति";
+hiTranslation.footer.terms = "सेवा की शर्तें";
+hiTranslation.footer.disclaimer = "चिकित्सा अस्वीकरण";
+hiTranslation.footer.medical = "नौमा चिकित्सा सलाह प्रदान नहीं करता है। चिकित्सा निर्णयों के लिए हमेशा स्वास्थ्य देखभाल पेशेवरों से परामर्श करें।";
+
 // Initialize i18next with all the options
 i18n
   // detect user language
@@ -14,7 +31,7 @@ i18n
   // init i18next
   .init({
     fallbackLng: 'en',
-    debug: false,
+    debug: true, // Enable debug to see what's happening
     
     interpolation: {
       escapeValue: false, // not needed for react as it escapes by default
